@@ -11,7 +11,7 @@
 
 ## 아키텍처 — FSD-라이트 (2026-08-23 확정)
 ```
-web/src/
+src/
   app/            # 라우트·페이지 (표현만 — 로직 금지)
   features/       # 기능 단위: graph/ auth/ sync/ billing/ — 각 {components, hooks}
   components/     # 공유 UI (디자인 시스템: 노드·버튼·패널·칩)
@@ -40,8 +40,8 @@ web/src/
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
 
 ## 명령
-- 웹 코드는 전부 `web/` — `cd web && npm run dev` / `npm run build` / `npm run lint`
+- `npm run dev` / `npm run build` / `npm run lint` (리포 루트 = 웹 앱)
 
 ## 주의
-- `legacy-ios/` = 구 iOS 앱 보존분. 건드리지 않음
-- 시크릿은 `web/.env` (gitignore됨), 키 목록은 `.env.example`
+- 구 iOS 앱은 GitHub SsangG77/notion-mind 리포에 보존 (로컬에는 없음)
+- 시크릿은 `.env` (gitignore됨), 키 목록은 `.env.example`
