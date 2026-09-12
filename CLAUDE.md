@@ -29,7 +29,10 @@ src/
 - 라이트: 배경 #FFFFFF · 도트 #E9E9E7 · 서피스 #F7F6F3 · 노드 #FDFDFC(페이지)/#F4F3EF(DB) · 돌출면 #2E2C27 · 텍스트 #37352F · 액센트 #2383E2
 - 다크: 배경 #191919 · 서피스 #202020 · 노드 #2B2A27/#35342F · 돌출면 #000000 · 텍스트 #EDEDEC
 - 노드: DB=디스크 아이콘 10×16px 14px 600 / 페이지 7×12px 13px 400, 입체=보더 1.5px+우·하 4~5px
-- 엣지: 직선. 계층 실선 1.3px 회색 / relation 점선 1.6px 액센트
+- 노드 타이틀: 최대 너비 150px·2줄 랩·말줄임. 호버 시 2줄 고정 좌우 확장으로 전체 표시
+- 줌 70% 미만: 타이틀 숨기고 고정 크기 미니 정사각(DB 16px/페이지 12px), 호버 시 원래 블록으로 확장
+- 엣지: 직선. DB 소속 검정(#2E2C27) 1.3px / 페이지 소속(페이지·DB) 회색 1.3px / relation 회색 점선 1.6px(별도 2D 캔버스 레이어 — WebGL 점선 미지원)
+- 호버: 히트 판정=블록 사각형 전체(커스텀), 연결 엣지 전부 액센트색
 - 확정 캔버스: claude.ai/design/p/4b873808-8300-4263-b7c6-e0e2555913cd
 
 ## 제품 규칙
@@ -45,3 +48,5 @@ src/
 ## 주의
 - 구 iOS 앱은 GitHub SsangG77/notion-mind 리포에 보존 (로컬에는 없음)
 - 시크릿은 `.env` (gitignore됨), 키 목록은 `.env.example`
+- 노션 search API(2025-09-03+ 버전)는 page + data_source만 반환 — database 객체 없음. data_source가 곧 DB 노드, DB의 상위 페이지는 data_source의 `database_parent`로 얻음
+- sigma는 WebGL 전제 — 서버 렌더에서 모듈 평가되면 죽으므로 그래프 뷰는 브라우저 전용 dynamic import로만 로드

@@ -1,0 +1,171 @@
+import { DB_NODE_SIZE, PAGE_NODE_SIZE, T } from "./tokens";
+
+interface BlockData {
+  x: number;
+  y: number;
+  size: number;
+  label?: string | null;
+  color?: string;
+}
+
+// 텍스트 최대 너비(기준 스케일 px) — 초과 시 2줄 랩, 그래도 넘치면 말줄임
+export const NODE_MAX_TEXT_W = 150;
+
+// 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장)
+export const COMPACT_S = 0.7;
+
+// 축소 상태의 미니 정사각 노드 (화면 px 고정 크기)
+function drawCompactSquare(ctx: CanvasRenderingContext2D, data: BlockData, isDb: boolean) {
+  const side = isDb ? 16 : 12;
+  const off = 3;
+  const r = 3;
+  const x = data.x - side / 2;
+  const y = data.y - side / 2;
+  ctx.beginPath();
+  ctx.roundRect(x + off, y + off, side, side, r);
+  ctx.fillStyle = T.extrude;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(x, y, side, side, r);
+  ctx.fillStyle = isDb ? T.dbFace : T.pageFace;
+  ctx.fill();
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = T.extrude;
+  ctx.stroke();
+}
+
+/** maxW 안에 들어가는 최장 prefix 글자 수 */
+function fitChars(ctx: CanvasRenderingContext2D, text: string, maxW: number): number {
+  let n = text.length;
+  while (n > 1 && ctx.measureText(text.slice(0, n)).width > maxW) n--;
+  return n;
+}
+
+/** maxLines까지 랩, 초과분은 말줄임 (maxLines=Infinity면 전체 표시). ctx.font 설정 후 호출 */
+function wrapLabel(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxW: number,
+  maxLines: number,
+): string[] {
+  const lines: string[] = [];
+  let rest = text;
+  while (rest && lines.length < maxLines) {
+    if (ctx.measureText(rest).width <= maxW) {
+      lines.push(rest);
+      return lines;
+    }
+    if (lines.length === maxLines - 1) {
+      const fit = fitChars(ctx, rest, maxW - ctx.measureText("…").width);
+      lines.push(rest.slice(0, fit).trimEnd() + "…");
+      return lines;
+    }
+    // 공백 경계 우선 절단 (너무 앞이면 강제 절단)
+    const fit = fitChars(ctx, rest, maxW);
+    const space = rest.lastIndexOf(" ", fit);
+    const cut = space >= fit * 0.6 ? space : fit;
+    lines.push(rest.slice(0, cut).trimEnd());
+    rest = rest.slice(cut).trimStart();
+  }
+  return lines;
+}
+
+// 확정 디자인: 우·하단 돌출 입체 블록 노드.
+// 타입 판별은 face 색으로 (DB=#F4F3EF / 페이지=#FDFDFC) — drawLabel 에는 커스텀 속성이 안 넘어옴.
+function drawBlock(
+  ctx: CanvasRenderingContext2D,
+  data: BlockData,
+  highlighted: boolean,
+) {
+  if (!data.label) return;
+  const isDb = data.color === T.dbFace;
+  let s = data.size / (isDb ? DB_NODE_SIZE : PAGE_NODE_SIZE); // 줌 스케일
+  if (s < COMPACT_S) {
+    if (!highlighted) {
+      drawCompactSquare(ctx, data, isDb);
+      return;
+    }
+    s = 1; // 축소 상태에서 호버하면 원래 크기 블록으로 확장해 타이틀 표시
+  }
+  const font = (isDb ? 14 : 13) * s;
+  const weight = isDb ? 600 : 400;
+  ctx.font = `${weight} ${font}px -apple-system, "Segoe UI", sans-serif`;
+
+  const iconW = isDb ? font * 1.15 : 0; // DB 디스크 아이콘 영역
+  const padX = (isDb ? 16 : 12) * s;
+  const padY = (isDb ? 10 : 7) * s;
+  // 호버 시 2줄 고정 유지, 최대 너비를 풀어 좌우로 확장 — 전체 타이틀 표시
+  let maxW = NODE_MAX_TEXT_W * s;
+  if (highlighted) {
+    const fullW = ctx.measureText(data.label).width;
+    // 기존 너비 이상으로만 확장 (절반씩 2줄 + 절단 여유) — 줄어들면 뒤의 일반 블록이 비져나옴
+    maxW = Math.max(maxW, fullW / 2 + font * 1.5);
+  }
+  const lines = wrapLabel(ctx, data.label, maxW, 2);
+  const textW = Math.max(...lines.map((l) => ctx.measureText(l).width));
+  const lineH = font * 1.3;
+  const w = textW + iconW + padX * 2;
+  const h = font + (lines.length - 1) * lineH + padY * 2;
+  const x = data.x - w / 2;
+  const y = data.y - h / 2;
+  const r = 8 * s;
+  const off = 4.5 * s; // 돌출 두께 (우·하 4~5px)
+
+  // 돌출면 (우·하 오프셋 블록)
+  ctx.beginPath();
+  ctx.roundRect(x + off, y + off, w, h, r);
+  ctx.fillStyle = T.extrude;
+  ctx.fill();
+
+  // 본면
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fillStyle = data.color ?? T.pageFace;
+  if (highlighted) {
+    ctx.save();
+    ctx.shadowColor = "rgba(35, 131, 226, 0.14)";
+    ctx.shadowBlur = 5 * s;
+    ctx.fill();
+    ctx.restore();
+  } else {
+    ctx.fill();
+  }
+  ctx.lineWidth = 1.5 * s;
+  ctx.strokeStyle = highlighted ? T.accent : T.extrude;
+  ctx.stroke();
+
+  // DB 디스크 아이콘 (1.5px 스트로크 실린더)
+  let textX = x + padX;
+  if (isDb) {
+    const cx = x + padX + iconW * 0.38;
+    const cy = data.y;
+    const rw = font * 0.42;
+    const rh = font * 0.16;
+    const bh = font * 0.55;
+    ctx.lineWidth = 1.5 * s;
+    ctx.strokeStyle = T.text;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - bh / 2, rw, rh, 0, 0, Math.PI * 2);
+    ctx.moveTo(cx - rw, cy - bh / 2);
+    ctx.lineTo(cx - rw, cy + bh / 2);
+    ctx.moveTo(cx + rw, cy - bh / 2);
+    ctx.lineTo(cx + rw, cy + bh / 2);
+    ctx.moveTo(cx - rw, cy + bh / 2);
+    ctx.ellipse(cx, cy + bh / 2, rw, rh, 0, 0, Math.PI, false);
+    ctx.stroke();
+    textX += iconW;
+  }
+
+  ctx.fillStyle = T.text;
+  ctx.textBaseline = "middle";
+  const firstLineY = data.y - ((lines.length - 1) * lineH) / 2;
+  lines.forEach((line, i) => ctx.fillText(line, textX, firstLineY + i * lineH));
+}
+
+export function drawNodeLabel(ctx: CanvasRenderingContext2D, data: BlockData) {
+  drawBlock(ctx, data, false);
+}
+
+export function drawNodeHover(ctx: CanvasRenderingContext2D, data: BlockData) {
+  drawBlock(ctx, data, true);
+}
