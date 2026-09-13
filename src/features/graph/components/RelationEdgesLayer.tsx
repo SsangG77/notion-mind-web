@@ -42,6 +42,8 @@ export default function RelationEdgesLayer() {
         [T.accent, true],
       ] as const) {
         ctx.strokeStyle = color;
+        // 호버 중엔 비연결 점선을 흐리게 (포커스 dim)
+        ctx.globalAlpha = hovered != null && !match ? 0.15 : 1;
         ctx.beginPath();
         graph.forEachEdge((edge, attr, _s, _t, sa, ta) => {
           if (attr.kind !== "relation") return;
@@ -54,6 +56,7 @@ export default function RelationEdgesLayer() {
         });
         ctx.stroke();
       }
+      ctx.globalAlpha = 1;
     };
 
     sigma.on("afterRender", draw);

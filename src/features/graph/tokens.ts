@@ -11,6 +11,8 @@ export interface Palette {
   accent: string;
   edgeHierarchy: string;
   edgeDb: string;
+  /** 호버 포커스 밖 엣지의 고스트 색 (배경에 가깝게) */
+  edgeDim: string;
 }
 
 export const LIGHT: Palette = {
@@ -25,6 +27,7 @@ export const LIGHT: Palette = {
   accent: "#2383E2",
   edgeHierarchy: "#C9C7C1",
   edgeDb: "#2E2C27",
+  edgeDim: "#E7E6E2",
 };
 
 // 다크 노드 면·돌출·텍스트는 디자인 탭 확정값, 엣지 회색·도트는 대비 맞춘 파생값
@@ -40,6 +43,7 @@ export const DARK: Palette = {
   accent: "#2383E2",
   edgeHierarchy: "#4A4844",
   edgeDb: "#8D8A83",
+  edgeDim: "#212120",
 };
 
 // 현재 테마 팔레트 — 캔버스 draw 함수들이 매 프레임 참조 (교체는 applyTheme로만)

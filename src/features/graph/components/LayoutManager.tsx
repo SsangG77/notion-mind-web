@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import forceAtlas2 from "graphology-layout-forceatlas2";
 import FA2Layout from "graphology-layout-forceatlas2/worker";
-import noverlap from "graphology-layout-noverlap";
+import { separateRects } from "../lib/separateRects";
 import { useSigma } from "@react-sigma/core";
 import type Graph from "graphology";
 import type { GraphData } from "@/types/graph";
@@ -23,18 +23,12 @@ function spreadAndNoverlap(graph: Graph) {
     maxY = Math.max(maxY, a.y);
   });
   const extent = Math.max(maxX - minX, maxY - minY, 1);
-  const k = (Math.sqrt(graph.order) * 760) / extent;
+  const k = (Math.sqrt(graph.order) * 1000) / extent;
   graph.updateEachNodeAttributes((_n, a) => ({ ...a, x: a.x * k, y: a.y * k }));
-  noverlap.assign(graph, {
-    maxIterations: 500,
-    inputReducer: (_key, attr) => ({
-      x: attr.x,
-      y: attr.y,
-      size: (attr as { blockHalfW?: number }).blockHalfW ?? attr.size,
-    }),
-    settings: { margin: 25 },
-  });
+  separateRects(graph); // 사각형 기준 겹침 분리 (기본 여백 가로 100 · 세로 60)
 }
+
+
 
 /**
  * 배치가 올 때마다 새 노드·엣지를 그래프에 추가하고 FA2를 돌린다 (점진 로딩).
@@ -105,20 +99,32 @@ export default function LayoutManager({
 
     if (graph.order === 0) return;
     const layout = new FA2Layout(graph, {
-      settings: { ...forceAtlas2.inferSettings(graph), gravity: 0.5 },
+      settings: {
+        ...forceAtlas2.inferSettings(graph),
+        gravity: 0.05, // 중심 인력 최소 — 뭉침 방지
+        scalingRatio: 40, // 반발 강화 — 허브 자식들이 배치 단계에서부터 퍼짐
+      },
     });
     layout.start();
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let timer2: ReturnType<typeof setTimeout> | null = null;
+    let killed = false;
     if (!loading) {
       timer = setTimeout(() => {
-        layout.stop();
-        spreadAndNoverlap(graph);
-        sigma.refresh();
-      }, 2500);
+        // 워커를 완전히 종료하고 잔여 좌표 메시지가 반영된 뒤에 겹침 해소 —
+        // 순서가 바뀌면 워커의 마지막 업데이트가 해소 결과를 덮어씀
+        layout.kill();
+        killed = true;
+        timer2 = setTimeout(() => {
+          spreadAndNoverlap(graph);
+          sigma.refresh();
+        }, 120);
+      }, 4000);
     }
     return () => {
       if (timer) clearTimeout(timer);
-      layout.kill();
+      if (timer2) clearTimeout(timer2);
+      if (!killed) layout.kill();
     };
   }, [sigma, data, gen, loading]);
 

@@ -1,6 +1,7 @@
 import { DB_NODE_SIZE, PAGE_NODE_SIZE, T } from "./tokens";
 
 interface BlockData {
+  key?: string;
   x: number;
   y: number;
   size: number;
@@ -8,11 +9,24 @@ interface BlockData {
   color?: string;
 }
 
+// 호버 포커스 — 설정되면 중심·이웃 외 노드는 흐리게 (옵시디언식 강조)
+let focus: { center: string; connected: Set<string> } | null = null;
+export function setFocus(next: { center: string; connected: Set<string> } | null) {
+  focus = next;
+}
+
 // 텍스트 최대 너비(기준 스케일 px) — 초과 시 2줄 랩, 그래도 넘치면 말줄임
 export const NODE_MAX_TEXT_W = 150;
 
-// 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장)
-export const COMPACT_S = 0.7;
+// 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장).
+// 기본 0.7, 레이아웃 후 실제 밀도 기준으로 재계산됨 — 블록끼리 안 겹치는 줌부터 실물 표시
+let compactS = 0.7;
+export function setCompactS(v: number) {
+  compactS = v;
+}
+export function getCompactS() {
+  return compactS;
+}
 
 // 블록 절반 크기 추정 (noverlap 충돌 반경 + 호버 히트 판정용)
 // ponytail: 캔버스 실측 대신 글자폭 휴리스틱 — 오차 크면 measureText 실측으로 교체
@@ -95,10 +109,24 @@ function drawBlock(
 ) {
   if (!data.label) return;
   const isDb = data.color?.startsWith(T.dbFace) ?? false; // 색에 투명 알파(00)가 붙어 있음
+  // 포커스 밖 노드는 반투명 처리 (중심·이웃 제외)
+  const dimmed =
+    focus != null &&
+    data.key != null &&
+    data.key !== focus.center &&
+    !focus.connected.has(data.key);
+  if (dimmed) {
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+  }
+  // 포커스 중심만 확장·글로우. 이웃은 호버 레이어에 "선명한 일반 블록"으로만 (하이라이트 효과)
+  const isCenter = focus == null || data.key == null || data.key === focus.center;
+  const emph = highlighted && isCenter;
   let s = data.size / (isDb ? DB_NODE_SIZE : PAGE_NODE_SIZE); // 줌 스케일
-  if (s < COMPACT_S) {
-    if (!highlighted) {
+  if (s < compactS) {
+    if (!emph) {
       drawCompactSquare(ctx, data, isDb);
+      if (dimmed) ctx.restore();
       return;
     }
     s = 1; // 축소 상태에서 호버하면 원래 크기 블록으로 확장해 타이틀 표시
@@ -112,7 +140,7 @@ function drawBlock(
   const padY = (isDb ? 10 : 7) * s;
   // 호버 시 2줄 고정 유지, 최대 너비를 풀어 좌우로 확장 — 전체 타이틀 표시
   let maxW = NODE_MAX_TEXT_W * s;
-  if (highlighted) {
+  if (emph) {
     const fullW = ctx.measureText(data.label).width;
     // 기존 너비 이상으로만 확장 (절반씩 2줄 + 절단 여유) — 줄어들면 뒤의 일반 블록이 비져나옴
     maxW = Math.max(maxW, fullW / 2 + font * 1.5);
@@ -137,7 +165,7 @@ function drawBlock(
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);
   ctx.fillStyle = isDb ? T.dbFace : T.pageFace;
-  if (highlighted) {
+  if (emph) {
     ctx.save();
     ctx.shadowColor = "rgba(35, 131, 226, 0.14)";
     ctx.shadowBlur = 5 * s;
@@ -147,7 +175,7 @@ function drawBlock(
     ctx.fill();
   }
   ctx.lineWidth = 1.5 * s;
-  ctx.strokeStyle = highlighted ? T.accent : T.extrude;
+  ctx.strokeStyle = emph ? T.accent : T.extrude;
   ctx.stroke();
 
   // DB 디스크 아이콘 (1.5px 스트로크 실린더)
@@ -176,6 +204,7 @@ function drawBlock(
   ctx.textBaseline = "middle";
   const firstLineY = data.y - ((lines.length - 1) * lineH) / 2;
   lines.forEach((line, i) => ctx.fillText(line, textX, firstLineY + i * lineH));
+  if (dimmed) ctx.restore();
 }
 
 export function drawNodeLabel(ctx: CanvasRenderingContext2D, data: BlockData) {
