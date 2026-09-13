@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 다크 모드 = html.dark 클래스 기준 (수동 토글 + 시스템 따름을 JS에서 결정) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -23,4 +26,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 그래프 화면 도트 그리드 — 라이트/다크 도트색 전환 */
+.nm-dotgrid {
+  background-image: radial-gradient(#e9e9e7 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.dark .nm-dotgrid {
+  background-image: radial-gradient(#2f2f2f 1px, transparent 1px);
 }

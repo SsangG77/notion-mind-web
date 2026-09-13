@@ -14,6 +14,22 @@ export const NODE_MAX_TEXT_W = 150;
 // 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장)
 export const COMPACT_S = 0.7;
 
+// 블록 절반 크기 추정 (noverlap 충돌 반경 + 호버 히트 판정용)
+// ponytail: 캔버스 실측 대신 글자폭 휴리스틱 — 오차 크면 measureText 실측으로 교체
+export function estimateBlockHalf(
+  title: string,
+  isDb: boolean,
+): { halfW: number; halfH: number } {
+  let raw = 0;
+  for (const ch of title) raw += ch.charCodeAt(0) > 0x2e80 ? 13.5 : 7.5; // CJK/라틴 대략폭
+  const textW = Math.min(raw, NODE_MAX_TEXT_W);
+  const font = isDb ? 14 : 13;
+  const lines = raw > NODE_MAX_TEXT_W ? 2 : 1;
+  const halfW = (textW + (isDb ? 16 * 2 + 16 : 12 * 2)) / 2; // 패딩 + DB 아이콘 폭
+  const halfH = (font + (lines - 1) * font * 1.3 + (isDb ? 10 : 7) * 2) / 2;
+  return { halfW, halfH };
+}
+
 // 축소 상태의 미니 정사각 노드 (화면 px 고정 크기)
 function drawCompactSquare(ctx: CanvasRenderingContext2D, data: BlockData, isDb: boolean) {
   const side = isDb ? 16 : 12;
@@ -78,7 +94,7 @@ function drawBlock(
   highlighted: boolean,
 ) {
   if (!data.label) return;
-  const isDb = data.color === T.dbFace;
+  const isDb = data.color?.startsWith(T.dbFace) ?? false; // 색에 투명 알파(00)가 붙어 있음
   let s = data.size / (isDb ? DB_NODE_SIZE : PAGE_NODE_SIZE); // 줌 스케일
   if (s < COMPACT_S) {
     if (!highlighted) {
@@ -120,7 +136,7 @@ function drawBlock(
   // 본면
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);
-  ctx.fillStyle = data.color ?? T.pageFace;
+  ctx.fillStyle = isDb ? T.dbFace : T.pageFace;
   if (highlighted) {
     ctx.save();
     ctx.shadowColor = "rgba(35, 131, 226, 0.14)";

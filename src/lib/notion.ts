@@ -53,9 +53,9 @@ export async function exchangeCode(code: string): Promise<TokenResponse> {
   return res.json();
 }
 
-// ---------- 그래프 수집 (슬라이스 2) ----------
+// ---------- 그래프 수집 ----------
 
-import type { GraphData, GraphEdge, GraphNode } from "@/types/graph";
+import type { GraphBatch, GraphItem } from "@/types/graph";
 
 interface RichText {
   plain_text: string;
@@ -86,8 +86,6 @@ interface SearchItem {
   >;
 }
 
-const FREE_NODE_LIMIT = 1000;
-
 function itemTitle(item: SearchItem): string {
   if (item.object === "page") {
     for (const prop of Object.values(item.properties ?? {})) {
@@ -113,95 +111,56 @@ function itemParentId(item: SearchItem): string | null {
 }
 
 /**
- * 워크스페이스 전체를 그래프 데이터로 수집.
- * - 최근 수정순 정렬 → Free 상한 1,000개 초과분은 잘림 (제품 규칙)
- * - 계층 엣지 = parent 관계 / relation 엣지 = 페이지 relation 속성 (search 응답에 포함)
- * - rate limit 평균 3req/s — 순차 호출로 자연 준수
+ * 노션 검색 1페이지(최대 100개)를 그래프 항목으로 줄여 반환 — 점진 로딩 단위.
+ * 최근 수정순 정렬. 그래프 조립(엣지 생성)은 클라이언트 순수 함수가 담당.
  */
-export async function fetchGraph(accessToken: string): Promise<GraphData> {
-  const items: SearchItem[] = [];
-  let cursor: string | undefined;
-  let total = 0;
-  // 상한 1,000 + 초과 감지용 1페이지 여유 = 최대 11페이지
-  for (let i = 0; i < 11; i++) {
-    const res = await fetch(`${NOTION_API}/search`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        page_size: 100,
-        sort: { direction: "descending", timestamp: "last_edited_time" },
-        ...(cursor ? { start_cursor: cursor } : {}),
-      }),
-    });
-    if (!res.ok) {
-      throw new Error(`search failed: ${res.status} ${await res.text()}`);
-    }
-    const data = (await res.json()) as {
-      results: SearchItem[];
-      has_more: boolean;
-      next_cursor: string | null;
-    };
-    total += data.results.length;
-    for (const r of data.results) {
-      if (items.length < FREE_NODE_LIMIT) items.push(r);
-    }
-    if (!data.has_more || !data.next_cursor) break;
-    cursor = data.next_cursor;
+export async function searchPage(accessToken: string, cursor?: string): Promise<GraphBatch> {
+  const res = await fetch(`${NOTION_API}/search`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      page_size: 100,
+      sort: { direction: "descending", timestamp: "last_edited_time" },
+      ...(cursor ? { start_cursor: cursor } : {}),
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`search failed: ${res.status} ${await res.text()}`);
   }
-
-  // 검색은 page + data_source만 반환 — data_source가 곧 DB 노드
-  const nodes: GraphNode[] = items
-    .filter((it) => it.object === "page" || it.object === "data_source")
-    .map((it) => ({
-      id: it.id,
-      title: itemTitle(it),
-      type: it.object === "page" ? "page" : "database",
-      parentId: itemParentId(it),
-      url: it.url ?? null,
-    }));
-  const idSet = new Set(nodes.map((n) => n.id));
-  // database id → 그 DB의 data_source 노드 id (database_id로만 참조되는 경우 해소용 — wiki 등)
-  const dbToDs = new Map<string, string>();
-  for (const it of items) {
-    if (it.object === "data_source" && it.parent?.database_id) {
-      dbToDs.set(it.parent.database_id, it.id);
-    }
-  }
-  const resolveId = (id: string) => (idSet.has(id) ? id : (dbToDs.get(id) ?? id));
-
-  const edges: GraphEdge[] = [];
-  const seen = new Set<string>();
-  const pushEdge = (source: string, target: string, kind: GraphEdge["kind"]) => {
-    if (!idSet.has(source) || !idSet.has(target) || source === target) return;
-    const key = `${kind}:${source}:${target}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    edges.push({ source, target, kind });
+  const data = (await res.json()) as {
+    results: SearchItem[];
+    has_more: boolean;
+    next_cursor: string | null;
   };
 
-  for (const it of items) {
+  const items: GraphItem[] = [];
+  for (const it of data.results) {
     if (it.object !== "page" && it.object !== "data_source") continue;
-    const rawParent = itemParentId(it);
-    if (rawParent) {
-      // 페이지의 부모가 data_source/database면 DB 소속, 그 외(페이지·블록·DB 자체)는 페이지 소속
-      const isDbMember =
-        it.object === "page" && !!(it.parent?.data_source_id ?? it.parent?.database_id);
-      pushEdge(resolveId(rawParent), it.id, isDbMember ? "dbChild" : "pageChild");
-    }
+    const relationIds: string[] = [];
     if (it.object === "page") {
       for (const prop of Object.values(it.properties ?? {})) {
         if (prop.type === "relation") {
-          for (const rel of prop.relation ?? []) pushEdge(it.id, rel.id, "relation");
+          for (const rel of prop.relation ?? []) relationIds.push(rel.id);
         }
       }
     }
+    items.push({
+      id: it.id,
+      kind: it.object,
+      title: itemTitle(it),
+      url: it.url ?? null,
+      parentId: itemParentId(it),
+      parentIsDb:
+        it.object === "page" && !!(it.parent?.data_source_id ?? it.parent?.database_id),
+      dbId: it.object === "data_source" ? (it.parent?.database_id ?? null) : null,
+      relationIds,
+    });
   }
-
-  return { nodes, edges, truncated: total > FREE_NODE_LIMIT, total };
+  return { items, nextCursor: data.has_more ? data.next_cursor : null };
 }
 
 /** 워크스페이스에서 접근 가능한 페이지·DB 개수를 센다 (tracer-bullet 검증용). */

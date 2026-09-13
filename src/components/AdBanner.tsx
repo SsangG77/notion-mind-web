@@ -4,7 +4,7 @@ export default function AdBanner() {
   return (
     <div
       data-testid="ad_banner_bottom"
-      className="flex h-[60px] w-full shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3]"
+      className="flex h-[60px] w-full shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
     >
       <span className="text-xs tracking-wide text-[#91908C]">AD — 광고 영역 (Free)</span>
     </div>

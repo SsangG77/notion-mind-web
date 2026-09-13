@@ -25,3 +25,25 @@ export interface GraphData {
   /** 잘리기 전 수집된 총 개수 */
   total: number;
 }
+
+/** 노션 검색 결과를 그래프 조립에 필요한 최소 형태로 줄인 항목 (API 응답 단위) */
+export interface GraphItem {
+  id: string;
+  kind: "page" | "data_source";
+  title: string;
+  url: string | null;
+  /** 부모 id — page: data_source/database/page/block, data_source: DB가 놓인 페이지 */
+  parentId: string | null;
+  /** page 전용: 부모가 DB(data_source/database)인지 */
+  parentIsDb: boolean;
+  /** data_source 전용: 소속 database id (database_id 참조 해소용) */
+  dbId: string | null;
+  /** page 전용: relation 속성이 가리키는 페이지 id들 */
+  relationIds: string[];
+}
+
+/** /api/graph 배치 응답 */
+export interface GraphBatch {
+  items: GraphItem[];
+  nextCursor: string | null;
+}
