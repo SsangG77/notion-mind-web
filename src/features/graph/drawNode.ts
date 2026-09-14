@@ -16,17 +16,20 @@ export function setFocus(next: { center: string; connected: Set<string> } | null
 }
 
 // 텍스트 최대 너비(기준 스케일 px) — 초과 시 2줄 랩, 그래도 넘치면 말줄임
-export const NODE_MAX_TEXT_W = 150;
+export const NODE_MAX_TEXT_W = 195; // 글자 30% 확대에 맞춰 비례 확대
 
 // 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장).
 // 기본 0.7, 레이아웃 후 실제 밀도 기준으로 재계산됨 — 블록끼리 안 겹치는 줌부터 실물 표시
-let compactS = 0.7;
+let compactS = 0.42;
 export function setCompactS(v: number) {
   compactS = v;
 }
 export function getCompactS() {
   return compactS;
 }
+
+// 블록 최소 표시 스케일 — 축소해도 이 밑으로는 안 작아짐 (글자 가독성 유지)
+export const MIN_BLOCK_S = 0.8;
 
 // 블록 절반 크기 추정 (noverlap 충돌 반경 + 호버 히트 판정용)
 // ponytail: 캔버스 실측 대신 글자폭 휴리스틱 — 오차 크면 measureText 실측으로 교체
@@ -35,9 +38,9 @@ export function estimateBlockHalf(
   isDb: boolean,
 ): { halfW: number; halfH: number } {
   let raw = 0;
-  for (const ch of title) raw += ch.charCodeAt(0) > 0x2e80 ? 13.5 : 7.5; // CJK/라틴 대략폭
+  for (const ch of title) raw += ch.charCodeAt(0) > 0x2e80 ? 17.5 : 9.8; // CJK/라틴 대략폭 (글자 130%)
   const textW = Math.min(raw, NODE_MAX_TEXT_W);
-  const font = isDb ? 14 : 13;
+  const font = isDb ? 18 : 17;
   const lines = raw > NODE_MAX_TEXT_W ? 2 : 1;
   const halfW = (textW + (isDb ? 16 * 2 + 16 : 12 * 2)) / 2; // 패딩 + DB 아이콘 폭
   const halfH = (font + (lines - 1) * font * 1.3 + (isDb ? 10 : 7) * 2) / 2;
@@ -131,7 +134,8 @@ function drawBlock(
     }
     s = 1; // 축소 상태에서 호버하면 원래 크기 블록으로 확장해 타이틀 표시
   }
-  const font = (isDb ? 14 : 13) * s;
+  s = Math.max(s, MIN_BLOCK_S); // 최소 표시 크기 — 축소 시 가독성 유지
+  const font = (isDb ? 18 : 17) * s; // 기존 14/13에서 30% 확대
   const weight = isDb ? 600 : 400;
   ctx.font = `${weight} ${font}px -apple-system, "Segoe UI", sans-serif`;
 

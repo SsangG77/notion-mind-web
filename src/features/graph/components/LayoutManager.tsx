@@ -10,22 +10,22 @@ import type { GraphData } from "@/types/graph";
 import { estimateBlockHalf } from "../drawNode";
 import { DB_NODE_SIZE, PAGE_NODE_SIZE, T } from "../tokens";
 
-// 레이아웃 마무리: 간격 확장 + 블록 크기 기준 겹침 해소
+// 레이아웃 마무리: 픽셀 스케일 정규화 + 블록 크기 기준 겹침 해소.
+// 자동 화면 맞춤이 꺼져 있어 좌표 1단위 = 1px(기본 배율) — 간격 값이 곧 화면 간격.
 function spreadAndNoverlap(graph: Graph) {
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  graph.forEachNode((_n, a) => {
-    minX = Math.min(minX, a.x);
-    maxX = Math.max(maxX, a.x);
-    minY = Math.min(minY, a.y);
-    maxY = Math.max(maxY, a.y);
+  // 일반 이웃 간 거리(엣지 길이 중앙값)를 ~420px로 정규화
+  const lens: number[] = [];
+  graph.forEachEdge((_e, _a, _s, _t, sa, ta) => {
+    lens.push(Math.hypot((sa.x as number) - (ta.x as number), (sa.y as number) - (ta.y as number)));
   });
-  const extent = Math.max(maxX - minX, maxY - minY, 1);
-  const k = (Math.sqrt(graph.order) * 1000) / extent;
+  lens.sort((a, b) => a - b);
+  const median = lens[Math.floor(lens.length / 2)] || 1;
+  const k = 420 / median;
   graph.updateEachNodeAttributes((_n, a) => ({ ...a, x: a.x * k, y: a.y * k }));
-  separateRects(graph); // 사각형 기준 겹침 분리 (기본 여백 가로 100 · 세로 60)
+  // 블록(최대 ~200px) 사이 실제 화면 여백 px
+  const gapX = 300;
+  graph.setAttribute("sepGapX", gapX); // 드래그 후 재정리도 같은 여백 사용
+  separateRects(graph, { gapX, gapY: 180 });
 }
 
 
@@ -98,11 +98,18 @@ export default function LayoutManager({
     }
 
     if (graph.order === 0) return;
+    // 연결(차수)이 많은 노드의 엣지일수록 당기는 힘을 약하게 —
+    // 허브 주변은 넓게 퍼지고, 연결 적은 노드끼리는 가깝게 붙음
+    graph.forEachEdge((e, _a, s, t) => {
+      const d = (graph.degree(s) + graph.degree(t)) / 2; // 양끝 평균 — 허브-허브 선도 중간 힘 유지
+      graph.setEdgeAttribute(e, "weight", 1 / (1 + Math.log2(1 + d)));
+    });
     const layout = new FA2Layout(graph, {
       settings: {
         ...forceAtlas2.inferSettings(graph),
         gravity: 0.05, // 중심 인력 최소 — 뭉침 방지
         scalingRatio: 40, // 반발 강화 — 허브 자식들이 배치 단계에서부터 퍼짐
+        edgeWeightInfluence: 1, // 위 weight 반영
       },
     });
     layout.start();

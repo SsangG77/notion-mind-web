@@ -25,7 +25,7 @@ export function separateRects(
       hh: (a.blockHalfH as number) ?? 16,
     });
   });
-  const cell = 400; // 최대 충돌 거리(블록 폭 합 + 여백)보다 크게
+  const cell = Math.max(400, 200 + gapX + 120); // 최대 충돌 거리(블록 폭 합 + 여백)보다 크게
   const relax = 0.55;
   for (let it = 0; it < maxIter; it++) {
     const grid = new Map<string, number[]>();

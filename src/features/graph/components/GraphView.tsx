@@ -24,8 +24,10 @@ const SIGMA_SETTINGS = {
   labelGridCellSize: 1, // 모든 노드 블록을 항상 렌더 — 블록이 곧 노드 본체
   labelDensity: Infinity,
   renderEdgeLabels: false,
+  // 자동 화면 맞춤 해제 — 좌표 1단위 = 1px(기본 배율)인 큰 캔버스. 전체가 화면에 들어갈 필요 없음
+  autoRescale: false,
   minCameraRatio: 0.05,
-  maxCameraRatio: 8,
+  maxCameraRatio: 100,
   stagePadding: 60,
 };
 

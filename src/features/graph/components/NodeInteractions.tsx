@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import { separateRects } from "../lib/separateRects";
-import { getCompactS, setFocus } from "../drawNode";
+import { getCompactS, MIN_BLOCK_S, setFocus } from "../drawNode";
 import { T } from "../tokens";
 
 interface Menu {
@@ -122,8 +122,9 @@ export default function NodeInteractions() {
         } else {
           simNodes = null;
           springs = null;
-          // 뭉친 채 끝났으면 겹침 해소 — 로드 때와 동일한 사각형 분리 (겹친 노드만 밀림)
-          separateRects(graph);
+          // 뭉친 채 끝났으면 겹침 해소 — 로드 때와 동일한 사각형 분리·여백 (겹친 노드만 밀림)
+          const gapX = (graph.getAttribute("sepGapX") as number) || 300;
+          separateRects(graph, { gapX, gapY: gapX * 0.6 });
           sigma.refresh({ skipIndexation: true });
         }
       };
@@ -146,12 +147,13 @@ export default function NodeInteractions() {
     const hitTest = (coords: { x: number; y: number }): string | null => {
       const scale = 1 / Math.sqrt(sigma.getCamera().ratio); // 블록 px 크기의 줌 스케일
       const compact = scale < getCompactS(); // 축소 상태: 미니 정사각(고정 px)이 히트 영역
+      const bs = Math.max(scale, MIN_BLOCK_S); // 블록 최소 표시 스케일 반영
       return (
         graph.findNode((_n, a) => {
           if (a.hidden) return false;
           const p = sigma.graphToViewport({ x: a.x as number, y: a.y as number });
-          const hw = compact ? 10 : (a.blockHalfW as number) * scale;
-          const hh = compact ? 10 : (a.blockHalfH as number) * scale;
+          const hw = compact ? 10 : (a.blockHalfW as number) * bs;
+          const hh = compact ? 10 : (a.blockHalfH as number) * bs;
           return Math.abs(coords.x - p.x) <= hw && Math.abs(coords.y - p.y) <= hh;
         }) ?? null
       );

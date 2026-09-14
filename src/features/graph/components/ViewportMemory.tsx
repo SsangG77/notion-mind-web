@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSigma } from "@react-sigma/core";
 
-const KEY = "nm:viewport";
+const KEY = "nm:viewport:v2"; // v1은 자동 맞춤 좌표계 기준이라 폐기
 
 /** 뷰포트 위치 localStorage 기억 — 로드 완료 후 1회 복원, 이동 시 저장 */
 export default function ViewportMemory({ ready }: { ready: boolean }) {

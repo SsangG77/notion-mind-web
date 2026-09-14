@@ -27,7 +27,7 @@ export default function SearchPanel() {
   const jump = (id: string) => {
     const graph = sigma.getGraph();
     const d = sigma.getNodeDisplayData(id);
-    if (d) sigma.getCamera().animate({ x: d.x, y: d.y, ratio: 0.45 }, { duration: 500 });
+    if (d) sigma.getCamera().animate({ x: d.x, y: d.y, ratio: 1 }, { duration: 500 });
     graph.setNodeAttribute(id, "highlighted", true);
     setTimeout(() => {
       if (graph.hasNode(id)) graph.removeNodeAttribute(id, "highlighted");
