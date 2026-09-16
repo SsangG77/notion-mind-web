@@ -17,12 +17,14 @@ export function separateRects(
   }
   const nodes: N[] = [];
   graph.forEachNode((id, a) => {
+    // 연결 많은 노드일수록 여유 반경 추가 (√ 곡선) — 허브 주변 빈 공간 확보
+    const pad = Math.sqrt(Math.max(0, graph.degree(id) - 2)) * 20;
     nodes.push({
       id,
       x: a.x as number,
       y: a.y as number,
-      hw: (a.blockHalfW as number) ?? 60,
-      hh: (a.blockHalfH as number) ?? 16,
+      hw: ((a.blockHalfW as number) ?? 60) + pad,
+      hh: ((a.blockHalfH as number) ?? 16) + pad * 0.6,
     });
   });
   const cell = Math.max(400, 200 + gapX + 120); // 최대 충돌 거리(블록 폭 합 + 여백)보다 크게

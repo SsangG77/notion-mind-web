@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSigma } from "@react-sigma/core";
-import { separateRects } from "../lib/separateRects";
+import { cool, getSimNode, reheat } from "../lib/simulation";
 import { getCompactS, MIN_BLOCK_S, setFocus } from "../drawNode";
 import { T } from "../tokens";
 
@@ -35,101 +35,8 @@ export default function NodeInteractions() {
     let hovered: string | null = null;
     let dragging: string | null = null;
 
-    // --- 옵시디언식 스프링 딸려오기 ---
-    // 드래그 시작 시 2홉 이웃을 수집해 국소 스프링 시뮬레이션을 돌린다.
-    // 드래그 노드 = 커서 고정, 이웃 = 스프링으로 끌려오고 놓으면 감쇠하며 정착.
-    interface SimNode {
-      vx: number;
-      vy: number;
-    }
-    let simNodes: Map<string, SimNode> | null = null;
-    let springs: Array<{ a: string; b: string; rest: number }> | null = null;
-    let raf = 0;
-    let settleFrames = 0;
-
-    const startSim = (root: string) => {
-      simNodes = new Map();
-      springs = [];
-      // BFS 2홉 — 핀·숨김 제외 (핀은 앵커로만 작동)
-      const hop = new Map<string, number>([[root, 0]]);
-      let frontier = [root];
-      for (let d = 1; d <= 2; d++) {
-        const next: string[] = [];
-        for (const n of frontier) {
-          for (const nb of graph.neighbors(n)) {
-            if (hop.has(nb)) continue;
-            hop.set(nb, d);
-            const a = graph.getNodeAttributes(nb);
-            if (!a.pinned && !a.hidden) {
-              simNodes.set(nb, { vx: 0, vy: 0 });
-              next.push(nb);
-            }
-          }
-        }
-        frontier = next;
-      }
-      // 수집 범위 안의 모든 엣지에 현재 거리 = 휴지 길이 스프링 생성
-      const inRange = (n: string) => hop.has(n);
-      const seen = new Set<string>();
-      for (const n of [root, ...simNodes.keys()]) {
-        for (const edge of graph.edges(n)) {
-          if (seen.has(edge)) continue;
-          seen.add(edge);
-          const [a, b] = graph.extremities(edge);
-          if (!inRange(a) && !inRange(b)) continue;
-          const pa = graph.getNodeAttributes(a);
-          const pb = graph.getNodeAttributes(b);
-          const rest = Math.hypot((pa.x as number) - (pb.x as number), (pa.y as number) - (pb.y as number));
-          springs.push({ a, b, rest });
-        }
-      }
-      settleFrames = 0;
-      cancelAnimationFrame(raf);
-      const step = () => {
-        if (!simNodes || !springs) return;
-        // 스프링 힘 적용 (자유 노드에만)
-        for (const s of springs) {
-          const pa = graph.getNodeAttributes(s.a);
-          const pb = graph.getNodeAttributes(s.b);
-          const dx = (pb.x as number) - (pa.x as number);
-          const dy = (pb.y as number) - (pa.y as number);
-          const dist = Math.hypot(dx, dy) || 1;
-          const f = ((dist - s.rest) / dist) * 0.06; // 스프링 강도
-          const na = simNodes.get(s.a);
-          const nb = simNodes.get(s.b);
-          if (na) {
-            na.vx += dx * f;
-            na.vy += dy * f;
-          }
-          if (nb) {
-            nb.vx -= dx * f;
-            nb.vy -= dy * f;
-          }
-        }
-        let energy = 0;
-        for (const [n, v] of simNodes) {
-          v.vx *= 0.82; // 감쇠
-          v.vy *= 0.82;
-          energy += Math.abs(v.vx) + Math.abs(v.vy);
-          const a = graph.getNodeAttributes(n);
-          graph.setNodeAttribute(n, "x", (a.x as number) + v.vx);
-          graph.setNodeAttribute(n, "y", (a.y as number) + v.vy);
-        }
-        // 드래그 중엔 계속, 놓은 뒤엔 에너지가 잦아들면 종료
-        if (dragging || (energy > 0.5 && settleFrames < 180)) {
-          if (!dragging) settleFrames++;
-          raf = requestAnimationFrame(step);
-        } else {
-          simNodes = null;
-          springs = null;
-          // 뭉친 채 끝났으면 겹침 해소 — 로드 때와 동일한 사각형 분리·여백 (겹친 노드만 밀림)
-          const gapX = (graph.getAttribute("sepGapX") as number) || 300;
-          separateRects(graph, { gapX, gapY: gapX * 0.6 });
-          sigma.refresh({ skipIndexation: true });
-        }
-      };
-      raf = requestAnimationFrame(step);
-    };
+    // 드래그 = 상시 물리 시뮬레이션에 위임 (옵시디언 방식) —
+    // 잡은 노드는 커서에 고정(fx/fy), 시뮬레이션 재가열로 주변이 출렁이며 따라옴
 
     // 배경 베일 — 호버 시 캔버스 뒤(도트 그리드)를 어둡게. 엣지·노드 dim은 각자 처리
     const veil = document.createElement("div");
@@ -190,14 +97,25 @@ export default function NodeInteractions() {
       dragging = hovered;
       // 드래그 중 오토스케일 재계산으로 화면이 튀지 않게 bbox 고정
       if (!sigma.getCustomBBox()) sigma.setCustomBBox(sigma.getBBox());
-      startSim(dragging);
+      const pos = sigma.viewportToGraph(e);
+      const sn = getSimNode(dragging);
+      if (sn) {
+        sn.fx = pos.x;
+        sn.fy = pos.y;
+      }
+      reheat(); // 시뮬레이션 재가열 — 주변이 살아 움직이며 따라옴
       e.preventSigmaDefault?.();
     };
 
     const onDragMove = (e: Coords) => {
       if (!dragging) return;
       const pos = sigma.viewportToGraph(e);
-      // 드래그 노드는 커서 고정 — 이웃은 스프링 루프가 끌어옴
+      // 잡은 노드는 커서에 고정 — 나머지는 시뮬레이션이 처리
+      const sn = getSimNode(dragging);
+      if (sn) {
+        sn.fx = pos.x;
+        sn.fy = pos.y;
+      }
       graph.setNodeAttribute(dragging, "x", pos.x);
       graph.setNodeAttribute(dragging, "y", pos.y);
       e.preventSigmaDefault?.();
@@ -206,7 +124,16 @@ export default function NodeInteractions() {
     };
 
     const onUp = () => {
-      dragging = null; // 시뮬레이션은 에너지가 잦아들 때까지 이어서 정착
+      if (dragging) {
+        const sn = getSimNode(dragging);
+        // 핀 상태가 아니면 고정 해제 — 시뮬레이션이 이어서 정착
+        if (sn && !graph.getNodeAttribute(dragging, "pinned")) {
+          sn.fx = null;
+          sn.fy = null;
+        }
+      }
+      dragging = null;
+      cool(); // 서서히 식으며 정착
     };
 
     const onLeave = () => {
@@ -235,7 +162,6 @@ export default function NodeInteractions() {
     container.addEventListener("mouseleave", onLeave);
     container.addEventListener("contextmenu", onContextMenu);
     return () => {
-      cancelAnimationFrame(raf);
       setFocus(null);
       veil.remove();
       captor.off("mousemove", onMove);
@@ -260,8 +186,20 @@ export default function NodeInteractions() {
   };
 
   const togglePin = (node: string, pinned: boolean) => {
-    if (pinned) graph.removeNodeAttribute(node, "pinned");
-    else graph.setNodeAttribute(node, "pinned", true);
+    const sn = getSimNode(node);
+    if (pinned) {
+      graph.removeNodeAttribute(node, "pinned");
+      if (sn) {
+        sn.fx = null;
+        sn.fy = null;
+      }
+    } else {
+      graph.setNodeAttribute(node, "pinned", true);
+      if (sn) {
+        sn.fx = graph.getNodeAttribute(node, "x") as number;
+        sn.fy = graph.getNodeAttribute(node, "y") as number;
+      }
+    }
     setMenu(null);
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import Graph from "graphology";
 import { SigmaContainer } from "@react-sigma/core";
@@ -36,6 +36,11 @@ export default function GraphView() {
   const { dark, toggle } = useTheme();
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
   const graph = useMemo(() => new Graph(), []);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      (window as unknown as { __nmGraph: Graph }).__nmGraph = graph; // 디버그 콘솔용
+    }
+  }, [graph]);
 
   const empty = !loading && !error && data != null && data.nodes.length === 0;
 
