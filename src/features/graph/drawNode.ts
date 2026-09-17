@@ -20,7 +20,8 @@ export const NODE_MAX_TEXT_W = 195; // 글자 30% 확대에 맞춰 비례 확대
 
 // 줌 스케일이 이보다 작으면 타이틀 숨기고 정사각 박스만 표시 (호버 시 원래 블록으로 확장).
 // 기본 0.7, 레이아웃 후 실제 밀도 기준으로 재계산됨 — 블록끼리 안 겹치는 줌부터 실물 표시
-let compactS = 0.42;
+// 0.38 = 줌 약 14.4% 경계 — 15%까지는 타이틀 블록, 14%부터 정사각
+let compactS = 0.38;
 export function setCompactS(v: number) {
   compactS = v;
 }
