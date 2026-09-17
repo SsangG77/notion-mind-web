@@ -1,74 +1,92 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import SearchPanel from "./SearchPanel";
-import { BLOCK, BLOCK_PRESS } from "./blockStyle";
+import SettingsPanel from "./SettingsPanel";
+import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 
-const SECTIONS = ["Filters", "Groups", "Display", "Forces"];
+const FREE_LIMIT = 1000;
 
-/** 상단 바 — 좌: 필터 버튼·검색창 / 우: 다크 스위치·동기화. 전부 노드 박스 스타일 */
+/** 상단 바 — 좌: 설정·검색(+필터) / 우: 다크 스위치. 전부 노드 박스 스타일 */
 export default function TopBar({
   loading,
   lastSync,
   onReload,
   dark,
   onToggleTheme,
+  nodeCount,
+  truncated,
 }: {
   loading: boolean;
   lastSync: number | null;
   onReload: () => void;
   dark: boolean;
   onToggleTheme: () => void;
+  nodeCount: number;
+  truncated: boolean;
 }) {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const syncTitle = lastSync
-    ? `마지막 동기화 ${new Date(lastSync).toLocaleTimeString("ko-KR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`
-    : "동기화";
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
-      {/* 좌측: 필터 + 검색 */}
+      {/* 좌측: 설정 + 검색 + 필터 */}
       <div className="pointer-events-auto flex items-start gap-2">
-        <div className="relative">
-          <button
-            data-testid="filter_button"
-            title="필터"
-            onClick={() => setFilterOpen((v) => !v)}
-            className={`${BLOCK} ${BLOCK_PRESS} flex h-9 w-9 items-center justify-center`}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <path
-                d="M1 2h12L8.5 7.5V12l-3-1.5V7.5L1 2Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          {filterOpen && (
-            <div
-              data-testid="filter_panel"
-              className={`${BLOCK} absolute left-0 top-11 w-52 px-3 py-2 text-sm`}
-            >
-              {SECTIONS.map((s) => (
-                <div
-                  key={s}
-                  className="flex items-center justify-between border-b border-[#E9E9E7] py-1.5 last:border-0 dark:border-[#2F2F2F]"
-                >
-                  <span>{s}</span>
-                  <span className="text-[11px] text-[#91908C]">준비 중</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <button
+          data-testid="settings_button"
+          title="설정"
+          onClick={() => setSettingsOpen((v) => !v)}
+          className={`${BLOCK} ${BLOCK_PRESS} flex h-9 w-9 items-center justify-center`}
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
+            <circle cx="7.5" cy="7.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
+            <path
+              d="M7.5 1.2v1.9M7.5 11.9v1.9M1.2 7.5h1.9M11.9 7.5h1.9M3 3l1.35 1.35M10.65 10.65 12 12M12 3l-1.35 1.35M4.35 10.65 3 12"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
         <SearchPanel />
+        {/* 연결된 페이지 수 — Free 한도 체감시켜 Pro 전환 유도, 클릭 시 요금제 */}
+        {nodeCount > 0 && (
+          <Link
+            data-testid="page_count_chip"
+            href="/pricing"
+            className={`${BLOCK} ${BLOCK_PRESS} flex h-9 items-center gap-2.5 px-3`}
+            title="요금제 보기"
+          >
+            <span className="flex flex-col justify-center gap-[5px] leading-none">
+              <span className="text-[11px]">
+                <b>{nodeCount.toLocaleString()}</b>
+                <span className="text-[#91908C]"> / {FREE_LIMIT.toLocaleString()} 페이지</span>
+              </span>
+              <span className="block h-1 w-28 overflow-hidden rounded-full bg-[#E9E9E7] dark:bg-black">
+                <span
+                  className={`block h-full rounded-full ${
+                    truncated || nodeCount >= FREE_LIMIT * 0.8 ? "bg-[#D44C47]" : "bg-[#2383E2]"
+                  }`}
+                  style={{ width: `${Math.min(100, (nodeCount / FREE_LIMIT) * 100)}%` }}
+                />
+              </span>
+            </span>
+            {truncated && (
+              <span className="text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>
+            )}
+          </Link>
+        )}
+        {settingsOpen && (
+          <SettingsPanel
+            onClose={() => setSettingsOpen(false)}
+            loading={loading}
+            lastSync={lastSync}
+            onReload={onReload}
+          />
+        )}
       </div>
 
-      {/* 우측: 다크 스위치 + 동기화 */}
+      {/* 우측: 다크 스위치 */}
       <div className="pointer-events-auto flex items-center gap-2">
         <button
           data-testid="theme_toggle_button"
@@ -85,30 +103,6 @@ export default function TopBar({
               {dark ? "🌙" : "☀️"}
             </span>
           </span>
-        </button>
-        <button
-          data-testid="sync_button"
-          title={syncTitle}
-          disabled={loading}
-          onClick={onReload}
-          className={`${BLOCK} ${BLOCK_PRESS} flex h-9 w-9 items-center justify-center disabled:opacity-60`}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            aria-hidden
-            className={loading ? "animate-spin" : ""}
-          >
-            <path
-              d="M12.5 7a5.5 5.5 0 1 1-1.6-3.9M12.5 1v3h-3"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
         </button>
       </div>
     </div>

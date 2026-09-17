@@ -39,7 +39,7 @@ function writeBack() {
 /** 정착 완료 시 최소 거리 보장 — 블록 실측 + 여백으로 강제 분리 후 시뮬레이션에 동기화 */
 function settle() {
   if (!simGraph) return;
-  separateRects(simGraph, { gapX: 320, gapY: 200 });
+  separateRects(simGraph, { gapX: 460, gapY: 290 });
   for (const n of simNodes) {
     n.x = simGraph.getNodeAttribute(n.id, "x") as number;
     n.y = simGraph.getNodeAttribute(n.id, "y") as number;
@@ -89,11 +89,21 @@ export function buildSimulation(graph: Graph): void {
       "link",
       forceLink<SimNode, { source: string | SimNode; target: string | SimNode }>(links)
         .id((d) => d.id)
-        // 양끝 연결 수의 합 — 허브끼리는 두 링 반경의 합만큼 벌어짐
+        // 양끝 연결 수의 합 — 허브끼리는 두 링 반경의 합만큼 벌어짐.
+        // 자식마다 거리 배율을 엇갈리게(0.82~1.18, 결정적) 줘서 이웃끼리 안쪽/바깥쪽으로 교차 배치
         .distance((l) => {
           const s = typeof l.source === "object" ? l.source.id : l.source;
           const t = typeof l.target === "object" ? l.target.id : l.target;
-          return Math.max(530, (graph.degree(s) + graph.degree(t)) * 62);
+          const degS = graph.degree(s);
+          const degT = graph.degree(t);
+          const base = Math.max(770, (degS + degT) * 90);
+          // 허브-허브(양쪽 다 주변 노드 많음)는 엇갈림 없이 두 링 합 + 여유 10% — 영역 침범 방지
+          if (Math.min(degS, degT) >= 4) return base * 2.2;
+          const child = degS < degT ? s : t;
+          let h = 0;
+          for (let i = 0; i < child.length; i++) h = (h * 31 + child.charCodeAt(i)) | 0;
+          const stagger = 0.82 + (Math.abs(h) % 5) * 0.09;
+          return base * stagger;
         })
         .strength(0.5), // 충돌 반경이 이길 수 있게 링크는 절반 힘
     )
@@ -113,8 +123,8 @@ export function buildSimulation(graph: Graph): void {
         // 다른 허브·노드가 링 안에 못 들어와 그룹끼리 안 섞임 (자식들은 링 위 = 영역 밖)
         .radius((d) =>
           Math.max(
-            (((graph.getNodeAttribute(d.id, "blockHalfW") as number) ?? 60) + 100),
-            graph.degree(d.id) * 62 * 0.75,
+            (((graph.getNodeAttribute(d.id, "blockHalfW") as number) ?? 60) + 150),
+            graph.degree(d.id) * 90 * 0.75,
           ),
         )
         .strength(1)

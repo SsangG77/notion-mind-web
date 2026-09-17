@@ -8,12 +8,12 @@ import "@react-sigma/core/lib/style.css";
 import { useGraphData } from "../hooks/useGraphData";
 import { useTheme } from "../hooks/useTheme";
 import { drawNodeHover, drawNodeLabel } from "../drawNode";
+import ContainerResize from "./ContainerResize";
 import LayoutManager from "./LayoutManager";
 import RelationEdgesLayer from "./RelationEdgesLayer";
 import NodeInteractions from "./NodeInteractions";
 import TopBar from "./TopBar";
 import ZoomControls from "./ZoomControls";
-import Legend from "./Legend";
 import ThemeSync from "./ThemeSync";
 import ViewportMemory from "./ViewportMemory";
 
@@ -26,6 +26,8 @@ const SIGMA_SETTINGS = {
   renderEdgeLabels: false,
   // 자동 화면 맞춤 해제 — 좌표 1단위 = 1px(기본 배율)인 큰 캔버스. 전체가 화면에 들어갈 필요 없음
   autoRescale: false,
+  // 컨테이너가 잠깐 0px이 돼도(탭 숨김·라우트 전환) 예외 대신 버팀 — 복귀는 ContainerResize가 처리
+  allowInvalidContainer: true,
   minCameraRatio: 0.05,
   maxCameraRatio: 100,
   stagePadding: 60,
@@ -52,6 +54,7 @@ export default function GraphView() {
         className="!h-full !w-full !bg-transparent"
       >
         <ThemeSync dark={dark} />
+        <ContainerResize />
         <LayoutManager data={data} gen={gen} loading={loading} />
         <RelationEdgesLayer />
         <NodeInteractions />
@@ -61,9 +64,10 @@ export default function GraphView() {
           onReload={reload}
           dark={dark}
           onToggleTheme={toggle}
+          nodeCount={data?.nodes.length ?? 0}
+          truncated={data?.truncated ?? false}
         />
         <ZoomControls />
-        <Legend />
         <ViewportMemory ready={!loading && data != null} />
       </SigmaContainer>
 

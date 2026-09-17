@@ -36,3 +36,43 @@ body {
 .dark .nm-dotgrid {
   background-image: radial-gradient(#2f2f2f 1px, transparent 1px);
 }
+
+/* 설정 패널 — 왼쪽에서 슬라이드 인 */
+@keyframes nm-slide-in {
+  from {
+    transform: translateX(calc(-100% - 16px));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.nm-slide-in {
+  animation: nm-slide-in 220ms ease-out;
+}
+
+@keyframes nm-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 16px));
+  }
+}
+.nm-slide-out {
+  animation: nm-slide-out 200ms ease-in forwards;
+}
+
+@keyframes nm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.nm-fade-in {
+  animation: nm-fade-in 200ms ease-out;
+}
+.nm-fade-out {
+  animation: nm-fade-in 180ms ease-in reverse forwards;
+}
