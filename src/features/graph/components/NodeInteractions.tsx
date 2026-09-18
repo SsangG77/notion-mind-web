@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSigma } from "@react-sigma/core";
+import type { NodeType } from "@/types/graph";
 import { cool, getSimNode, reheat } from "../lib/simulation";
 import { getCompactS, MIN_BLOCK_S, setFocus } from "../drawNode";
 import { T } from "../tokens";
@@ -22,18 +23,27 @@ interface Coords {
 
 /**
  * 노드 인터랙션 — 히트 판정은 블록 사각형 전체(커스텀).
- * 호버 강조 · 드래그(이웃 딸려오기, 핀 제외) · 우클릭 메뉴(숨기기/핀)
+ * 호버 강조 · 클릭 선택(상세 패널) · 드래그(이웃 딸려오기, 핀 제외) · 우클릭 메뉴(숨기기/핀)
  */
-export default function NodeInteractions() {
+export default function NodeInteractions({
+  onSelect,
+}: {
+  onSelect: (next: { id: string; type: NodeType } | null) => void;
+}) {
   const sigma = useSigma();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [hiddenCount, setHiddenCount] = useState(0);
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     const graph = sigma.getGraph();
     const container = sigma.getContainer();
     let hovered: string | null = null;
     let dragging: string | null = null;
+    let downAt: { x: number; y: number } | null = null; // 클릭·드래그 구분용
 
     // 드래그 = 상시 물리 시뮬레이션에 위임 (옵시디언 방식) —
     // 잡은 노드는 커서에 고정(fx/fy), 시뮬레이션 재가열로 주변이 출렁이며 따라옴
@@ -93,6 +103,7 @@ export default function NodeInteractions() {
 
     const onDown = (e: Coords) => {
       setMenu(null);
+      downAt = { x: e.x, y: e.y };
       if (!hovered) return;
       dragging = hovered;
       // 드래그 중 오토스케일 재계산으로 화면이 튀지 않게 bbox 고정
@@ -123,7 +134,18 @@ export default function NodeInteractions() {
       e.original?.stopPropagation();
     };
 
-    const onUp = () => {
+    const onUp = (e: Coords) => {
+      // 거의 안 움직였으면 클릭으로 간주 — 노드 선택 / 빈 영역이면 선택 해제
+      const moved = downAt ? Math.hypot(e.x - downAt.x, e.y - downAt.y) : 0;
+      if (downAt && moved < 4) {
+        const hit = hitTest(e);
+        onSelectRef.current(
+          hit
+            ? { id: hit, type: graph.getNodeAttribute(hit, "nodeType") as NodeType }
+            : null,
+        );
+      }
+      downAt = null;
       if (dragging) {
         const sn = getSimNode(dragging);
         // 핀 상태가 아니면 고정 해제 — 시뮬레이션이 이어서 정착

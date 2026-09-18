@@ -15,6 +15,12 @@ export function setFocus(next: { center: string; connected: Set<string> } | null
   focus = next;
 }
 
+// 상세 패널에서 선택된 노드 — 액센트 테두리 + 글로우 유지
+let selected: string | null = null;
+export function setSelected(id: string | null) {
+  selected = id;
+}
+
 // 텍스트 최대 너비(기준 스케일 px) — 초과 시 2줄 랩, 그래도 넘치면 말줄임
 export const NODE_MAX_TEXT_W = 195; // 글자 30% 확대에 맞춰 비례 확대
 
@@ -125,7 +131,8 @@ function drawBlock(
   }
   // 포커스 중심만 확장·글로우. 이웃은 호버 레이어에 "선명한 일반 블록"으로만 (하이라이트 효과)
   const isCenter = focus == null || data.key == null || data.key === focus.center;
-  const emph = highlighted && isCenter;
+  const isSelected = selected != null && data.key === selected;
+  const emph = (highlighted && isCenter) || isSelected;
   let s = data.size / (isDb ? DB_NODE_SIZE : PAGE_NODE_SIZE); // 줌 스케일
   if (s < compactS) {
     if (!emph) {
@@ -172,14 +179,14 @@ function drawBlock(
   ctx.fillStyle = isDb ? T.dbFace : T.pageFace;
   if (emph) {
     ctx.save();
-    ctx.shadowColor = "rgba(35, 131, 226, 0.14)";
-    ctx.shadowBlur = 5 * s;
+    ctx.shadowColor = isSelected ? "rgba(35, 131, 226, 0.4)" : "rgba(35, 131, 226, 0.14)";
+    ctx.shadowBlur = (isSelected ? 14 : 5) * s;
     ctx.fill();
     ctx.restore();
   } else {
     ctx.fill();
   }
-  ctx.lineWidth = 1.5 * s;
+  ctx.lineWidth = (isSelected ? 2.5 : 1.5) * s;
   ctx.strokeStyle = emph ? T.accent : T.extrude;
   ctx.stroke();
 

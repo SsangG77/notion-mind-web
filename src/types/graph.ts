@@ -47,3 +47,25 @@ export interface GraphBatch {
   items: GraphItem[];
   nextCursor: string | null;
 }
+
+/** 노드 상세 패널용 — 속성 한 줄 */
+export interface NodeProperty {
+  name: string;
+  /** 사람이 읽는 값. 빈 값이면 패널에서 생략 */
+  value: string;
+}
+
+/** /api/node/[id] 응답 */
+export interface NodeDetail {
+  id: string;
+  title: string;
+  type: NodeType;
+  url: string | null;
+  /** 마지막 수정 시각 (ISO) */
+  lastEdited: string | null;
+  properties: NodeProperty[];
+  /** 본문 미리보기 — 블록 평문 줄 */
+  excerpt: string[];
+  /** 본문이 잘렸는지 */
+  excerptTruncated: boolean;
+}

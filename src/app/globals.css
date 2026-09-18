@@ -62,6 +62,22 @@ body {
   animation: nm-slide-out 200ms ease-in forwards;
 }
 
+/* 노드 상세 패널 — 오른쪽에서 슬라이드 인·아웃 */
+@keyframes nm-slide-in-right {
+  from {
+    transform: translateX(calc(100% + 16px));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.nm-slide-in-right {
+  animation: nm-slide-in-right 220ms ease-out;
+}
+.nm-slide-out-right {
+  animation: nm-slide-in-right 200ms ease-in reverse forwards;
+}
+
 @keyframes nm-fade-in {
   from {
     opacity: 0;

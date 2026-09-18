@@ -198,3 +198,148 @@ export async function countAccessibleItems(
   }
   return { pages, databases };
 }
+
+// ---------- 노드 상세 (사이드패널) ----------
+
+import type { NodeDetail, NodeProperty } from "@/types/graph";
+
+const EXCERPT_LIMIT = 24; // 본문 미리보기 줄 수
+
+function api(accessToken: string, path: string) {
+  return fetch(`${NOTION_API}${path}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Notion-Version": NOTION_VERSION,
+    },
+  });
+}
+
+function plain(rich: RichText[] | undefined): string {
+  return (rich ?? []).map((t) => t.plain_text).join("");
+}
+
+/** 속성 값을 사람이 읽는 한 줄로 — 빈 값은 "" */
+function propertyValue(prop: Record<string, unknown>): string {
+  const type = prop.type as string;
+  const v = prop[type];
+  switch (type) {
+    case "title":
+    case "rich_text":
+      return plain(v as RichText[]);
+    case "number":
+      return v == null ? "" : String(v);
+    case "select":
+    case "status":
+      return (v as { name?: string } | null)?.name ?? "";
+    case "multi_select":
+      return ((v as Array<{ name: string }>) ?? []).map((o) => o.name).join(", ");
+    case "date": {
+      const d = v as { start?: string; end?: string } | null;
+      if (!d?.start) return "";
+      return d.end ? `${d.start} → ${d.end}` : d.start;
+    }
+    case "people":
+      return ((v as Array<{ name?: string }>) ?? []).map((p) => p.name ?? "사용자").join(", ");
+    case "checkbox":
+      return v ? "✓" : "—";
+    case "url":
+    case "email":
+    case "phone_number":
+      return (v as string) ?? "";
+    case "relation":
+      return ((v as unknown[]) ?? []).length ? `${((v as unknown[]) ?? []).length}개 연결` : "";
+    case "formula": {
+      const f = v as { type: string; [k: string]: unknown };
+      const inner = f?.[f?.type];
+      return inner == null ? "" : String(inner);
+    }
+    case "created_time":
+    case "last_edited_time":
+      return (v as string) ?? "";
+    default:
+      return "";
+  }
+}
+
+/** 블록 하나를 평문 한 줄로 — 텍스트 계열만, 나머지는 빈 문자열 */
+function blockText(block: Record<string, unknown>): string {
+  const type = block.type as string;
+  const body = block[type] as { rich_text?: RichText[] } | undefined;
+  const text = plain(body?.rich_text);
+  if (!text) return "";
+  if (type === "bulleted_list_item" || type === "numbered_list_item") return `• ${text}`;
+  if (type === "to_do") return `☐ ${text}`;
+  if (type.startsWith("heading")) return text;
+  return text;
+}
+
+/**
+ * 노드 상세 — 속성·수정일·본문 미리보기.
+ * rate limit 평균 3req/s → 호출 2회(메타 + 블록)로 제한.
+ */
+export async function fetchNodeDetail(
+  accessToken: string,
+  id: string,
+  kind: "page" | "database",
+): Promise<NodeDetail> {
+  const metaRes = await api(accessToken, kind === "page" ? `/pages/${id}` : `/data_sources/${id}`);
+  if (!metaRes.ok) {
+    throw new Error(`detail failed: ${metaRes.status} ${await metaRes.text()}`);
+  }
+  const meta = (await metaRes.json()) as {
+    url?: string;
+    last_edited_time?: string;
+    title?: RichText[];
+    description?: RichText[];
+    properties?: Record<string, Record<string, unknown>>;
+  };
+
+  let title = "무제";
+  const properties: NodeProperty[] = [];
+  if (kind === "page") {
+    for (const [name, prop] of Object.entries(meta.properties ?? {})) {
+      if (prop.type === "title") {
+        title = plain(prop.title as RichText[]) || "무제";
+        continue;
+      }
+      const value = propertyValue(prop);
+      if (value) properties.push({ name, value });
+    }
+  } else {
+    title = plain(meta.title) || "무제";
+    const desc = plain(meta.description);
+    if (desc) properties.push({ name: "설명", value: desc });
+    const schema = Object.keys(meta.properties ?? {});
+    if (schema.length) properties.push({ name: "속성", value: schema.join(", ") });
+  }
+
+  // 본문 — DB(data_source)는 자식 블록이 없으므로 페이지만 조회
+  const excerpt: string[] = [];
+  let excerptTruncated = false;
+  if (kind === "page") {
+    const blockRes = await api(accessToken, `/blocks/${id}/children?page_size=${EXCERPT_LIMIT + 1}`);
+    if (blockRes.ok) {
+      const data = (await blockRes.json()) as {
+        results: Array<Record<string, unknown>>;
+        has_more: boolean;
+      };
+      for (const b of data.results) {
+        const line = blockText(b);
+        if (line) excerpt.push(line);
+      }
+      excerptTruncated = data.has_more || excerpt.length > EXCERPT_LIMIT;
+      if (excerpt.length > EXCERPT_LIMIT) excerpt.length = EXCERPT_LIMIT;
+    }
+  }
+
+  return {
+    id,
+    title,
+    type: kind,
+    url: meta.url ?? null,
+    lastEdited: meta.last_edited_time ?? null,
+    properties,
+    excerpt,
+    excerptTruncated,
+  };
+}

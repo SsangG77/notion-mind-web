@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Graph from "graphology";
 import { SigmaContainer } from "@react-sigma/core";
 import "@react-sigma/core/lib/style.css";
 import { useGraphData } from "../hooks/useGraphData";
 import { useTheme } from "../hooks/useTheme";
-import { drawNodeHover, drawNodeLabel } from "../drawNode";
+import { drawNodeHover, drawNodeLabel, setSelected } from "../drawNode";
 import ContainerResize from "./ContainerResize";
 import LayoutManager from "./LayoutManager";
 import RelationEdgesLayer from "./RelationEdgesLayer";
 import NodeInteractions from "./NodeInteractions";
+import NodeDetailPanel, { type Selection } from "./NodeDetailPanel";
 import TopBar from "./TopBar";
 import ZoomControls from "./ZoomControls";
 import ThemeSync from "./ThemeSync";
@@ -46,6 +47,19 @@ export default function GraphView() {
 
   const empty = !loading && !error && data != null && data.nodes.length === 0;
 
+  // 상세 패널 선택 — 캔버스 드로잉과 상태 공유
+  const [selection, setSelection] = useState<Selection | null>(null);
+  // 닫기 요청 — 패널이 슬라이드 아웃을 끝낸 뒤 실제 해제 (빈 영역 클릭 포함 모든 경로 동일)
+  const [closeRequest, setCloseRequest] = useState(0);
+  useEffect(() => {
+    setSelected(selection?.id ?? null);
+  }, [selection]);
+
+  const handleSelect = (next: Selection | null) => {
+    if (next) setSelection(next);
+    else if (selection) setCloseRequest((n) => n + 1); // 즉시 제거 대신 닫기 애니메이션
+  };
+
   return (
     <div className="relative h-full w-full" data-testid="graph_canvas">
       <SigmaContainer
@@ -57,7 +71,15 @@ export default function GraphView() {
         <ContainerResize />
         <LayoutManager data={data} gen={gen} loading={loading} />
         <RelationEdgesLayer />
-        <NodeInteractions />
+        <NodeInteractions onSelect={handleSelect} />
+        {selection && (
+          <NodeDetailPanel
+            selection={selection}
+            onSelect={setSelection}
+            onClose={() => setSelection(null)}
+            closeRequest={closeRequest}
+          />
+        )}
         <TopBar
           loading={loading}
           lastSync={lastSync}
