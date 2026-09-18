@@ -83,12 +83,20 @@ export function buildSimulation(graph: Graph): void {
   byId = new Map(simNodes.map((n) => [n.id, n]));
   const links = graph.mapEdges((_e, _a, s, t) => ({ source: s, target: t }));
 
-  // 링 반경 = 자식들이 원 둘레에 겹치지 않고 늘어서는 데 필요한 최소 반경.
-  // 둘레 = 자식 수 × (블록 폭 + 호 간격), 반경 = 둘레 / 2π — 필요 이상으로 멀어지지 않음.
+  // 링 반경 = 자식들이 겹치지 않고 늘어서는 데 필요한 최소 반경.
+  // 한 겹으로 세우면 반경이 자식 수에 선형으로 커져(자식 87개 = 반경 6,500px) 허브 하나가
+  // 화면을 수십 배로 벗어남 → 한 겹이 RING_GAP 간격의 여러 겹보다 커지면 여러 겹으로 나눠 담는다.
+  // 그러면 반경이 √(자식 수)로만 자람. 자식 13개 이하는 예전과 동일(한 겹).
   const ARC_PER_CHILD = 480;
+  const RING_GAP = 520; // 동심원 겹 간격
   const CHILD_R = 400; // 대표 자식 충돌 반경 (허브 충돌 반경에서 상쇄)
-  const ring = (n: string) =>
-    (Math.max(0, graph.degree(n) - 1) * ARC_PER_CHILD) / (2 * Math.PI);
+  const ring = (n: string) => {
+    const c = Math.max(0, graph.degree(n) - 1);
+    if (c === 0) return 0;
+    const oneRing = (c * ARC_PER_CHILD) / (2 * Math.PI); // 한 겹에 다 세울 때
+    const packed = Math.sqrt((c * ARC_PER_CHILD * RING_GAP) / Math.PI); // 여러 겹으로 채울 때
+    return Math.min(oneRing, packed);
+  };
 
   sim = forceSimulation(simNodes)
     .stop() // 내부 스테퍼 사용 안 함 — 아래 자체 프레임 루프로 구동
@@ -105,8 +113,17 @@ export function buildSimulation(graph: Graph): void {
           // 허브-허브는 엇갈림 없이 두 영역 합 그대로
           if (Math.min(graph.degree(s), graph.degree(t)) >= 4) return base;
           const child = graph.degree(s) < graph.degree(t) ? s : t;
+          const hub = child === s ? t : s;
           let h = 0;
           for (let i = 0; i < child.length; i++) h = (h * 31 + child.charCodeAt(i)) | 0;
+          const hubRing = ring(hub);
+          const rings = Math.max(1, Math.round(hubRing / RING_GAP));
+          if (rings > 1) {
+            // 여러 겹 허브 — 자식을 겹에 흩어 배정. 바깥 겹일수록 자리가 많으므로 √ 분포
+            const u = (Math.abs(h) % 997) / 997;
+            const k = Math.max(1, Math.ceil(Math.sqrt(u) * rings));
+            return (hubRing * k) / rings + ring(child) + 620;
+          }
           const stagger = 0.88 + (Math.abs(h) % 5) * 0.06;
           return base * stagger;
         })
