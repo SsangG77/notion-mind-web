@@ -13,6 +13,8 @@ import LayoutManager from "./LayoutManager";
 import RelationEdgesLayer from "./RelationEdgesLayer";
 import NodeInteractions from "./NodeInteractions";
 import NodeDetailPanel, { type Selection } from "./NodeDetailPanel";
+import PageCountChip from "./PageCountChip";
+import ThemeToggle from "./ThemeToggle";
 import TopBar from "./TopBar";
 import ZoomControls from "./ZoomControls";
 import ThemeSync from "./ThemeSync";
@@ -34,7 +36,7 @@ const SIGMA_SETTINGS = {
   stagePadding: 60,
 };
 
-export default function GraphView() {
+export default function GraphView({ workspace }: { workspace?: string }) {
   const { data, error, loading, gen, lastSync, reload } = useGraphData();
   const { dark, toggle } = useTheme();
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
@@ -84,8 +86,10 @@ export default function GraphView() {
           loading={loading}
           lastSync={lastSync}
           onReload={reload}
-          dark={dark}
-          onToggleTheme={toggle}
+          workspace={workspace}
+        />
+        <ThemeToggle dark={dark} onToggle={toggle} />
+        <PageCountChip
           nodeCount={data?.nodes.length ?? 0}
           truncated={data?.truncated ?? false}
         />

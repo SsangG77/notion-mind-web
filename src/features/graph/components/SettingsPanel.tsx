@@ -29,11 +29,14 @@ export default function SettingsPanel({
   loading,
   lastSync,
   onReload,
+  workspace,
 }: {
   onClose: () => void;
   loading: boolean;
   lastSync: number | null;
   onReload: () => void;
+  /** 연결된 노션 워크스페이스 이름 — 상단 헤더가 사라져 이 패널이 표시 자리 */
+  workspace?: string;
 }) {
   const [paywall, setPaywall] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -61,10 +64,17 @@ export default function SettingsPanel({
         data-testid="settings_panel"
         className={`${BLOCK} ${
           closing ? "nm-slide-out" : "nm-slide-in"
-        } pointer-events-auto fixed bottom-[72px] left-3 top-[104px] z-20 flex w-[332px] flex-col overflow-hidden`}
+        } pointer-events-auto fixed bottom-[116px] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
       >
         <div className={`${ROW} shrink-0`}>
-          <span className="text-sm font-semibold">설정</span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold">설정</span>
+            {workspace && (
+              <span className="mt-0.5 block truncate text-[10px] text-[#91908C]">
+                {workspace}
+              </span>
+            )}
+          </span>
           <button
             data-testid="settings_close_button"
             onClick={close}
