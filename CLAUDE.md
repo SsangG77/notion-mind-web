@@ -7,7 +7,7 @@
 - 그래프: Sigma.js v3 + graphology + graphology-layout-forceatlas2 (web worker) + @react-sigma/core
 - 백엔드: Next.js API Routes + Supabase (Postgres) — 노션 OAuth secret 보관·토큰 암호화 저장
 - 결제: Stripe
-- 배포: 미정 (Vercel 유력)
+- 배포: Vercel (프로젝트 `ssangg77s-projects/notion-mind-web`, CLI `npx vercel deploy --prod`). 정식 주소 https://notion-mind.com (Cloudflare Registrar, A 레코드 76.76.21.21, DNS only). www·notion-mind-web.vercel.app 은 정식 주소로 308 리디렉션. 시크릿은 Vercel 환경변수(Production·Preview)로만 — `.vercelignore` 가 `.env` 업로드 차단. GitHub 자동 배포는 미연결(Vercel GitHub 앱 권한 필요)
 
 ## 아키텍처 — FSD-라이트 (2026-08-23 확정)
 ```
@@ -27,6 +27,7 @@ src/
 
 ## 디자인 시스템 (노션 디자인 탭 = 원본)
 - 라이트: 배경 #FFFFFF · 도트 #E9E9E7 · 서피스 #F7F6F3 · 노드 #FDFDFC(페이지)/#F4F3EF(DB) · 돌출면 #2E2C27 · 텍스트 #37352F · 액센트 #2383E2
+- UI 크롬(설정·검색·페이지 수·줌·패널 — `BLOCK` 토큰)은 노드와 같은 입체 블록이되 면 색만 서피스(#F7F6F3 / 다크 #202020)로 한 단계 구분(2026-09-19). 반투명·블러는 하드 엣지 블록 언어와 안 맞아 채택 안 함. ⚠️ 다크에서 UI↔배경 대비 1.07로 약함 — 보더 밝게(#4A4844) 하는 안 미결
 - 다크: 배경 #191919 · 서피스 #202020 · 노드 #2B2A27/#35342F · 돌출면 #000000 · 텍스트 #EDEDEC
 - 노드: DB=디스크 아이콘 18px 600 / 페이지 17px 400 (2026-09-14 30% 확대), 입체=보더 1.5px+우·하 4~5px
 - 노드 타이틀: 최대 너비 195px·2줄 랩·말줄임. 호버 시 2줄 고정 좌우 확장으로 전체 표시
@@ -51,6 +52,11 @@ src/
 - ⚠️ sigma는 컨테이너 폭이 0이면 예외를 던짐(탭 숨김·라우트 전환) — `allowInvalidContainer: true` + ResizeObserver(`ContainerResize`)로 복귀 처리
 - 다크 모드: html.dark 클래스(Tailwind) + 캔버스 팔레트 전환, 시스템 따름 + 수동 토글 저장
 - 뷰포트 위치 localStorage 기억·복원
+
+## 상표·이름 (2026-09-23 결정)
+- 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지
+- 위험: 노션이 교체 요구할 수 있음. 노션 공식 연동 목록·마켓플레이스 등록은 이름 규정 때문에 불가로 봐야 함
+- 근거 문서: notion.so/Notion-Trademark-Usage-Guidelines-9826313c686a4f6e9d8a48347162714b
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)

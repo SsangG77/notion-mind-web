@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import NotionDisclaimer from "@/components/NotionDisclaimer";
 
 // 화면 1. 로그인 — 디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드
 const dotGrid = {
@@ -93,6 +94,8 @@ export default async function Home({
           </p>
         )}
       </div>
+
+      <NotionDisclaimer className="absolute bottom-5 left-0 right-0 px-6 text-center" />
     </main>
   );
 }

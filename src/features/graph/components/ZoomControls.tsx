@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSigma } from "@react-sigma/core";
+import { BLOCK } from "@/components/blockStyle";
 
+// 박스 안쪽 버튼 — 색은 박스(BLOCK)에서 상속, 호버만 서피스색
 const BTN =
-  "flex h-8 w-8 items-center justify-center text-sm text-[#37352F] hover:bg-[#F7F6F3] dark:text-[#EDEDEC] dark:hover:bg-[#2B2A27]";
+  "flex h-8 w-9 items-center justify-center text-sm hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]";
 
 const TRACK_H = 96; // 슬라이더 트랙 높이(px)
 
@@ -65,11 +67,11 @@ export default function ZoomControls() {
     <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-2">
       <span
         data-testid="zoom_percent"
-        className="rounded-md border border-[#E9E9E7] bg-white/90 px-2 py-0.5 text-[11px] tabular-nums text-[#91908C] shadow-sm backdrop-blur dark:border-[#2F2F2F] dark:bg-[#202020]/90"
+        className={`${BLOCK} px-2 py-0.5 text-[11px] tabular-nums`}
       >
         {percent}%
       </span>
-      <div className="flex flex-col items-center overflow-hidden rounded-lg border border-[#E9E9E7] bg-white shadow-sm dark:border-[#2F2F2F] dark:bg-[#202020]">
+      <div className={`${BLOCK} flex flex-col items-center overflow-hidden`}>
         <button
           data-testid="zoom_in_button"
           className={BTN}
@@ -94,7 +96,7 @@ export default function ZoomControls() {
           role="slider"
           aria-label="줌"
           aria-valuenow={percent}
-          className="relative my-2 w-8 cursor-pointer touch-none"
+          className="relative my-2 w-9 cursor-pointer touch-none"
           style={{ height: TRACK_H }}
         >
           <span className="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 rounded-full bg-[#E9E9E7] dark:bg-black" />

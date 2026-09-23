@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import NotionDisclaimer from "@/components/NotionDisclaimer";
 
 const FREE_FEATURES = [
   "노드 1,000개 (최근 수정순)",
@@ -110,6 +111,8 @@ export default function PricingView() {
           </button>
         </div>
       </div>
+
+      <NotionDisclaimer className="mt-10 text-center" />
     </div>
   );
 }

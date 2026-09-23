@@ -1,0 +1,4 @@
+# 로컬 시크릿은 배포 업로드에서 제외 — 값은 Vercel 환경변수로만 관리
+.env
+.env.*
+!.env.example

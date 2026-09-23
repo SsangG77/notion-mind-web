@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
+import NotionDisclaimer from "@/components/NotionDisclaimer";
 
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
@@ -178,6 +179,7 @@ export default function SettingsPanel({
               </div>
             </div>
           </div>
+          <NotionDisclaimer className="mt-3 border-t border-[#E9E9E7] pt-3 text-[10px] dark:border-[#2F2F2F]" />
         </div>
       </div>
       {paywall && <PaywallModal onClose={() => setPaywall(false)} />}

@@ -23,15 +23,15 @@ export default function PageCountChip({
     <Link
       data-testid="page_count_chip"
       href="/pricing"
-      className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-3 z-10 flex h-9 items-center gap-2.5 px-3`}
+      className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-3 z-10 flex h-9 w-[276px] items-center gap-2.5 px-3`}
       title="요금제 보기"
     >
-      <span className="flex flex-col justify-center gap-[5px] leading-none">
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-[5px] leading-none">
         <span className="text-[11px]">
           <b>{nodeCount.toLocaleString()}</b>
           <span className="text-[#91908C]"> / {FREE_LIMIT.toLocaleString()} 페이지</span>
         </span>
-        <span className="block h-1 w-28 overflow-hidden rounded-full bg-[#E9E9E7] dark:bg-black">
+        <span className="block h-1 w-full overflow-hidden rounded-full bg-[#E9E9E7] dark:bg-black">
           <span
             className={`block h-full rounded-full ${over ? "bg-[#D44C47]" : "bg-[#2383E2]"}`}
             style={{ width: `${Math.min(100, (nodeCount / FREE_LIMIT) * 100)}%` }}
