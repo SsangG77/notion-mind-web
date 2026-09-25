@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* 다크 모드 = html.dark 클래스 기준 (수동 토글 + 시스템 따름을 JS에서 결정) */
 @custom-variant dark (&:where(.dark, .dark *));

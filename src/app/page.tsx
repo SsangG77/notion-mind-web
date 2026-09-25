@@ -88,6 +88,17 @@ export default async function Home({
           Notion으로 계속하기
         </a>
         <p className="text-sm text-[#91908C]">노션 계정으로 로그인합니다 — 별도 가입 없음</p>
+        <p className="-mt-2 text-[11px] text-[#91908C]">
+          계속하면{" "}
+          <a href="/terms" className="underline">
+            이용약관
+          </a>
+          과{" "}
+          <a href="/privacy" className="underline">
+            개인정보 처리방침
+          </a>
+          에 동의하는 것입니다
+        </p>
         {error && (
           <p className="rounded-lg border border-[#E9E9E7] bg-white px-4 py-2 text-sm text-[#37352F]">
             연결에 실패했습니다: {error}

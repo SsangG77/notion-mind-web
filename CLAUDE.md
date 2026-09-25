@@ -6,7 +6,7 @@
 - Next.js (TypeScript · App Router · Tailwind · src/)
 - 그래프: Sigma.js v3 + graphology + graphology-layout-forceatlas2 (web worker) + @react-sigma/core
 - 백엔드: Next.js API Routes + Supabase (Postgres) — 노션 OAuth secret 보관·토큰 암호화 저장
-- 결제: Stripe
+- 결제: Paddle (판매대행 MoR — 한국 사업자는 Stripe 직접 가입 불가, 정산 USD/Payoneer, KRW 불가). 광고: Google AdSense
 - 배포: Vercel (프로젝트 `ssangg77s-projects/notion-mind-web`, CLI `npx vercel deploy --prod`). 정식 주소 https://notion-mind.com (Cloudflare Registrar, A 레코드 76.76.21.21, DNS only). www·notion-mind-web.vercel.app 은 정식 주소로 308 리디렉션. 시크릿은 Vercel 환경변수(Production·Preview)로만 — `.vercelignore` 가 `.env` 업로드 차단. GitHub 자동 배포는 미연결(Vercel GitHub 앱 권한 필요)
 
 ## 아키텍처 — FSD-라이트 (2026-08-23 확정)
@@ -15,7 +15,8 @@ src/
   app/            # 라우트·페이지 (표현만 — 로직 금지)
   features/       # 기능 단위: graph/ auth/ sync/ billing/ — 각 {components, hooks}
   components/     # 공유 UI (디자인 시스템: 노드·버튼·패널·칩)
-  lib/            # 외부 접근 Service: notion.ts supabase.ts stripe.ts crypto.ts
+  lib/            # 외부 접근 Service: notion.ts crypto.ts (예정: supabase.ts paddle.ts)
+  content/legal/  # 약관·처리방침 MDX (ko 루트 / eu 영문)
   types/
 ```
 가드레일 (항상):
@@ -53,6 +54,12 @@ src/
 - 다크 모드: html.dark 클래스(Tailwind) + 캔버스 팔레트 전환, 시스템 따름 + 수동 토글 저장
 - 뷰포트 위치 localStorage 기억·복원
 
+## 약관·개인정보 (2026-09-25)
+- 페이지: /privacy /terms (한국어, PIPA+전자상거래법) · /eu/privacy /eu/terms (영문, GDPR+CRD). MDX(`@next/mdx`, remark-gfm 문자열 지정 — Turbopack 직렬화) + `@tailwindcss/typography`, 공통 틀 `components/legal/LegalLayout`(노드 박스 카드, 언어 전환, 쿠키 설정 링크). 스킬 기본값(shadcn·Pretendard·흑백)은 디자인 충돌로 미적용
+- 운영자 정보: 개인사업자 차상진(286-23-02144, 부산 동래구) — 이메일만 공개. 환불 = 결제(갱신 포함) 후 14일 전액. 아동 기준 16세 통일. 통신판매업 신고번호·EU Representative·CPO 전화번호 미기재(확인 필요, MDX 주석 참조)
+- 쿠키 배너 `components/legal/CookieBanner` 앱 전역 1개(layout.tsx), EU 옵트인. 동의값 localStorage `nm_cookie_consent`(accepted/rejected) — 광고 스크립트는 accepted일 때만 로드할 것. `openCookieSettings()`로 재열기
+- 회원가입 폼 없음(노션 OAuth) → 로그인 버튼 아래 동의 문구로 갈음
+
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지
 - 위험: 노션이 교체 요구할 수 있음. 노션 공식 연동 목록·마켓플레이스 등록은 이름 규정 때문에 불가로 봐야 함
@@ -60,7 +67,7 @@ src/
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 저장 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너, 네트워크 미정)
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 저장 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너, AdSense — 스크립트 미삽입, `AdBanner` 플레이스홀더)
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더

@@ -179,7 +179,11 @@ export default function SettingsPanel({
               </div>
             </div>
           </div>
-          <NotionDisclaimer className="mt-3 border-t border-[#E9E9E7] pt-3 text-[10px] dark:border-[#2F2F2F]" />
+          <div className="mt-3 flex gap-3 border-t border-[#E9E9E7] pt-3 text-[10px] text-[#91908C] dark:border-[#2F2F2F]">
+            <Link href="/terms" className="underline">이용약관</Link>
+            <Link href="/privacy" className="underline">개인정보 처리방침</Link>
+          </div>
+          <NotionDisclaimer className="mt-2 text-[10px]" />
         </div>
       </div>
       {paywall && <PaywallModal onClose={() => setPaywall(false)} />}
