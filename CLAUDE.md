@@ -41,7 +41,7 @@ src/
 - 점진 로딩: /api/graph 가 커서 배치(100개) 단위 응답 → 클라이언트가 반복 수신하며 그래프 실시간 성장, "페이지 N개 읽는 중" 진행 표시
 - 화면 모서리 배치(2026-09-19, 캔버스 앱 관례 따름 — 전용 헤더 줄 없음): 좌상단 = `⚙ Notion-mind` 박스(앱 이름 겸 설정 버튼) + 검색+필터 통합 블록(구분선으로 분리, Filters/Groups/Display/Forces 골격) / 우상단 = 페이지 수 박스(N/1,000 게이지, 클릭 시 /pricing) / 좌하단 = 다크 스위치 / 우하단 = 줌 컨트롤. 전부 노드 박스 스타일
 - 설정 패널: 좌측 슬라이드 인·아웃 + 배경 딤. 상단에 워크스페이스 이름(구 헤더가 표시하던 값) · 요금제(→/pricing) · 연결된 페이지 변경(OAuth 재인증으로 페이지 재선택) · 수동 동기화 · 광고 제거/자동 동기화 Pro 스위치(누르면 페이월) · 로그아웃(빨간 텍스트+확인) · 맨 아래 그래프 범례. 높이는 좌하단 다크 스위치 위에서 끝남(bottom 116px)
-- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글, 결제 연동 전 스켈레톤(가격 미정)
+- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글. Pro 월 $5 / 연 $48 (USD, 세금 별도 — `PRO_PRICE`, Paddle 카탈로그와 반드시 일치). 결제 버튼은 아직 비활성
 - 노드 상세 패널: 노드 클릭 시 우측 슬라이드 인(설정 패널과 같은 노드 박스 디자인, 딤 없음 — 그래프는 계속 조작 가능). 소속·속성·마지막 수정·관계형 연결·하위·본문 미리보기(24줄) · 하단 "노션에서 열기" + Free 광고 배너. 칩을 누르면 그 노드로 카메라 이동 + 선택 이동. 닫기는 X·ESC·빈 영역 클릭 모두 같은 슬라이드 아웃 경로(빈 영역 클릭은 닫기 요청 카운터로 패널에 전달)
 - 노드 조작: 드래그 = 스프링 물리(2홉 이웃 딸려오기, 핀 제외, 놓으면 출렁이며 정착 후 겹침 분리) · 우클릭 메뉴(숨기기·핀 고정/해제) · 하단 "숨긴 노드 N개 · 모두 표시" 칩
 - 호버 포커스(옵시디언식): 중심+이웃만 선명(호버 레이어 최상단), 나머지 노드 15% 반투명·비연결 선은 배경 근접 고스트색·배경 베일(라이트 7%/다크 35%)
@@ -55,10 +55,10 @@ src/
 - 뷰포트 위치 localStorage 기억·복원
 
 ## 약관·개인정보 (2026-09-25)
-- 페이지: /privacy /terms (한국어, PIPA+전자상거래법) · /eu/privacy /eu/terms (영문, GDPR+CRD). MDX(`@next/mdx`, remark-gfm 문자열 지정 — Turbopack 직렬화) + `@tailwindcss/typography`, 공통 틀 `components/legal/LegalLayout`(노드 박스 카드, 언어 전환, 쿠키 설정 링크). 스킬 기본값(shadcn·Pretendard·흑백)은 디자인 충돌로 미적용
+- 페이지: /privacy /terms /refund (한국어, PIPA+전자상거래법) · /eu/privacy /eu/terms /eu/refund (영문, GDPR+CRD). 환불정책은 약관 조항의 요약본(Paddle 심사가 별도 페이지 요구). MDX(`@next/mdx`, remark-gfm 문자열 지정 — Turbopack 직렬화) + `@tailwindcss/typography`, 공통 틀 `components/legal/LegalLayout`(노드 박스 카드, 언어 전환, 쿠키 설정 링크). 스킬 기본값(shadcn·Pretendard·흑백)은 디자인 충돌로 미적용
 - 운영자 정보: 개인사업자 차상진(286-23-02144, 부산 동래구) — 이메일만 공개. 환불 = 결제(갱신 포함) 후 14일 전액. 아동 기준 16세 통일. 통신판매업 신고번호·EU Representative·CPO 전화번호 미기재(확인 필요, MDX 주석 참조)
 - 쿠키 배너 `components/legal/CookieBanner` 앱 전역 1개(layout.tsx), EU 옵트인. 동의값 localStorage `nm_cookie_consent`(accepted/rejected) — 광고 스크립트는 accepted일 때만 로드할 것. `openCookieSettings()`로 재열기
-- 회원가입 폼 없음(노션 OAuth) → 로그인 버튼 아래 동의 문구로 갈음
+- 회원가입 폼 없음(노션 OAuth) → 로그인 버튼 아래 동의 문구로 갈음. 홈 푸터에 요금제·약관·처리방침·환불·English·문의 메일 링크(결제사·광고 심사가 홈에서 찾음)
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지

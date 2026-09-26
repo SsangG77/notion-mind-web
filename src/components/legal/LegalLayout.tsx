@@ -4,10 +4,13 @@ import CookieSettingsLink from "./CookieSettingsLink";
 
 type Locale = "ko" | "en";
 
-const NAV: Record<Locale, { privacy: string; terms: string; other: string; otherHref: (p: "privacy" | "terms") => string; cookies: string }> = {
+type Page = "privacy" | "terms" | "refund";
+
+const NAV: Record<Locale, { privacy: string; terms: string; refund: string; other: string; otherHref: (p: Page) => string; cookies: string }> = {
   ko: {
     privacy: "개인정보 처리방침",
     terms: "이용약관",
+    refund: "환불정책",
     other: "English (EU)",
     otherHref: (p) => `/eu/${p}`,
     cookies: "쿠키 설정",
@@ -15,6 +18,7 @@ const NAV: Record<Locale, { privacy: string; terms: string; other: string; other
   en: {
     privacy: "Privacy Notice",
     terms: "Terms of Service",
+    refund: "Refund Policy",
     other: "한국어",
     otherHref: (p) => `/${p}`,
     cookies: "Cookie settings",
@@ -28,7 +32,7 @@ export default function LegalLayout({
   children,
 }: {
   locale: Locale;
-  page: "privacy" | "terms";
+  page: Page;
   children: React.ReactNode;
 }) {
   const t = NAV[locale];
@@ -45,6 +49,9 @@ export default function LegalLayout({
           </Link>
           <Link href={`${base}/terms`} className={page === "terms" ? "text-[#2383E2]" : ""}>
             {t.terms}
+          </Link>
+          <Link href={`${base}/refund`} className={page === "refund" ? "text-[#2383E2]" : ""}>
+            {t.refund}
           </Link>
           <Link href={t.otherHref(page)} className="ml-auto" data-testid="legal_locale_switch">
             {t.other}

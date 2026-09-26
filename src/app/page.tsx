@@ -80,6 +80,9 @@ export default async function Home({
       {/* 중앙 대형 노드 */}
       <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
         <h1 className="text-2xl font-bold tracking-tight text-[#37352F]">Notion-mind</h1>
+        <p className="-mt-3 max-w-[300px] text-center text-sm text-[#37352F]">
+          노션 워크스페이스의 페이지와 데이터베이스를 하나의 노드 그래프로 펼쳐 보는 도구
+        </p>
         <a
           href="/api/auth/login"
           data-testid="login_notion_button"
@@ -106,7 +109,18 @@ export default async function Home({
         )}
       </div>
 
-      <NotionDisclaimer className="absolute bottom-5 left-0 right-0 px-6 text-center" />
+      {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
+      <footer className="absolute bottom-5 left-0 right-0 flex flex-col items-center gap-2 px-6 text-center">
+        <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
+          <a href="/pricing" className="hover:underline">요금제</a>
+          <a href="/terms" className="hover:underline">이용약관</a>
+          <a href="/privacy" className="hover:underline">개인정보 처리방침</a>
+          <a href="/refund" className="hover:underline">환불정책</a>
+          <a href="/eu/terms" className="hover:underline">English</a>
+          <a href="mailto:sangjincha719@gmail.com" className="hover:underline">문의 sangjincha719@gmail.com</a>
+        </nav>
+        <NotionDisclaimer />
+      </footer>
     </main>
   );
 }

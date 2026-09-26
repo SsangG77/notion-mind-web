@@ -14,6 +14,9 @@ const FREE_FEATURES = [
   "광고 표시",
 ];
 
+// Pro 가격 — Paddle 카탈로그와 반드시 일치시킬 것(심사 항목). 통화 USD, 세금은 결제 화면에서 별도 계산
+const PRO_PRICE = { monthly: 5, yearly: 48 } as const;
+
 const PRO_FEATURES = [
   "노드 무제한",
   "핀·숨김·필터 영구 저장",
@@ -54,7 +57,7 @@ export default function PricingView() {
           onClick={() => setYearly(true)}
           className={`px-4 py-1.5 ${yearly ? "bg-[#F4F3EF] font-semibold dark:bg-[#35342F]" : "text-[#91908C]"}`}
         >
-          연간 <span className="text-[10px] text-[#2383E2]">할인 예정</span>
+          연간 <span className="text-[10px] text-[#2383E2]">20% 할인</span>
         </button>
       </div>
 
@@ -88,10 +91,14 @@ export default function PricingView() {
               추천
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold">
-            가격 공개 예정
+          <p className="mt-2 text-2xl font-bold" data-testid="pro_price">
+            ${yearly ? PRO_PRICE.yearly : PRO_PRICE.monthly}
+            <span className="text-sm font-normal text-[#91908C]"> / {yearly ? "년" : "월"}</span>
             <span className="block text-xs font-normal text-[#91908C]">
-              {yearly ? "연간 결제 — 할인 적용 예정" : "월간 결제"}
+              {yearly
+                ? `월 $${(PRO_PRICE.yearly / 12).toFixed(0)} 꼴, 연 1회 결제`
+                : "매월 자동 갱신, 언제든 해지"}
+              , 세금 별도
             </span>
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
@@ -109,6 +116,12 @@ export default function PricingView() {
           >
             곧 출시
           </button>
+          <p className="mt-3 text-center text-[10px] text-[#91908C]">
+            결제 후 14일 이내 전액 환불,{" "}
+            <Link href="/refund" className="underline">
+              환불정책
+            </Link>
+          </p>
         </div>
       </div>
 
