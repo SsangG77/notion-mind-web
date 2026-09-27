@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type Graph from "graphology";
+import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import HiddenNodesPanel, { type HiddenNodeRow } from "./HiddenNodesPanel";
 import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
 import { cool, getSimNode, reheat } from "../lib/simulation";
@@ -37,6 +39,7 @@ export default function NodeInteractions({
   const sigma = useSigma();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [hiddenCount, setHiddenCount] = useState(0);
+  const [listOpen, setListOpen] = useState(false);
   // 저장된 숨김이 로드 시 복원되므로 노드가 추가될 때마다 다시 센다
   useEffect(() => {
     const g = sigma.getGraph();
@@ -252,6 +255,21 @@ export default function NodeInteractions({
     onPersist(graph);
   };
 
+  const unhideNode = (node: string) => {
+    if (graph.hasNode(node)) graph.removeNodeAttribute(node, "hidden");
+    setHiddenCount((c) => Math.max(0, c - 1));
+    sigma.refresh();
+    onPersist(graph);
+  };
+
+  const hiddenRows = (): HiddenNodeRow[] => {
+    const rows: HiddenNodeRow[] = [];
+    graph.forEachNode((id, a) => {
+      if (a.hidden) rows.push({ id, title: (a.label as string) ?? "무제", isDb: a.nodeType === "database" });
+    });
+    return rows;
+  };
+
   const showAll = () => {
     graph.forEachNode((n, a) => {
       if (a.hidden) graph.removeNodeAttribute(n, "hidden");
@@ -286,13 +304,30 @@ export default function NodeInteractions({
         </div>
       )}
       {hiddenCount > 0 && (
-        <button
-          data-testid="show_hidden_chip"
-          className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-[#E9E9E7] bg-white px-3 py-1 text-xs text-[#37352F] shadow-sm hover:bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020] dark:text-[#EDEDEC] dark:hover:bg-[#2B2A27]"
-          onClick={showAll}
-        >
-          숨긴 노드 {hiddenCount}개 · 모두 표시
-        </button>
+        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2 text-xs">
+          <button
+            data-testid="show_hidden_chip"
+            className={`${BLOCK} ${BLOCK_PRESS} px-3 py-1.5 hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
+            onClick={showAll}
+          >
+            숨긴 노드 {hiddenCount}개, 모두 표시
+          </button>
+          <button
+            data-testid="hidden_list_chip"
+            className={`${BLOCK} ${BLOCK_PRESS} px-3 py-1.5 hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
+            onClick={() => setListOpen(true)}
+          >
+            숨긴 목록 보기
+          </button>
+        </div>
+      )}
+      {listOpen && (
+        <HiddenNodesPanel
+          rows={hiddenRows()}
+          onUnhide={unhideNode}
+          onShowAll={showAll}
+          onClose={() => setListOpen(false)}
+        />
       )}
     </>
   );
