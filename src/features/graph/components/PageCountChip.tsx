@@ -7,8 +7,8 @@ import type { Plan } from "@/lib/billing";
 const FREE_LIMIT = 1000;
 
 /**
- * 연결된 페이지 수 — 우상단. Free 한도를 계속 체감시켜 Pro 전환을 유도하고,
- * 누르면 요금제 화면으로 간다.
+ * 연결된 페이지 수 — 우상단. Free 는 개수와 무관하게 "Pro로 전체 보기"를 항상 보여 전환을 유도하고,
+ * 누르면 요금제 화면으로 간다. Pro 는 게이지 없이 개수만.
  */
 export default function PageCountChip({
   nodeCount,
@@ -46,7 +46,8 @@ export default function PageCountChip({
           </span>
         )}
       </span>
-      {truncated && !pro && <span className="text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>}
+      {/* Free 는 개수와 무관하게 항상 노출 — 상한 체감 전에도 Pro 를 보게 */}
+      {!pro && <span className="shrink-0 text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>}
     </Link>
   );
 }
