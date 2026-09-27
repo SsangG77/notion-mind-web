@@ -74,7 +74,7 @@ src/
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 저장 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너, AdSense — 스크립트 미삽입, `AdBanner` 플레이스홀더)
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 저장 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 쿠키 동의 accepted 일 때만 로드
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
