@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GraphBatch, GraphData, GraphItem } from "@/types/graph";
-import { assembleGraph, FREE_NODE_LIMIT } from "../lib/assembleGraph";
+import type { Plan } from "@/lib/billing";
+import { assembleGraph, FREE_NODE_LIMIT, PRO_NODE_LIMIT } from "../lib/assembleGraph";
 
 interface State {
   data: GraphData | null;
@@ -15,10 +16,13 @@ interface State {
   lastSync: number | null;
 }
 
-const MAX_BATCHES = Math.ceil(FREE_NODE_LIMIT / 100) + 1; // 상한 + 초과 감지 여유 1페이지
+// 상한 + 초과 감지 여유 1페이지. 서버(/api/graph)도 같은 배치 수를 요금제로 검사
+const maxBatches = (limit: number) => Math.ceil(limit / 100) + 1;
 
-/** 커서 배치를 반복 수신하며 그래프를 점진 조립. reload()로 재동기화 */
-export function useGraphData(): State & { reload: () => void } {
+/** 커서 배치를 반복 수신하며 그래프를 점진 조립. reload()로 재동기화. 상한은 요금제에 따름 */
+export function useGraphData(plan: Plan): State & { reload: () => void } {
+  const limit = plan === "pro" ? PRO_NODE_LIMIT : FREE_NODE_LIMIT;
+  const MAX_BATCHES = maxBatches(limit);
   const [state, setState] = useState<State>({
     data: null,
     error: null,
@@ -36,7 +40,7 @@ export function useGraphData(): State & { reload: () => void } {
     let cursor: string | null = null;
     try {
       for (let i = 0; i < MAX_BATCHES; i++) {
-        const url = cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}` : "/api/graph";
+        const url = cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}&i=${i}` : "/api/graph";
         const res = await fetch(url);
         if (!res.ok) {
           const body = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -49,7 +53,7 @@ export function useGraphData(): State & { reload: () => void } {
         const done = !cursor || i === MAX_BATCHES - 1;
         setState((s) => ({
           ...s,
-          data: assembleGraph(items, !!cursor),
+          data: assembleGraph(items, !!cursor, limit),
           loading: !done,
           lastSync: done ? Date.now() : s.lastSync,
         }));
@@ -64,7 +68,7 @@ export function useGraphData(): State & { reload: () => void } {
         }));
       }
     }
-  }, []);
+  }, [limit, MAX_BATCHES]);
 
   useEffect(() => {
     const ids = runId; // 언마운트 시 진행 중 로드 무효화

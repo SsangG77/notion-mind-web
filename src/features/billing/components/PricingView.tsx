@@ -137,9 +137,15 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
             ))}
           </ul>
           {isPro ? (
-            <p className="mt-6 rounded-[8px] bg-[#F4F3EF] px-4 py-2.5 text-center text-xs text-[#91908C] dark:bg-[#35342F]">
-              구독 관리(결제 수단 변경, 해지)는 결제 확인 메일의 Paddle 고객 포털에서
-            </p>
+            <a
+              data-testid="manage_subscription_button"
+              href="/api/billing/portal"
+              target="_blank"
+              rel="noopener"
+              className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2.5 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000]`}
+            >
+              구독 관리 ↗
+            </a>
           ) : workspaceId ? (
             <button
               data-testid="pricing_subscribe_button"

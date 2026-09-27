@@ -1,14 +1,16 @@
 import type { GraphData, GraphEdge, GraphItem, GraphNode } from "@/types/graph";
 
 export const FREE_NODE_LIMIT = 1000;
+// Pro 상한 — "무제한"이되 브라우저가 버틸 범위. 넘으면 최근 수정순 상위만
+export const PRO_NODE_LIMIT = 20000;
 
 /**
  * 누적된 항목들로 그래프 데이터를 조립한다 (순수 함수 — 배치가 올 때마다 재호출).
- * - 항목은 최근 수정순으로 수신 → Free 상한 초과분은 노드에서 제외
+ * - 항목은 최근 수정순으로 수신 → 상한(Free 1,000 / Pro 20,000) 초과분은 노드에서 제외
  * - dbChild = DB 소속 페이지 / pageChild = 페이지 안의 페이지·DB / relation = 관계형 속성
  */
-export function assembleGraph(items: GraphItem[], hasMore: boolean): GraphData {
-  const capped = items.slice(0, FREE_NODE_LIMIT);
+export function assembleGraph(items: GraphItem[], hasMore: boolean, limit = FREE_NODE_LIMIT): GraphData {
+  const capped = items.slice(0, limit);
   const nodes: GraphNode[] = capped.map((it) => ({
     id: it.id,
     title: it.title,
@@ -44,7 +46,7 @@ export function assembleGraph(items: GraphItem[], hasMore: boolean): GraphData {
   return {
     nodes,
     edges,
-    truncated: hasMore || items.length > FREE_NODE_LIMIT,
+    truncated: hasMore || items.length > limit,
     total: items.length,
   };
 }

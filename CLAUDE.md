@@ -65,7 +65,9 @@ src/
 - 웹훅 `/api/billing/webhook`: `paddle.webhooks.unmarshal(rawBody, secret, signature)` 서명 검증(원문 body 필수), `subscription.created/updated/canceled` 만 UPSERT. 2xx 만 전달 완료 — 실패는 전부 500 으로 재시도 유도. 등록된 알림 대상 ntfset_01m3gqjgnysws25w3hcajr5tjv
 - Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
 - 카탈로그·웹훅 생성 스크립트: `scripts/seed-paddle-catalog.ts`, `scripts/register-paddle-webhook.ts` (라이브 쓰기라 사용자가 `!` 로 직접 실행)
-- 아직 없음: 노드 1,000개 상한 실제 적용(Free 쪽도 미구현), 자동 동기화, 핀/숨김/필터 영구 저장, 구독 관리 화면(Paddle 고객 포털 링크로 대체)
+- 노드 상한: Free 1,000 / Pro 20,000 (`assembleGraph` limit, `useGraphData(plan)`). 클라이언트는 상한+1 배치까지 요청(초과 감지), 서버 `/api/graph` 는 배치 번호 `i` 가 Free 상한을 넘으면 요금제 확인 후 빈 응답 — 클라이언트 조작만으로는 더 못 받음
+- 구독 관리: `/api/billing/portal` 이 Paddle 고객 포털 세션(customer_id + subscription_id)을 만들어 리디렉션. 설정 패널(Pro 만)과 요금제 화면 Pro 카드에서 진입
+- 아직 없음: 자동 동기화, 핀/숨김/필터 영구 저장, 이미지 내보내기
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지

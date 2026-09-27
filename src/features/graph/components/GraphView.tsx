@@ -38,7 +38,7 @@ const SIGMA_SETTINGS = {
 };
 
 export default function GraphView({ workspace, plan }: { workspace?: string; plan: Plan }) {
-  const { data, error, loading, gen, lastSync, reload } = useGraphData();
+  const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
   const graph = useMemo(() => new Graph(), []);
