@@ -63,6 +63,8 @@ export default function NodeInteractions({
   }, [sigma]);
   const onSelectRef = useRef(onSelect);
   const onPersistRef = useRef(onPersist);
+  // 이펙트 안의 setHovered(null) 을 바깥 핸들러(숨기기 등)에서 부르기 위한 통로
+  const clearHoverRef = useRef<() => void>(() => {});
   useEffect(() => {
     onSelectRef.current = onSelect;
     onPersistRef.current = onPersist;
@@ -125,6 +127,8 @@ export default function NodeInteractions({
       container.style.cursor = node ? "pointer" : "default";
       sigma.refresh({ skipIndexation: true });
     };
+
+    clearHoverRef.current = () => setHovered(null);
 
     const onMove = (e: Coords) => {
       if (dragging) return;
@@ -231,9 +235,10 @@ export default function NodeInteractions({
   const graph = sigma.getGraph();
 
   const hideNode = (node: string) => {
+    // 메뉴 클릭은 캔버스 mousemove 를 안 일으켜 호버 포커스(흐림+베일)가 남음 — 명시적으로 해제
+    clearHoverRef.current();
     graph.setNodeAttribute(node, "hidden", true);
     graph.removeNodeAttribute(node, "highlighted");
-    if (graph.getAttribute("hoveredNode") === node) graph.setAttribute("hoveredNode", null);
     setHiddenCount((c) => c + 1);
     setMenu(null);
     sigma.refresh();
@@ -241,6 +246,7 @@ export default function NodeInteractions({
   };
 
   const togglePin = (node: string, pinned: boolean) => {
+    clearHoverRef.current();
     const sn = getSimNode(node);
     if (pinned) {
       graph.removeNodeAttribute(node, "pinned");
