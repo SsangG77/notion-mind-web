@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type Graph from "graphology";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import HiddenNodesPanel, { type HiddenNodeRow } from "./HiddenNodesPanel";
+import { getLeftPanel, getLeftPanelServer, setLeftPanel, subscribeLeftPanel } from "../lib/leftPanel";
 import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
 import { cool, getSimNode, reheat } from "../lib/simulation";
@@ -39,7 +40,10 @@ export default function NodeInteractions({
   const sigma = useSigma();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [hiddenCount, setHiddenCount] = useState(0);
-  const [listOpen, setListOpen] = useState(false);
+  // 좌측 패널 조정 — 설정 패널이 열리면 여기는 닫힘. 슬라이드 아웃이 끝날 때까지는 마운트 유지
+  const leftPanel = useSyncExternalStore(subscribeLeftPanel, getLeftPanel, getLeftPanelServer);
+  const listOpen = leftPanel === "hidden";
+  const [listMounted, setListMounted] = useState(false);
   // 저장된 숨김이 로드 시 복원되므로 노드가 추가될 때마다 다시 센다
   useEffect(() => {
     const g = sigma.getGraph();
@@ -315,18 +319,26 @@ export default function NodeInteractions({
           <button
             data-testid="hidden_list_chip"
             className={`${BLOCK} ${BLOCK_PRESS} px-3 py-1.5 hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
-            onClick={() => setListOpen(true)}
+            onClick={() => {
+              if (listOpen) setLeftPanel(null);
+              else {
+                setListMounted(true);
+                setLeftPanel("hidden");
+              }
+            }}
           >
-            숨긴 목록 보기
+            {listOpen ? "숨긴 목록 닫기" : "숨긴 목록 보기"}
           </button>
         </div>
       )}
-      {listOpen && (
+      {listMounted && (
         <HiddenNodesPanel
+          open={listOpen}
           rows={hiddenRows()}
           onUnhide={unhideNode}
           onShowAll={showAll}
-          onClose={() => setListOpen(false)}
+          onClose={() => setLeftPanel(null)}
+          onClosed={() => setListMounted(false)}
         />
       )}
     </>

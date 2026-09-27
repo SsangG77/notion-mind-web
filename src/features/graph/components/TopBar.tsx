@@ -1,6 +1,7 @@
 "use client";
 
 import type { Plan } from "@/lib/billing";
+import { setLeftPanel } from "../lib/leftPanel";
 import { useState } from "react";
 import SearchPanel from "./SearchPanel";
 import SettingsPanel from "./SettingsPanel";
@@ -21,6 +22,14 @@ export default function TopBar({
   plan: Plan;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const openSettings = () => {
+    setLeftPanel("settings"); // 숨긴 목록 패널이 열려 있으면 닫힘
+    setSettingsOpen(true);
+  };
+  const closeSettings = () => {
+    setLeftPanel(null);
+    setSettingsOpen(false);
+  };
 
   return (
     <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
@@ -29,7 +38,7 @@ export default function TopBar({
         <button
           data-testid="settings_button"
           title="설정"
-          onClick={() => setSettingsOpen((v) => !v)}
+          onClick={() => (settingsOpen ? closeSettings() : openSettings())}
           className={`${BLOCK} ${BLOCK_PRESS} flex h-9 items-center gap-2 px-3 text-sm font-semibold`}
         >
           {/* 기어(톱니) 아이콘 — 아이콘 먼저, 앱 이름 뒤 */}
@@ -52,7 +61,7 @@ export default function TopBar({
         <SearchPanel />
         {settingsOpen && (
           <SettingsPanel
-            onClose={() => setSettingsOpen(false)}
+            onClose={closeSettings}
             loading={loading}
             lastSync={lastSync}
             onReload={onReload}

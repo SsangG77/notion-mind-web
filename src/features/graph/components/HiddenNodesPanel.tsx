@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { BLOCK } from "@/components/blockStyle";
 
 export interface HiddenNodeRow {
@@ -11,29 +10,36 @@ export interface HiddenNodeRow {
 
 const ROW = "flex items-center justify-between gap-3 border-b border-[#E9E9E7] px-4 py-2.5 dark:border-[#2F2F2F]";
 
-/** 숨긴 노드 목록 — 설정 패널과 같은 좌측 슬라이드 노드 박스. 딤 없음(그래프 계속 조작 가능) */
+/**
+ * 숨긴 노드 목록 — 설정 패널과 같은 좌측 슬라이드 노드 박스. 딤 없음(그래프 계속 조작 가능).
+ * open=false 가 되면 슬라이드 아웃을 재생하고, 애니메이션이 끝나면 onClosed 로 부모가 언마운트
+ */
 export default function HiddenNodesPanel({
+  open,
   rows,
   onUnhide,
   onShowAll,
   onClose,
+  onClosed,
 }: {
+  open: boolean;
   rows: HiddenNodeRow[];
   onUnhide: (id: string) => void;
   onShowAll: () => void;
+  /** 닫기 요청(X 버튼) */
   onClose: () => void;
+  /** 슬라이드 아웃 완료 — 언마운트 시점 */
+  onClosed: () => void;
 }) {
-  const [closing, setClosing] = useState(false);
-  const close = () => {
-    if (closing) return;
-    setClosing(true);
-    setTimeout(onClose, 200);
-  };
+  const close = onClose;
 
   return (
     <div
       data-testid="hidden_nodes_panel"
-      className={`${BLOCK} ${closing ? "nm-slide-out" : "nm-slide-in"} pointer-events-auto fixed bottom-[116px] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
+      className={`${BLOCK} ${open ? "nm-slide-in" : "nm-slide-out"} pointer-events-auto fixed bottom-[116px] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
+      onAnimationEnd={(e) => {
+        if (e.animationName === "nm-slide-out") onClosed();
+      }}
     >
       <div className={`${ROW} shrink-0 py-3`}>
         <span className="text-sm font-semibold">숨긴 노드 {rows.length}개</span>
