@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import type { Plan } from "@/lib/billing";
 
 const FREE_LIMIT = 1000;
 
@@ -12,12 +13,15 @@ const FREE_LIMIT = 1000;
 export default function PageCountChip({
   nodeCount,
   truncated,
+  plan,
 }: {
   nodeCount: number;
   truncated: boolean;
+  plan: Plan;
 }) {
   if (nodeCount === 0) return null;
   const over = truncated || nodeCount >= FREE_LIMIT * 0.8;
+  const pro = plan === "pro";
 
   return (
     <Link
@@ -29,16 +33,20 @@ export default function PageCountChip({
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-[5px] leading-none">
         <span className="text-[11px]">
           <b>{nodeCount.toLocaleString()}</b>
-          <span className="text-[#91908C]"> / {FREE_LIMIT.toLocaleString()} 페이지</span>
+          <span className="text-[#91908C]">
+            {pro ? " 페이지, Pro" : ` / ${FREE_LIMIT.toLocaleString()} 페이지`}
+          </span>
         </span>
-        <span className="block h-1 w-full overflow-hidden rounded-full bg-[#E9E9E7] dark:bg-black">
-          <span
-            className={`block h-full rounded-full ${over ? "bg-[#D44C47]" : "bg-[#2383E2]"}`}
-            style={{ width: `${Math.min(100, (nodeCount / FREE_LIMIT) * 100)}%` }}
-          />
-        </span>
+        {!pro && (
+          <span className="block h-1 w-full overflow-hidden rounded-full bg-[#E9E9E7] dark:bg-black">
+            <span
+              className={`block h-full rounded-full ${over ? "bg-[#D44C47]" : "bg-[#2383E2]"}`}
+              style={{ width: `${Math.min(100, (nodeCount / FREE_LIMIT) * 100)}%` }}
+            />
+          </span>
+        )}
       </span>
-      {truncated && <span className="text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>}
+      {truncated && !pro && <span className="text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>}
     </Link>
   );
 }

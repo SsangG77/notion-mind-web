@@ -18,6 +18,14 @@ export async function GET(req: NextRequest) {
     const token = await exchangeCode(code);
     const res = NextResponse.redirect(new URL("/", url.origin));
     res.cookies.delete("nm_oauth_state");
+    // 워크스페이스 ID = 요금제(구독) 키. 서버만 읽음
+    res.cookies.set("nm_ws", token.workspace_id, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
     res.cookies.set("nm_token", encrypt(token.access_token), {
       httpOnly: true,
       sameSite: "lax",

@@ -1,15 +1,22 @@
+import { Suspense } from "react";
+import { cookies } from "next/headers";
 import PricingView from "@/features/billing/components/PricingView";
 import AdBanner from "@/components/AdBanner";
+import { getPlan } from "@/lib/billing";
 
-// 화면 5. 요금제 — Free/Pro 카드 (결제 연동 전 스켈레톤)
-export default function PricingPage() {
+// 화면 5. 요금제 — Free/Pro 카드. 로그인 상태면 체크아웃 가능, 아니면 로그인 유도
+export default async function PricingPage() {
+  const jar = await cookies();
+  const workspaceId = jar.get("nm_ws")?.value;
+  const plan = await getPlan(workspaceId);
   return (
     <div className="flex min-h-screen flex-col bg-white nm-dotgrid text-[#37352F] dark:bg-[#191919] dark:text-[#EDEDEC]">
       <main className="flex-1">
-        <PricingView />
+        <Suspense>
+          <PricingView plan={plan} workspaceId={workspaceId} />
+        </Suspense>
       </main>
-      {/* 광고는 Free 전용 — 과금 도입 전까지 전원 Free */}
-      <AdBanner />
+      {plan === "free" && <AdBanner />}
     </div>
   );
 }

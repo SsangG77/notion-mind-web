@@ -5,5 +5,6 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(new URL("/", req.url));
   res.cookies.delete("nm_token");
   res.cookies.delete("nm_workspace");
+  res.cookies.delete("nm_ws");
   return res;
 }

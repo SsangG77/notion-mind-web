@@ -5,21 +5,24 @@ import Link from "next/link";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import type { Plan } from "@/lib/billing";
 
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
 
-/** Pro 전용 기능 스위치 — 켜려고 하면 페이월 노출 */
-function ProSwitch({ testid, onAttempt }: { testid: string; onAttempt: () => void }) {
+/** Pro 전용 기능 스위치 — Free 가 켜려고 하면 페이월, Pro 는 켜짐 고정(개별 끄기는 추후) */
+function ProSwitch({ testid, on, onAttempt }: { testid: string; on: boolean; onAttempt: () => void }) {
   return (
     <button
       data-testid={testid}
-      onClick={onAttempt}
-      className="relative h-[18px] w-[34px] rounded-full bg-[#E9E9E7] dark:bg-black"
-      aria-checked="false"
+      onClick={on ? undefined : onAttempt}
+      className={`relative h-[18px] w-[34px] rounded-full ${on ? "bg-[#2383E2]" : "bg-[#E9E9E7] dark:bg-black"}`}
+      aria-checked={on}
       role="switch"
     >
-      <span className="absolute left-[2px] top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow" />
+      <span
+        className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow ${on ? "left-[18px]" : "left-[2px]"}`}
+      />
     </button>
   );
 }
@@ -31,6 +34,7 @@ export default function SettingsPanel({
   lastSync,
   onReload,
   workspace,
+  plan,
 }: {
   onClose: () => void;
   loading: boolean;
@@ -38,6 +42,7 @@ export default function SettingsPanel({
   onReload: () => void;
   /** 연결된 노션 워크스페이스 이름 — 상단 헤더가 사라져 이 패널이 표시 자리 */
   workspace?: string;
+  plan: Plan;
 }) {
   const [paywall, setPaywall] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -94,8 +99,13 @@ export default function SettingsPanel({
           >
             <span>요금제</span>
             <span className="flex items-center gap-1.5">
-              <span className="rounded-full bg-[#F4F3EF] px-2.5 py-0.5 text-xs font-semibold dark:bg-[#35342F]">
-                Free
+              <span
+                data-testid="plan_badge"
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  plan === "pro" ? "bg-[#2383E2] text-white" : "bg-[#F4F3EF] dark:bg-[#35342F]"
+                }`}
+              >
+                {plan === "pro" ? "Pro" : "Free"}
               </span>
               <span className="text-[#91908C]">›</span>
             </span>
@@ -135,13 +145,13 @@ export default function SettingsPanel({
             <span>
               광고 제거 <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
-            <ProSwitch testid="ad_free_switch" onAttempt={() => setPaywall(true)} />
+            <ProSwitch testid="ad_free_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
           </div>
           <div className={ROW}>
             <span>
               자동 동기화 <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
-            <ProSwitch testid="auto_sync_switch" onAttempt={() => setPaywall(true)} />
+            <ProSwitch testid="auto_sync_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
           </div>
           {/* 로그아웃 — 목록 마지막, 파괴적 액션 = 빨간 텍스트 + 확인 단계 (HIG) */}
           <a

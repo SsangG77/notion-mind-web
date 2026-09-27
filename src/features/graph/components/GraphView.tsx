@@ -19,6 +19,7 @@ import TopBar from "./TopBar";
 import ZoomControls from "./ZoomControls";
 import ThemeSync from "./ThemeSync";
 import ViewportMemory from "./ViewportMemory";
+import type { Plan } from "@/lib/billing";
 
 const SIGMA_SETTINGS = {
   defaultDrawNodeLabel: drawNodeLabel,
@@ -36,7 +37,7 @@ const SIGMA_SETTINGS = {
   stagePadding: 60,
 };
 
-export default function GraphView({ workspace }: { workspace?: string }) {
+export default function GraphView({ workspace, plan }: { workspace?: string; plan: Plan }) {
   const { data, error, loading, gen, lastSync, reload } = useGraphData();
   const { dark, toggle } = useTheme();
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
@@ -80,6 +81,7 @@ export default function GraphView({ workspace }: { workspace?: string }) {
             onSelect={setSelection}
             onClose={() => setSelection(null)}
             closeRequest={closeRequest}
+            plan={plan}
           />
         )}
         <TopBar
@@ -87,11 +89,13 @@ export default function GraphView({ workspace }: { workspace?: string }) {
           lastSync={lastSync}
           onReload={reload}
           workspace={workspace}
+          plan={plan}
         />
         <ThemeToggle dark={dark} onToggle={toggle} />
         <PageCountChip
           nodeCount={data?.nodes.length ?? 0}
           truncated={data?.truncated ?? false}
+          plan={plan}
         />
         <ZoomControls />
         <ViewportMemory ready={!loading && data != null} />

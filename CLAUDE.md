@@ -5,8 +5,8 @@
 ## 스택
 - Next.js (TypeScript · App Router · Tailwind · src/)
 - 그래프: Sigma.js v3 + graphology + graphology-layout-forceatlas2 (web worker) + @react-sigma/core
-- 백엔드: Next.js API Routes + Supabase (Postgres) — 노션 OAuth secret 보관·토큰 암호화 저장
-- 결제: Paddle (판매대행 MoR — 한국 사업자는 Stripe 직접 가입 불가, 정산 USD/Payoneer, KRW 불가). 광고: Google AdSense
+- 백엔드: Next.js API Routes + Supabase (Postgres, 프로젝트 `notion-mind` 서울 리전 jqebviioxtnjfpmhmsqz). 노션 토큰은 서버에 저장 안 함(암호화 쿠키만). Supabase 는 `subscriptions` 테이블 하나 — RLS 켜고 정책 없음, 서버가 secret 키(`SUPABASE_SERVICE_ROLE_KEY`, 새 형식 sb_secret_)로만 접근
+- 결제: Paddle Billing (판매대행 MoR — 한국 사업자는 Stripe 직접 가입 불가, 정산 USD/Payoneer, KRW 불가). 라이브 계정만 사용(샌드박스 계정 없음) — 결제창 테스트는 심사 통과 후 실결제. 광고: Google AdSense
 - 배포: Vercel (프로젝트 `ssangg77s-projects/notion-mind-web`, CLI `npx vercel deploy --prod`). 정식 주소 https://notion-mind.com (Cloudflare Registrar, A 레코드 76.76.21.21, DNS only). www·notion-mind-web.vercel.app 은 정식 주소로 308 리디렉션. 시크릿은 Vercel 환경변수(Production·Preview)로만 — `.vercelignore` 가 `.env` 업로드 차단. GitHub 자동 배포는 미연결(Vercel GitHub 앱 권한 필요)
 
 ## 아키텍처 — FSD-라이트 (2026-08-23 확정)
@@ -15,7 +15,7 @@ src/
   app/            # 라우트·페이지 (표현만 — 로직 금지)
   features/       # 기능 단위: graph/ auth/ sync/ billing/ — 각 {components, hooks}
   components/     # 공유 UI (디자인 시스템: 노드·버튼·패널·칩)
-  lib/            # 외부 접근 Service: notion.ts crypto.ts (예정: supabase.ts paddle.ts)
+  lib/            # 외부 접근 Service: notion.ts crypto.ts supabase.ts paddle.ts billing.ts
   content/legal/  # 약관·처리방침 MDX (ko 루트 / eu 영문)
   types/
 ```
@@ -41,7 +41,7 @@ src/
 - 점진 로딩: /api/graph 가 커서 배치(100개) 단위 응답 → 클라이언트가 반복 수신하며 그래프 실시간 성장, "페이지 N개 읽는 중" 진행 표시
 - 화면 모서리 배치(2026-09-19, 캔버스 앱 관례 따름 — 전용 헤더 줄 없음): 좌상단 = `⚙ Notion-mind` 박스(앱 이름 겸 설정 버튼) + 검색+필터 통합 블록(구분선으로 분리, Filters/Groups/Display/Forces 골격) / 우상단 = 페이지 수 박스(N/1,000 게이지, 클릭 시 /pricing) / 좌하단 = 다크 스위치 / 우하단 = 줌 컨트롤. 전부 노드 박스 스타일
 - 설정 패널: 좌측 슬라이드 인·아웃 + 배경 딤. 상단에 워크스페이스 이름(구 헤더가 표시하던 값) · 요금제(→/pricing) · 연결된 페이지 변경(OAuth 재인증으로 페이지 재선택) · 수동 동기화 · 광고 제거/자동 동기화 Pro 스위치(누르면 페이월) · 로그아웃(빨간 텍스트+확인) · 맨 아래 그래프 범례. 높이는 좌하단 다크 스위치 위에서 끝남(bottom 116px)
-- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글. Pro 월 $5 / 연 $48 (USD, 세금 별도 — `PRO_PRICE`, Paddle 카탈로그와 반드시 일치). 결제 버튼은 아직 비활성
+- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글. Pro 월 $5 / 연 $48 (USD, 세금 별도 — `PRO_PRICE`, Paddle 카탈로그 `pri_` ID 는 `lib/paddle.ts` PRICE_IDS 와 일치해야 함). 구독 버튼 = Paddle.js 오버레이(`features/billing/hooks/usePaddle`), `customData.workspace_id` 로 유저 연결. 결제 후 `?checkout=success` 로 돌아와 `/api/billing/status` 폴링 → Pro 반영되면 새로고침
 - 노드 상세 패널: 노드 클릭 시 우측 슬라이드 인(설정 패널과 같은 노드 박스 디자인, 딤 없음 — 그래프는 계속 조작 가능). 소속·속성·마지막 수정·관계형 연결·하위·본문 미리보기(24줄) · 하단 "노션에서 열기" + Free 광고 배너. 칩을 누르면 그 노드로 카메라 이동 + 선택 이동. 닫기는 X·ESC·빈 영역 클릭 모두 같은 슬라이드 아웃 경로(빈 영역 클릭은 닫기 요청 카운터로 패널에 전달)
 - 노드 조작: 드래그 = 스프링 물리(2홉 이웃 딸려오기, 핀 제외, 놓으면 출렁이며 정착 후 겹침 분리) · 우클릭 메뉴(숨기기·핀 고정/해제) · 하단 "숨긴 노드 N개 · 모두 표시" 칩
 - 호버 포커스(옵시디언식): 중심+이웃만 선명(호버 레이어 최상단), 나머지 노드 15% 반투명·비연결 선은 배경 근접 고스트색·배경 베일(라이트 7%/다크 35%)
@@ -59,6 +59,13 @@ src/
 - 운영자 정보: 개인사업자 차상진(286-23-02144, 부산 동래구) — 이메일만 공개. 환불 = 결제(갱신 포함) 후 14일 전액. 아동 기준 16세 통일. 통신판매업 신고번호·EU Representative·CPO 전화번호 미기재(확인 필요, MDX 주석 참조)
 - 쿠키 배너 `components/legal/CookieBanner` 앱 전역 1개(layout.tsx), EU 옵트인. 동의값 localStorage `nm_cookie_consent`(accepted/rejected) — 광고 스크립트는 accepted일 때만 로드할 것. `openCookieSettings()`로 재열기
 - 회원가입 폼 없음(노션 OAuth) → 로그인 버튼 아래 동의 문구로 갈음. 홈 푸터에 요금제·약관·처리방침·환불·English·문의 메일 링크(결제사·광고 심사가 홈에서 찾음)
+
+## 결제·요금제 판정
+- 유저 키 = 노션 `workspace_id` (OAuth 응답, httpOnly 쿠키 `nm_ws`). 팀 워크스페이스면 구성원 전체가 Pro 공유 — 초기엔 의도된 단순화
+- 웹훅 `/api/billing/webhook`: `paddle.webhooks.unmarshal(rawBody, secret, signature)` 서명 검증(원문 body 필수), `subscription.created/updated/canceled` 만 UPSERT. 2xx 만 전달 완료 — 실패는 전부 500 으로 재시도 유도. 등록된 알림 대상 ntfset_01m3gqjgnysws25w3hcajr5tjv
+- Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
+- 카탈로그·웹훅 생성 스크립트: `scripts/seed-paddle-catalog.ts`, `scripts/register-paddle-webhook.ts` (라이브 쓰기라 사용자가 `!` 로 직접 실행)
+- 아직 없음: 노드 1,000개 상한 실제 적용(Free 쪽도 미구현), 자동 동기화, 핀/숨김/필터 영구 저장, 구독 관리 화면(Paddle 고객 포털 링크로 대체)
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지

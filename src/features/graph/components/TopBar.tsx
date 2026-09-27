@@ -1,5 +1,6 @@
 "use client";
 
+import type { Plan } from "@/lib/billing";
 import { useState } from "react";
 import SearchPanel from "./SearchPanel";
 import SettingsPanel from "./SettingsPanel";
@@ -11,11 +12,13 @@ export default function TopBar({
   lastSync,
   onReload,
   workspace,
+  plan,
 }: {
   loading: boolean;
   lastSync: number | null;
   onReload: () => void;
   workspace?: string;
+  plan: Plan;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -54,6 +57,7 @@ export default function TopBar({
             lastSync={lastSync}
             onReload={onReload}
             workspace={workspace}
+            plan={plan}
           />
         )}
       </div>

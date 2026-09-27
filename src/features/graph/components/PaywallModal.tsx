@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 
 const BENEFITS = [
@@ -10,7 +11,7 @@ const BENEFITS = [
   "광고 제거",
 ];
 
-/** Pro 페이월 — 노드 박스 디자인 모달. 결제 연동 전 스켈레톤 */
+/** Pro 페이월 — 노드 박스 디자인 모달. 결제는 요금제 화면에서 */
 export default function PaywallModal({ onClose }: { onClose: () => void }) {
   return (
     <div
@@ -35,13 +36,13 @@ export default function PaywallModal({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
         <div className="px-5 pb-5">
-          <button
+          <Link
             data-testid="paywall_subscribe_button"
-            disabled
-            className={`${BLOCK_PRESS} w-full cursor-not-allowed rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-sm font-semibold text-white opacity-70 shadow-[3px_3px_0_#2E2C27] dark:border-black dark:shadow-[3px_3px_0_#000]`}
+            href="/pricing"
+            className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-center text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] dark:border-black dark:shadow-[3px_3px_0_#000]`}
           >
-            곧 출시 — 가격 미정
-          </button>
+            월 $5 부터 — 요금제 보기
+          </Link>
           <button
             data-testid="paywall_close_button"
             onClick={onClose}

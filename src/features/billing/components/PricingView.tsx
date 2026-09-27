@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import { PRICE_IDS } from "@/lib/paddle";
+import type { Plan } from "@/lib/billing";
+import { usePaddle } from "../hooks/usePaddle";
 
 const FREE_FEATURES = [
   "노드 1,000개 (최근 수정순)",
@@ -26,9 +30,30 @@ const PRO_FEATURES = [
   "워크스페이스 3개+",
 ];
 
-/** 요금제 화면 — Free/Pro 카드 + 월/연 토글. 결제 연동 전 스켈레톤 */
-export default function PricingView() {
+/** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
+export default function PricingView({ plan, workspaceId }: { plan: Plan; workspaceId?: string }) {
   const [yearly, setYearly] = useState(false);
+  const { ready, openCheckout } = usePaddle();
+  const router = useRouter();
+  const params = useSearchParams();
+  // 결제 직후: 웹훅이 몇 초 뒤 도착하므로 Pro 반영될 때까지 폴링 후 새로고침
+  const [waiting, setWaiting] = useState(params.get("checkout") === "success" && plan === "free");
+  useEffect(() => {
+    if (!waiting) return;
+    let tries = 0;
+    const id = setInterval(async () => {
+      const r = await fetch("/api/billing/status").then((r) => r.json()).catch(() => null);
+      if (r?.plan === "pro" || ++tries > 20) {
+        clearInterval(id);
+        setWaiting(false);
+        router.replace("/pricing");
+        router.refresh();
+      }
+    }, 1500);
+    return () => clearInterval(id);
+  }, [waiting, router]);
+  const isPro = plan === "pro";
+  const priceId = yearly ? PRICE_IDS.yearly : PRICE_IDS.monthly;
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col items-center px-6 py-10">
@@ -66,12 +91,14 @@ export default function PricingView() {
         <div className={`${BLOCK} flex flex-col p-6`}>
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold">Free</span>
-            <span className="rounded-full bg-[#F4F3EF] px-2.5 py-0.5 text-xs font-semibold dark:bg-[#35342F]">
-              현재 사용 중
-            </span>
+            {!isPro && (
+              <span className="rounded-full bg-[#F4F3EF] px-2.5 py-0.5 text-xs font-semibold dark:bg-[#35342F]">
+                현재 사용 중
+              </span>
+            )}
           </div>
           <p className="mt-2 text-2xl font-bold">
-            ₩0<span className="text-sm font-normal text-[#91908C]"> / 월</span>
+            $0<span className="text-sm font-normal text-[#91908C]"> / 월</span>
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
             {FREE_FEATURES.map((f) => (
@@ -88,7 +115,7 @@ export default function PricingView() {
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold">Pro</span>
             <span className="rounded-full bg-[#2383E2] px-2.5 py-0.5 text-xs font-semibold text-white">
-              추천
+              {isPro ? "현재 사용 중" : "추천"}
             </span>
           </div>
           <p className="mt-2 text-2xl font-bold" data-testid="pro_price">
@@ -109,13 +136,28 @@ export default function PricingView() {
               </li>
             ))}
           </ul>
-          <button
-            data-testid="pricing_subscribe_button"
-            disabled
-            className={`${BLOCK_PRESS} mt-6 w-full cursor-not-allowed rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-sm font-semibold text-white opacity-70 shadow-[3px_3px_0_#2E2C27] dark:border-black dark:shadow-[3px_3px_0_#000]`}
-          >
-            곧 출시
-          </button>
+          {isPro ? (
+            <p className="mt-6 rounded-[8px] bg-[#F4F3EF] px-4 py-2.5 text-center text-xs text-[#91908C] dark:bg-[#35342F]">
+              구독 관리(결제 수단 변경, 해지)는 결제 확인 메일의 Paddle 고객 포털에서
+            </p>
+          ) : workspaceId ? (
+            <button
+              data-testid="pricing_subscribe_button"
+              disabled={!ready || waiting}
+              onClick={() => openCheckout(priceId, workspaceId, () => setWaiting(true))}
+              className={`${BLOCK_PRESS} mt-6 w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] disabled:cursor-wait disabled:opacity-70 dark:border-black dark:shadow-[3px_3px_0_#000]`}
+            >
+              {waiting ? "결제 확인 중…" : ready ? "Pro 구독하기" : "결제 모듈 로딩…"}
+            </button>
+          ) : (
+            <a
+              data-testid="pricing_login_button"
+              href="/api/auth/login"
+              className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-center text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] dark:border-black dark:shadow-[3px_3px_0_#000]`}
+            >
+              Notion으로 로그인 후 구독
+            </a>
+          )}
           <p className="mt-3 text-center text-[10px] text-[#91908C]">
             결제 후 14일 이내 전액 환불,{" "}
             <Link href="/refund" className="underline">

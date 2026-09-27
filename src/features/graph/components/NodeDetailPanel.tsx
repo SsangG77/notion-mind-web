@@ -1,5 +1,6 @@
 "use client";
 
+import type { Plan } from "@/lib/billing";
 import { useEffect, useRef, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
@@ -52,12 +53,14 @@ export default function NodeDetailPanel({
   onSelect,
   onClose,
   closeRequest,
+  plan,
 }: {
   selection: Selection;
   onSelect: (next: Selection) => void;
   onClose: () => void;
   /** 바깥(빈 영역 클릭 등)에서의 닫기 요청 — 값이 바뀌면 닫기 애니메이션 시작 */
   closeRequest: number;
+  plan: Plan;
 }) {
   const sigma = useSigma();
   const graph = sigma.getGraph();
@@ -225,12 +228,14 @@ export default function NodeDetailPanel({
         </a>
       </div>
       {/* Free 전용 패널 하단 배너 — 네트워크 미정, 플레이스홀더 */}
-      <div
-        data-testid="ad_banner_detail"
-        className="flex h-[52px] shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
-      >
-        <span className="text-xs tracking-wide text-[#91908C]">AD — 광고 영역 (Free)</span>
-      </div>
+      {plan === "free" && (
+        <div
+          data-testid="ad_banner_detail"
+          className="flex h-[52px] shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
+        >
+          <span className="text-xs tracking-wide text-[#91908C]">AD — 광고 영역 (Free)</span>
+        </div>
+      )}
     </div>
   );
 }
