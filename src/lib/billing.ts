@@ -46,3 +46,29 @@ export async function upsertSubscription(row: SubscriptionRow) {
     .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "workspace_id" });
   if (error) throw new Error(`subscriptions upsert failed: ${error.message}`);
 }
+
+// ---------- Pro 영구 설정 (숨김·핀) ----------
+
+export interface WorkspaceSettings {
+  hidden: string[];
+  pinned: Record<string, { x: number; y: number }>;
+}
+
+export const EMPTY_SETTINGS: WorkspaceSettings = { hidden: [], pinned: {} };
+
+export async function getWorkspaceSettings(workspaceId: string): Promise<WorkspaceSettings> {
+  const { data, error } = await supabaseAdmin()
+    .from("workspace_settings")
+    .select("hidden, pinned")
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+  if (error) throw new Error(`workspace_settings read failed: ${error.message}`);
+  return (data as WorkspaceSettings | null) ?? EMPTY_SETTINGS;
+}
+
+export async function putWorkspaceSettings(workspaceId: string, s: WorkspaceSettings) {
+  const { error } = await supabaseAdmin()
+    .from("workspace_settings")
+    .upsert({ workspace_id: workspaceId, ...s, updated_at: new Date().toISOString() }, { onConflict: "workspace_id" });
+  if (error) throw new Error(`workspace_settings upsert failed: ${error.message}`);
+}

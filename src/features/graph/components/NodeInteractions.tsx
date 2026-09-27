@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type Graph from "graphology";
 import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
 import { cool, getSimNode, reheat } from "../lib/simulation";
@@ -27,16 +28,38 @@ interface Coords {
  */
 export default function NodeInteractions({
   onSelect,
+  onPersist,
 }: {
   onSelect: (next: { id: string; type: NodeType } | null) => void;
+  /** 숨김·핀이 바뀐 뒤 호출 — Pro 는 서버 저장, Free 는 no-op */
+  onPersist: (graph: Graph) => void;
 }) {
   const sigma = useSigma();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [hiddenCount, setHiddenCount] = useState(0);
+  // 저장된 숨김이 로드 시 복원되므로 노드가 추가될 때마다 다시 센다
+  useEffect(() => {
+    const g = sigma.getGraph();
+    const recount = () => {
+      let c = 0;
+      g.forEachNode((_, a) => {
+        if (a.hidden) c++;
+      });
+      setHiddenCount(c);
+    };
+    g.on("nodeAdded", recount);
+    g.on("cleared", recount);
+    return () => {
+      g.off("nodeAdded", recount);
+      g.off("cleared", recount);
+    };
+  }, [sigma]);
   const onSelectRef = useRef(onSelect);
+  const onPersistRef = useRef(onPersist);
   useEffect(() => {
     onSelectRef.current = onSelect;
-  }, [onSelect]);
+    onPersistRef.current = onPersist;
+  }, [onSelect, onPersist]);
 
   useEffect(() => {
     const graph = sigma.getGraph();
@@ -152,6 +175,8 @@ export default function NodeInteractions({
         if (sn && !graph.getNodeAttribute(dragging, "pinned")) {
           sn.fx = null;
           sn.fy = null;
+        } else {
+          onPersistRef.current(graph); // 핀 노드를 옮김 — 새 좌표 저장
         }
       }
       dragging = null;
@@ -205,6 +230,7 @@ export default function NodeInteractions({
     setHiddenCount((c) => c + 1);
     setMenu(null);
     sigma.refresh();
+    onPersist(graph);
   };
 
   const togglePin = (node: string, pinned: boolean) => {
@@ -223,6 +249,7 @@ export default function NodeInteractions({
       }
     }
     setMenu(null);
+    onPersist(graph);
   };
 
   const showAll = () => {
@@ -231,6 +258,7 @@ export default function NodeInteractions({
     });
     setHiddenCount(0);
     sigma.refresh();
+    onPersist(graph);
   };
 
   return (

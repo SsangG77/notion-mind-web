@@ -7,6 +7,7 @@ import { SigmaContainer } from "@react-sigma/core";
 import "@react-sigma/core/lib/style.css";
 import { useGraphData } from "../hooks/useGraphData";
 import { useTheme } from "../hooks/useTheme";
+import { useWorkspaceSettings } from "../hooks/useWorkspaceSettings";
 import { drawNodeHover, drawNodeLabel, setSelected } from "../drawNode";
 import ContainerResize from "./ContainerResize";
 import LayoutManager from "./LayoutManager";
@@ -40,6 +41,7 @@ const SIGMA_SETTINGS = {
 export default function GraphView({ workspace, plan }: { workspace?: string; plan: Plan }) {
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
+  const { saved, persist } = useWorkspaceSettings(plan);
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
   const graph = useMemo(() => new Graph(), []);
   useEffect(() => {
@@ -72,9 +74,9 @@ export default function GraphView({ workspace, plan }: { workspace?: string; pla
       >
         <ThemeSync dark={dark} />
         <ContainerResize />
-        <LayoutManager data={data} gen={gen} loading={loading} />
+        <LayoutManager data={data} gen={gen} loading={loading} saved={saved} />
         <RelationEdgesLayer />
-        <NodeInteractions onSelect={handleSelect} />
+        <NodeInteractions onSelect={handleSelect} onPersist={persist} />
         {selection && (
           <NodeDetailPanel
             selection={selection}

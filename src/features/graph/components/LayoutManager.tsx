@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSigma } from "@react-sigma/core";
 import type { GraphData } from "@/types/graph";
+import type { WorkspaceSettings } from "@/lib/billing";
 import { estimateBlockHalf } from "../drawNode";
 import { buildSimulation, stopSimulation } from "../lib/simulation";
 import { DB_NODE_SIZE, PAGE_NODE_SIZE, T } from "../tokens";
@@ -16,17 +17,21 @@ export default function LayoutManager({
   data,
   gen,
   loading,
+  saved,
 }: {
   data: GraphData | null;
   gen: number;
   loading: boolean;
+  /** Pro 영구 설정 — null 이면 아직 로드 전(대기), Free 는 빈 값 */
+  saved: WorkspaceSettings | null;
 }) {
   const sigma = useSigma();
   const genRef = useRef(gen);
 
   useEffect(() => {
-    if (!data) return;
+    if (!data || !saved) return; // 설정 로드 전에 노드를 넣으면 핀 좌표를 못 살림
     const graph = sigma.getGraph();
+    const hiddenSet = new Set(saved.hidden);
     if (genRef.current !== gen) {
       genRef.current = gen;
       graph.clear(); // 재동기화 — 처음부터 다시
@@ -40,7 +45,11 @@ export default function LayoutManager({
       // 초기 위치: 부모 근처(있으면), 아니면 황금각 나선 — 시뮬레이션이 정리
       let x: number;
       let y: number;
-      if (n.parentId && graph.hasNode(n.parentId)) {
+      const pin = saved.pinned[n.id];
+      if (pin) {
+        x = pin.x;
+        y = pin.y;
+      } else if (n.parentId && graph.hasNode(n.parentId)) {
         const p = graph.getNodeAttributes(n.parentId);
         x = (p.x as number) + Math.cos(idx * 2.4) * 60;
         y = (p.y as number) + Math.sin(idx * 2.4) * 60;
@@ -60,6 +69,8 @@ export default function LayoutManager({
         url: n.url,
         blockHalfW: halfW,
         blockHalfH: halfH,
+        ...(pin ? { pinned: true } : {}),
+        ...(hiddenSet.has(n.id) ? { hidden: true } : {}),
       });
       idx++;
     }
@@ -81,7 +92,7 @@ export default function LayoutManager({
       // 다음 배치가 곧바로 다시 만들므로 여기서는 정지만
       stopSimulation();
     };
-  }, [sigma, data, gen, loading]);
+  }, [sigma, data, gen, loading, saved]);
 
   return null;
 }

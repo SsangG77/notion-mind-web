@@ -67,7 +67,8 @@ src/
 - 카탈로그·웹훅 생성 스크립트: `scripts/seed-paddle-catalog.ts`, `scripts/register-paddle-webhook.ts` (라이브 쓰기라 사용자가 `!` 로 직접 실행)
 - 노드 상한: Free 1,000 / Pro 20,000 (`assembleGraph` limit, `useGraphData(plan)`). 클라이언트는 상한+1 배치까지 요청(초과 감지), 서버 `/api/graph` 는 배치 번호 `i` 가 Free 상한을 넘으면 요금제 확인 후 빈 응답 — 클라이언트 조작만으로는 더 못 받음
 - 구독 관리: `/api/billing/portal` 이 Paddle 고객 포털 세션(customer_id + subscription_id)을 만들어 리디렉션. 설정 패널(Pro 만)과 요금제 화면 Pro 카드에서 진입
-- 아직 없음: 자동 동기화, 핀/숨김/필터 영구 저장, 이미지 내보내기
+- Pro 영구 설정: Supabase `workspace_settings`(workspace_id PK, hidden jsonb string[], pinned jsonb {id:{x,y}}). `/api/settings` GET(Free 는 빈 값)/PUT(Pro 만, 20,000개 상한). 클라이언트 `useWorkspaceSettings(plan)` — 로드 후 `saved` 를 LayoutManager 에 넘겨 노드 추가 시 hidden/pinned+좌표 적용(로드 전엔 노드 추가 보류), 숨김/핀/핀 드래그/모두 표시 뒤 `persist(graph)` 가 그래프에서 읽어 800ms 디바운스 PUT. 필터는 UI 골격만 있어 저장 대상 없음
+- 아직 없음: 자동 동기화, 이미지 내보내기, 필터 실기능
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지
@@ -76,7 +77,7 @@ src/
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 저장 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 거부 시 `requestNonPersonalizedAds=1`, 미응답 시 `pauseAdRequests=1`. EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 거부 시 `requestNonPersonalizedAds=1`, 미응답 시 `pauseAdRequests=1`. EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
