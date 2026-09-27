@@ -1,19 +1,31 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Script from "next/script";
 import { isBannerOpen, isBannerOpenServer, readCookieConsent, subscribeBanner } from "./legal/cookieConsent";
 import { ADSENSE_CLIENT } from "./adsense";
 
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[] & { requestNonPersonalizedAds?: number; pauseAdRequests?: number };
+  }
+}
+
 /**
- * AdSense 스크립트 — 쿠키 배너에서 "동의"한 뒤에만 로드(EU 옵트인). 거부하면 광고 자리엔 플레이스홀더만 남음.
- * 동의 상태는 배너 스토어를 구독해 배너를 닫는 즉시 반영. Pro 는 상위에서 아예 렌더 안 함.
+ * AdSense 스크립트 — 항상 로드. 구글 인증 CMP(EEA/UK/CH 접속자에게만 뜸)가 이 스크립트로 동의창을 띄우므로
+ * 동의 전에 막으면 CMP 자체가 안 뜬다. 우리 쿠키 배너는 그 외 지역용: 거부하면 비맞춤 광고, 답 전엔 광고 요청 정지.
+ * ponytail: EEA 사용자는 두 창(우리 배너 + 구글 CMP)을 볼 수 있음 — EEA 트래픽 생기면 배너를 지역별로 분기.
  */
 export default function AdSenseLoader() {
-  // 배너 열림 여부를 구독해서 동의 직후 리렌더 — 실제 판단은 readCookieConsent
   useSyncExternalStore(subscribeBanner, isBannerOpen, isBannerOpenServer);
-  const accepted = typeof window !== "undefined" && readCookieConsent() === "accepted";
-  if (!accepted) return null;
+  const consent = typeof window !== "undefined" ? readCookieConsent() : null;
+
+  useEffect(() => {
+    const q = (window.adsbygoogle = window.adsbygoogle || []);
+    q.pauseAdRequests = consent === null ? 1 : 0;
+    q.requestNonPersonalizedAds = consent === "accepted" ? 0 : 1;
+  }, [consent]);
+
   return (
     <Script
       id="adsbygoogle-js"
