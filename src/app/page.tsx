@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import LandingContent from "@/features/landing/components/LandingContent";
 
-// 화면 1. 로그인 — 디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드
+// 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
+// 그 아래로 서비스 소개 텍스트(광고 심사, 검색 노출용 — 로그인 뒤 그래프는 크롤러가 못 봄)
 const dotGrid = {
   backgroundImage: "radial-gradient(#E9E9E7 1px, transparent 1px)",
   backgroundSize: "22px 22px",
@@ -45,79 +47,115 @@ export default async function Home({
   if (jar.get("nm_token")?.value) redirect("/graph");
 
   return (
-    <main
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white"
-      style={dotGrid}
-    >
-      {/* 배경 그래프 (장식 — 클릭 요소 아님) */}
-      <div aria-hidden className="absolute inset-0 opacity-50 blur-[2px]">
-        <svg className="absolute inset-0 h-full w-full">
-          {bgLines.map(([a, b]) => (
-            <line
-              key={`${a}-${b}`}
-              x1={`${bgNodes[a].x}%`}
-              y1={`${bgNodes[a].y}%`}
-              x2={`${bgNodes[b].x}%`}
-              y2={`${bgNodes[b].y}%`}
-              stroke="#C9C7C1"
-              strokeWidth="1.3"
-            />
+    <main className="bg-white nm-dotgrid dark:bg-[#191919]">
+      <section
+        className="relative flex min-h-screen items-center justify-center overflow-hidden"
+        style={dotGrid}
+      >
+        {/* 배경 그래프 (장식 — 클릭 요소 아님) */}
+        <div aria-hidden className="absolute inset-0 opacity-50 blur-[2px]">
+          <svg className="absolute inset-0 h-full w-full">
+            {bgLines.map(([a, b]) => (
+              <line
+                key={`${a}-${b}`}
+                x1={`${bgNodes[a].x}%`}
+                y1={`${bgNodes[a].y}%`}
+                x2={`${bgNodes[b].x}%`}
+                y2={`${bgNodes[b].y}%`}
+                stroke="#C9C7C1"
+                strokeWidth="1.3"
+              />
+            ))}
+          </svg>
+          {bgNodes.map((n) => (
+            <span
+              key={n.label}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-[6px] border border-[#2E2C27] px-2.5 py-1 text-[9px] text-[#37352F] shadow-[3px_3px_0_#2E2C27] ${
+                n.db ? "bg-[#F4F3EF] font-semibold" : "bg-[#FDFDFC]"
+              }`}
+              style={{ left: `${n.x}%`, top: `${n.y}%` }}
+            >
+              {n.label}
+            </span>
           ))}
-        </svg>
-        {bgNodes.map((n) => (
-          <span
-            key={n.label}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-[6px] border border-[#2E2C27] px-2.5 py-1 text-[9px] text-[#37352F] shadow-[3px_3px_0_#2E2C27] ${
-              n.db ? "bg-[#F4F3EF] font-semibold" : "bg-[#FDFDFC]"
-            }`}
-            style={{ left: `${n.x}%`, top: `${n.y}%` }}
-          >
-            {n.label}
-          </span>
-        ))}
-      </div>
+        </div>
 
-      {/* 중앙 대형 노드 */}
-      <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
-        <h1 className="text-2xl font-bold tracking-tight text-[#37352F]">Notion-mind</h1>
-        <p className="-mt-3 max-w-[300px] text-center text-sm text-[#37352F]">
-          노션 워크스페이스의 페이지와 데이터베이스를 하나의 노드 그래프로 펼쳐 보는 도구
-        </p>
-        <a
-          href="/api/auth/login"
-          data-testid="login_notion_button"
-          className="rounded-lg bg-[#2383E2] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1b74cb]"
-        >
-          Notion으로 계속하기
-        </a>
-        <p className="text-sm text-[#91908C]">노션 계정으로 로그인합니다 — 별도 가입 없음</p>
-        <p className="-mt-2 text-[11px] text-[#91908C]">
-          계속하면{" "}
-          <a href="/terms" className="underline">
-            이용약관
-          </a>
-          과{" "}
-          <a href="/privacy" className="underline">
-            개인정보 처리방침
-          </a>
-          에 동의하는 것입니다
-        </p>
-        {error && (
-          <p className="rounded-lg border border-[#E9E9E7] bg-white px-4 py-2 text-sm text-[#37352F]">
-            연결에 실패했습니다: {error}
+        {/* 중앙 대형 노드 */}
+        <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
+          <h1 className="text-2xl font-bold tracking-tight text-[#37352F]">
+            Notion-mind
+          </h1>
+          <p className="-mt-3 max-w-[300px] text-center text-sm text-[#37352F]">
+            노션 워크스페이스의 페이지와 데이터베이스를 하나의 노드 그래프로
+            펼쳐 보는 도구
           </p>
-        )}
+          <a
+            href="/api/auth/login"
+            data-testid="login_notion_button"
+            className="rounded-lg bg-[#2383E2] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1b74cb]"
+          >
+            Notion으로 계속하기
+          </a>
+          <p className="text-sm text-[#91908C]">
+            노션 계정으로 로그인합니다 — 별도 가입 없음
+          </p>
+          <p className="-mt-2 text-[11px] text-[#91908C]">
+            계속하면{" "}
+            <a href="/terms" className="underline">
+              이용약관
+            </a>
+            과{" "}
+            <a href="/privacy" className="underline">
+              개인정보 처리방침
+            </a>
+            에 동의하는 것입니다
+          </p>
+          {error && (
+            <p className="rounded-lg border border-[#E9E9E7] bg-white px-4 py-2 text-sm text-[#37352F]">
+              연결에 실패했습니다: {error}
+            </p>
+          )}
+        </div>
+
+        <a
+          href="#intro"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] text-[#91908C] hover:underline"
+        >
+          어떤 도구인지 보기 ↓
+        </a>
+      </section>
+
+      <div id="intro">
+        <LandingContent />
       </div>
 
       {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
-      <footer className="absolute bottom-5 left-0 right-0 flex flex-col items-center gap-2 px-6 text-center">
+      <footer className="flex flex-col items-center gap-2 px-6 pb-8 text-center">
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
-          <a href="/pricing" className="hover:underline">요금제</a>
-          <a href="/terms" className="hover:underline">이용약관</a>
-          <a href="/privacy" className="hover:underline">개인정보 처리방침</a>
-          <a href="/refund" className="hover:underline">환불정책</a>
-          <a href="/eu/terms" className="hover:underline">English</a>
-          <a href="mailto:sangjincha719@gmail.com" className="hover:underline">문의 sangjincha719@gmail.com</a>
+          <a href="/guide" className="hover:underline">
+            사용 가이드
+          </a>
+          <a href="/faq" className="hover:underline">
+            자주 묻는 질문
+          </a>
+          <a href="/pricing" className="hover:underline">
+            요금제
+          </a>
+          <a href="/terms" className="hover:underline">
+            이용약관
+          </a>
+          <a href="/privacy" className="hover:underline">
+            개인정보 처리방침
+          </a>
+          <a href="/refund" className="hover:underline">
+            환불정책
+          </a>
+          <a href="/eu/terms" className="hover:underline">
+            English
+          </a>
+          <a href="mailto:sangjincha719@gmail.com" className="hover:underline">
+            문의 sangjincha719@gmail.com
+          </a>
         </nav>
         <NotionDisclaimer />
       </footer>

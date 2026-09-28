@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BIP Post Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<!-- capture.sh 가 만든 레딧 캡쳐 내장본 (window.SHOTS) -->
+<script src="img/shots.js"></script>
+<!-- render-kit.sh 가 크롬으로 미리 만든 슬라이드 PNG (window.RENDERED). Safari 는 브라우저 안 변환이 장당 1분 넘게 걸림 -->
+<script src="img/rendered.js" onerror="window.RENDERED = {}"></script>
+<style>
+  :root {
+    --bg: #FFFFFF; --dot: #E9E9E7; --surface: #F7F6F3; --node: #FDFDFC; --db: #F4F3EF;
+    --raised: #2E2C27; --text: #37352F; --muted: #8A8883; --accent: #2383E2; --reddit: #0E1113;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--surface); font-family: Inter, -apple-system, sans-serif; color: var(--text); }
+
+  /* ---------- 키트 페이지 UI ---------- */
+  .page { max-width: 1280px; margin: 0 auto; padding: 40px 16px 120px; }
+  .page > h1 { font-size: 32px; font-weight: 800; }
+  .page > p { color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  section.platform { margin-top: 56px; }
+  section.platform > h2 { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  section.platform > h3 { font-size: 17px; font-weight: 700; margin-top: 24px; }
+  section.platform > p { color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .btn { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    background: var(--node); color: var(--text); border: 1.5px solid var(--raised); box-shadow: 3px 3px 0 var(--raised); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--raised); }
+  .btn.primary { background: var(--accent); color: #fff; }
+
+  .attach { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .drop { background: var(--node); border: 1.5px dashed var(--muted); border-radius: 12px; padding: 14px; cursor: pointer; min-height: 180px;
+    display: flex; flex-direction: column; gap: 8px; }
+  .drop.filled { border-style: solid; border-color: var(--raised); box-shadow: 4px 4px 0 var(--raised); }
+  .drop.over { border-color: var(--accent); background: #EEF5FC; }
+  .drop b { font-size: 15px; }
+  .drop span { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .drop img { width: 100%; height: 110px; object-fit: contain; background: var(--surface); border-radius: 6px; }
+  .drop input { display: none; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px; }
+  .item { display: flex; flex-direction: column; gap: 10px; }
+  .item .meta { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+  .frame { overflow: hidden; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .frame.ig { width: 389px; height: 486px; }
+  .frame.x { width: 600px; height: 338px; }
+  .frame.ig .slide { transform: scale(.36); }
+  .frame.x .slide { transform: scale(.5); }
+
+  .copy { margin-top: 16px; background: var(--node); border: 1.5px solid var(--raised); border-radius: 10px; padding: 16px; }
+  .copy header { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; }
+  .copy header small { font-weight: 500; color: var(--muted); }
+  .copy header small.over { color: #D44C47; font-weight: 700; }
+  .copy pre { margin-top: 10px; white-space: pre-wrap; font: 15px/1.55 Inter, sans-serif; }
+  .copy .attach-note { margin-top: 10px; font-size: 13px; color: var(--accent); font-weight: 600; }
+
+  /* ---------- 슬라이드 (실제 내보내기 크기) ---------- */
+  .slide { position: relative; overflow: hidden; transform-origin: 0 0; font-family: Inter, sans-serif; color: var(--text);
+    background: var(--bg) radial-gradient(var(--dot) 2px, transparent 2px) 0 0 / 36px 36px; display: flex; flex-direction: column; }
+  .slide.ig { width: 1080px; height: 1350px; padding: 96px 88px; }
+  .slide.x { width: 1200px; height: 675px; padding: 64px 72px; }
+  .kicker { font-size: 26px; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .kicker b { color: var(--accent); }
+  .h { font-size: 76px; line-height: 1.08; font-weight: 800; letter-spacing: -.02em; margin-top: 28px; }
+  .h em { font-style: normal; color: var(--accent); }
+  .x .kicker { font-size: 20px; }
+  .x .h { font-size: 58px; margin-top: 18px; }
+  .stat { font-size: 30px; color: var(--muted); line-height: 1.45; margin-top: 28px; }
+  .stat b { color: var(--text); }
+  .x .stat { font-size: 24px; margin-top: 20px; }
+  .foot { position: absolute; left: 88px; right: 88px; bottom: 64px; display: flex; justify-content: space-between; font-size: 24px; font-weight: 600; color: var(--muted); }
+  .x .foot { left: 72px; right: 72px; bottom: 40px; font-size: 18px; }
+  .foot .brand { color: var(--text); }
+  .box { background: var(--node); border: 1.5px solid var(--raised); box-shadow: 6px 6px 0 var(--raised); border-radius: 10px; }
+  .box.db { background: var(--db); }
+
+  /* 이미지 슬롯: 첨부 전엔 안내, 첨부 후엔 캡쳐를 비율 유지로 담음 */
+  .slot { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; cursor: pointer; }
+  .slot img { display: block; max-width: 100%; max-height: 100%; border: 1.5px solid var(--raised); box-shadow: 6px 6px 0 var(--raised); border-radius: 14px; }
+  .slot.empty { background: var(--surface); border: 1.5px dashed var(--muted); border-radius: 14px; color: var(--muted);
+    font-size: 28px; text-align: center; padding: 24px; line-height: 1.4; }
+  .x .slot img { box-shadow: 4px 4px 0 var(--raised); border-radius: 10px; }
+  .x .slot.empty { font-size: 18px; }
+
+  /* 버전 노드 (표지) */
+  .versions { display: flex; align-items: center; gap: 22px; }
+  .ver { padding: 24px 30px; font-size: 36px; font-weight: 600; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+  .ver .mark { font-weight: 800; }
+  .ver.dead { color: var(--muted); }
+  .ver.dead .label { text-decoration: line-through; text-decoration-thickness: 3px; }
+  .ver.dead .mark { color: #D44C47; }
+  .ver.live { border-color: var(--accent); box-shadow: 6px 6px 0 var(--accent); }
+  .ver.live .mark { color: var(--accent); }
+  .ver.building { border: 2px dashed var(--accent); box-shadow: none; background: #EEF5FC; }
+  .ver.building .mark { font-size: .6em; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .edge { flex: 1; min-width: 20px; border-top: 3px dashed #C9C8C4; }
+  .x .ver { font-size: 28px; padding: 18px 22px; }
+
+  /* 댓글 → 기능 */
+  .map { display: grid; grid-template-columns: 1fr 64px 1fr; row-gap: 30px; align-items: center; }
+  .map .c { padding: 22px 26px; font-size: 28px; line-height: 1.3; font-weight: 500; }
+  .map .f { padding: 22px 26px; font-size: 30px; font-weight: 700; }
+  .map .f small { display: block; font-size: 22px; font-weight: 500; color: var(--muted); margin-top: 6px; }
+  .map .arrow { text-align: center; font-size: 40px; color: var(--accent); font-weight: 700; }
+  .map .next { color: var(--muted); border-style: dashed; box-shadow: none; }
+  .x .map { row-gap: 16px; grid-template-columns: 1fr 48px 1fr; }
+  .x .map .c { font-size: 21px; padding: 14px 18px; }
+  .x .map .f { font-size: 22px; padding: 14px 18px; }
+  .x .map .f small { font-size: 16px; }
+  .x .map .arrow { font-size: 28px; }
+
+  .url { padding: 22px 32px; font-size: 40px; font-weight: 800; color: #fff; background: var(--accent); }
+
+  /* 표지 미니 그래프: 앱과 같은 노드 언어로 "무슨 서비스인지" 보여줌. 좌표 = 노드 중심 */
+  .mg { position: relative; width: 904px; height: 520px; }
+  .mg > svg { position: absolute; inset: 0; }
+  .mg .n { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; display: flex; align-items: center; gap: 10px;
+    padding: 14px 22px; font-size: 26px; background: var(--node); border: 1.5px solid var(--raised); box-shadow: 5px 5px 0 var(--raised); border-radius: 10px; }
+  .mg .n.db { background: var(--db); font-size: 29px; font-weight: 700; padding: 16px 26px; }
+  .mg .n.hot { border-color: var(--accent); box-shadow: 5px 5px 0 var(--accent); }
+  .mg .rl { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; padding: 6px 14px; border-radius: 999px;
+    background: var(--accent); color: #fff; font-size: 22px; font-weight: 700; }
+  .legend { margin-top: 40px; display: flex; gap: 28px; font-size: 22px; color: var(--muted); align-items: center; }
+  .legend span { display: flex; align-items: center; gap: 8px; }
+  .legend i { display: inline-block; width: 34px; border-top: 2px solid #C9C8C4; }
+  .legend i.rel { border-top: 4px dashed var(--accent); }
+  .mg-x { position: relative; width: 560px; padding-top: 322px; }
+  .mg-x .mg { position: absolute; top: 0; left: 0; transform: scale(.62); transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Notion-mind 빌드인퍼블릭 게시물 키트</h1>
+  <p>레딧 게시글과 댓글 캡쳐(다른 사람 닉네임 블러, 핵심 문장 형광펜)가 미리 들어가 있습니다.
+     슬라이드마다 PNG 저장 또는 플랫폼별 "전체 저장". 캡션은 복사 버튼으로.</p>
+
+  <section class="platform">
+    <h2>이미지</h2>
+    <p>칸을 클릭하거나 끌어다 놓으면 교체됩니다. 교체한 이미지는 이 브라우저에만 저장되고, "기본값" 을 누르면 레딧 캡쳐로 돌아갑니다. 캡쳐를 새로 뜨려면 <code>capture.sh</code> 실행.</p>
+    <div class="attach" id="attach"></div>
+  </section>
+
+  <!-- ================= 1편: iPhone ================= -->
+  <section class="platform">
+    <h2>1편: iPhone 버전 <span class="btn primary" data-save-all="p1">1편 이미지 전체 저장</span></h2>
+    <p>8/18 r/Notion 에 올린 iPhone 목업과 댓글 반응. 인스타 4장(1080×1350) + X 스레드 3개(1200×675).</p>
+    <h3>Instagram 캐러셀</h3>
+    <div class="grid">
+      <div class="item"><div class="frame ig"><div class="slide ig p1" data-name="p1-ig-1">
+        <div class="kicker"><b>Build in public</b> / Part 1</div>
+        <div class="h">See your Notion<br>as <em>one map.</em></div>
+        <div class="stat" style="margin-top:20px">Every database, page and relation, <b>wired together.</b></div>
+        <div data-minigraph style="margin-top:56px"><div class="legend"><span><i></i>page inside a database</span><span><i class="rel"></i>relation property</span></div></div>
+        <div class="stat" style="margin-top:auto; margin-bottom:120px"><b>Part 1:</b> I put it on a phone first. <b>5.7K</b> people had thoughts.</div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>Swipe →</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p1" data-name="p1-ig-2">
+        <div class="kicker"><b>v1</b> / iPhone / r/Notion</div>
+        <div class="h">First try:<br>on your <em>phone.</em></div>
+        <div style="display:flex; gap:40px; margin-top:44px; height:780px">
+          <div class="slot" data-key="iphone-post" style="width:520px"></div>
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center">
+            <div class="stat" style="margin:0"><b>5.7K</b> views<br><b>10</b> comments</div>
+            <div class="stat">One question:<br><b>“Would you actually use this?”</b></div>
+          </div>
+        </div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>2 / 4</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p1" data-name="p1-ig-3">
+        <div class="kicker"><b>v1</b> / The comments</div>
+        <div class="h">Right idea.<br><em>Wrong screen.</em></div>
+        <div style="margin-top:40px; display:flex; flex-direction:column; gap:20px; width:760px; align-self:center">
+          <div class="slot" data-key="iphone-c-cluttered"></div>
+          <div class="slot" data-key="iphone-c-desktop"></div>
+          <div class="slot" data-key="iphone-c-mobile"></div>
+        </div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>3 / 4</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p1" data-name="p1-ig-4">
+        <div class="kicker"><b>Part 1</b> / The verdict</div>
+        <div class="h">Not on a phone.<br><em>Next: iPad.</em></div>
+        <div style="margin:auto 0">
+          <div class="versions">
+            <div class="ver box dead"><span class="label">v1 iPhone</span><span class="mark">✕</span></div>
+            <div class="edge"></div>
+            <div class="ver box building"><span class="label">v2 iPad</span><span class="mark">part 2</span></div>
+          </div>
+        </div>
+        <div style="margin-bottom:110px; display:flex; gap:24px; align-items:center">
+          <div class="url box">Follow for part 2</div>
+          <div class="stat" style="margin:0; font-size:28px">Would you open a map<br>of your Notion on your phone?</div>
+        </div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>4 / 4</span></div>
+      </div></div></div>
+
+    </div>
+    <div class="copy"><header>인스타 캡션 <button class="btn" data-copy>복사</button></header><pre>Your Notion databases, pages and relations, drawn as one map.
+
+Before writing real code, I showed an iPhone version on r/Notion and asked one question: would you actually use this?
+
+5.7K views, 10 comments. The verdict: "No - visually too cluttered." "I'd use it but only on desktop."
+
+Right idea, wrong screen. Every screenshot is a real post or comment. Swipe →
+
+Part 2: I moved it to a bigger screen. Follow along.
+
+#buildinpublic #notion #indiehacker #sideproject #productivity #notiontips #secondbrain</pre></div>
+
+    <div class="copy"><header>인스타 첫 댓글 <button class="btn" data-copy>복사</button></header><pre>Would you open a map of your Notion on your phone? Be honest. Reddit was.</pre></div>
+
+    <h3>X 스레드</h3>
+    <div class="grid">
+      <div class="item"><div class="frame x"><div class="slide x p1" data-name="p1-x-1">
+        <div style="display:flex; gap:40px; height:100%; align-items:center">
+          <div style="width:470px">
+            <div class="kicker"><b>Build in public</b> / Part 1</div>
+            <div class="h">See your Notion as <em>one map.</em></div>
+            <div class="stat"><b>Part 1:</b> the iPhone version.<br><b>5.7K</b> people saw it on Reddit.</div>
+          </div>
+          <div class="mg-x" data-minigraph><div class="legend" style="margin-top:24px; font-size:18px"><span><i></i>page inside a database</span><span><i class="rel"></i>relation property</span></div></div>
+        </div>
+      </div></div></div>
+
+      <div class="item"><div class="frame x"><div class="slide x p1" data-name="p1-x-2">
+        <div style="display:flex; gap:36px; height:100%">
+          <div style="width:390px; display:flex; flex-direction:column">
+            <div class="kicker"><b>v1</b> / iPhone</div>
+            <div class="h">Right idea.<br><em>Wrong screen.</em></div>
+            <div class="stat"><b>5.7K</b> views, <b>10</b> comments</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px">
+            <div class="slot" data-key="iphone-c-cluttered"></div>
+            <div class="slot" data-key="iphone-c-desktop"></div>
+          </div>
+        </div>
+      </div></div></div>
+
+    </div>
+
+    <div class="copy" data-limit="280"><header>트윗 1 <small></small><button class="btn" data-copy>복사</button></header><pre>I'm building a map of your Notion: every database, page and relation as one graph.
+
+Before writing real code, I showed an iPhone version on Reddit. Here's what 5.7K people said 🧵</pre><div class="attach-note">이미지: p1-x-1.png</div></div>
+
+    <div class="copy" data-limit="280"><header>트윗 2 <small></small><button class="btn" data-copy>복사</button></header><pre>v1: an iPhone app that draws your Notion workspace as a graph.
+
+10 comments. The verdict:
+"No - visually too cluttered"
+"I'd use it but only on desktop"</pre><div class="attach-note">이미지: p1-x-2.png + img/shots/iphone-post.png</div></div>
+
+    <div class="copy" data-limit="280"><header>트윗 3 <small></small><button class="btn" data-copy>복사</button></header><pre>Right idea, wrong screen.
+
+So I moved it to iPad. Part 2 soon.</pre><div class="attach-note">이미지 없음</div></div>
+
+  </section>
+
+  <!-- ================= 2편: iPad ================= -->
+  <section class="platform">
+    <h2>2편: iPad 버전 <span class="btn primary" data-save-all="p2">2편 이미지 전체 저장</span></h2>
+    <p>8/21 r/Notion 에 올린 iPad 목업, "아이패드 없다" 댓글, 웹으로 가기로 한 결정. 인스타 5장 + X 스레드 4개.</p>
+    <h3>Instagram 캐러셀</h3>
+    <div class="grid">
+      <div class="item"><div class="frame ig"><div class="slide ig p2" data-name="p2-ig-1">
+        <div class="kicker"><b>Build in public</b> / Part 2</div>
+        <div class="h">See your Notion<br>as <em>one map.</em></div>
+        <div class="stat" style="margin-top:20px">Every database, page and relation, <b>wired together.</b></div>
+        <div data-minigraph style="margin-top:56px"><div class="legend"><span><i></i>page inside a database</span><span><i class="rel"></i>relation property</span></div></div>
+        <div class="stat" style="margin-top:auto; margin-bottom:120px"><b>Part 2:</b> Reddit said the phone was too cluttered. So I tried <b>iPad.</b></div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>Swipe →</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p2" data-name="p2-ig-2">
+        <div class="kicker"><b>v2</b> / iPad / r/Notion</div>
+        <div class="h">Second try:<br>a <em>bigger</em> screen.</div>
+        <div style="display:flex; gap:40px; margin-top:44px; height:780px">
+          <div class="slot" data-key="ipad-post" style="width:520px"></div>
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center">
+            <div class="stat" style="margin:0"><b>9.9K</b> views<br><b>24</b> upvotes</div>
+            <div class="stat">Tap a node,<br><b>read it beside the graph.</b></div>
+          </div>
+        </div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>2 / 5</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p2" data-name="p2-ig-3">
+        <div class="kicker"><b>v2</b> / The comments</div>
+        <div class="h">“I don't have an iPad.”<br>So I made a <em>promise.</em></div>
+        <div class="slot" data-key="ipad-c-browser" style="margin-top:44px; height:800px"></div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>3 / 5</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p2" data-name="p2-ig-4">
+        <div class="kicker"><b>Building</b> / Reddit wrote half my roadmap</div>
+        <div class="h">You commented.<br>I'm <em>building it.</em></div>
+        <div class="map" style="margin:auto 0 120px">
+          <div class="c box">“visually too cluttered”</div><div class="arrow">→</div>
+          <div class="f box db">Hover focus<small>everything else fades out</small></div>
+          <div class="c box">“pin and sort pages”</div><div class="arrow">→</div>
+          <div class="f box db">Pin and hide nodes<small>your layout, your way</small></div>
+          <div class="c box">“browser would be better”</div><div class="arrow">→</div>
+          <div class="f box db">A web app<small>any laptop, no install</small></div>
+          <div class="c box">“up-to-date with Notion”</div><div class="arrow">→</div>
+          <div class="f box db">One-click sync<small>pull the latest anytime</small></div>
+        </div>
+        <div class="foot"><span class="brand">Notion-mind</span><span>4 / 5</span></div>
+      </div></div></div>
+
+      <div class="item"><div class="frame ig"><div class="slide ig p2" data-name="p2-ig-5">
+        <div class="kicker"><b>Next</b> / v3</div>
+        <div class="h">Third try: the web.<br><em>Building it now.</em></div>
+        <div style="margin:auto 0">
+          <div class="versions">
+            <div class="ver box dead"><span class="label">v1 iPhone</span><span class="mark">✕</span></div>
+            <div class="edge"></div>
+            <div class="ver box dead"><span class="label">v2 iPad</span><span class="mark">✕</span></div>
+          </div>
+          <div class="versions" style="margin-top:48px; justify-content:center"><div class="ver box building"><span class="label">v3 Web</span><span class="mark">building</span></div></div>
+        </div>
+        <div style="margin-bottom:110px; display:flex; gap:24px; align-items:center">
+          <div class="url box">Follow along</div>
+          <div class="stat" style="margin:0; font-size:28px">Launching soon.<br>What should it do on day one?</div>
+        </div>
+        <div class="foot"><span class="brand">Build in public</span><span>5 / 5</span></div>
+      </div></div></div>
+
+    </div>
+    <div class="copy"><header>인스타 캡션 <button class="btn" data-copy>복사</button></header><pre>Part 2 of building a map of your Notion in public.
+
+Reddit said my iPhone version was too cluttered. So I tried iPad: tap a node, read the page right next to the graph.
+
+9.9K views, 24 upvotes. Top comment: "I don't have an iPad, so browser or Android app would be better for me."
+
+So I replied: I'll make it a web version. That's v3, and I'm building it now.
+
+Every screenshot is a real post or comment. Swipe →
+
+#buildinpublic #notion #indiehacker #sideproject #productivity #notiontips #secondbrain</pre></div>
+
+    <div class="copy"><header>인스타 첫 댓글 <button class="btn" data-copy>복사</button></header><pre>Phone, tablet, or laptop: where do you actually reorganize your Notion? Reddit said laptop. Curious if you agree.</pre></div>
+
+    <h3>X 스레드</h3>
+    <div class="grid">
+      <div class="item"><div class="frame x"><div class="slide x p2" data-name="p2-x-1">
+        <div style="display:flex; gap:36px; height:100%">
+          <div style="width:390px; display:flex; flex-direction:column">
+            <div class="kicker"><b>v2</b> / iPad</div>
+            <div class="h">“I don't have an <em>iPad.</em>”</div>
+            <div class="stat"><b>9.9K</b> views, <b>24</b> upvotes</div>
+          </div>
+          <div class="slot" data-key="ipad-c-browser" style="flex:1"></div>
+        </div>
+      </div></div></div>
+
+      <div class="item"><div class="frame x"><div class="slide x p2" data-name="p2-x-2">
+        <div style="display:flex; gap:48px; height:100%; align-items:center">
+          <div style="width:330px">
+            <div class="kicker"><b>Building</b></div>
+            <div class="h">You commented.<br>I'm <em>building it.</em></div>
+          </div>
+          <div class="map" style="flex:1">
+            <div class="c box">“visually too cluttered”</div><div class="arrow">→</div>
+            <div class="f box db">Hover focus<small>everything else fades</small></div>
+            <div class="c box">“pin and sort pages”</div><div class="arrow">→</div>
+            <div class="f box db">Pin and hide nodes<small>your layout, your way</small></div>
+            <div class="c box">“browser would be better”</div><div class="arrow">→</div>
+            <div class="f box db">A web app<small>no install</small></div>
+          </div>
+        </div>
+      </div></div></div>
+
+    </div>
+
+    <div class="copy" data-limit="280"><header>트윗 1 <small></small><button class="btn" data-copy>복사</button></header><pre>Part 2 of building a Notion graph view in public.
+
+Reddit said the iPhone version was too cluttered. So I tried iPad: tap a node, read the page next to the graph.
+
+9.9K views 🧵</pre><div class="attach-note">이미지: img/shots/ipad-post.png</div></div>
+
+    <div class="copy" data-limit="280"><header>트윗 2 <small></small><button class="btn" data-copy>복사</button></header><pre>Top comment: "I don't have an iPad, so browser or Android app would be better for me."
+
+So I replied: I'll make it a web version.</pre><div class="attach-note">이미지: p2-x-1.png</div></div>
+
+    <div class="copy" data-limit="280"><header>트윗 3 <small></small><button class="btn" data-copy>복사</button></header><pre>What I'm building because of the comments:
+
+"too cluttered" → hover a node, everything else fades
+"pin and sort pages" → pin and hide nodes
+"browser" → a web app
+"track mentioned pages?" → next up</pre><div class="attach-note">이미지: p2-x-2.png</div></div>
+
+    <div class="copy" data-limit="280"><header>트윗 4 <small></small><button class="btn" data-copy>복사</button></header><pre>v3 is a web app. Building it now, launching soon.
+
+What should it do on day one?</pre><div class="attach-note">이미지 없음</div></div>
+
+  </section>
+
+  <!-- ================= Reddit ================= -->
+  <section class="platform">
+    <h2>Reddit</h2>
+    <p>레딧은 편집한 카드보다 원본 캡쳐가 더 자연스럽습니다. 갤러리에는 인스타 슬라이드 7장을 그대로 쓰면 됩니다. r/Notion은 일반 글로 홍보하면 삭제되고, 2주마다 고정되는 Self-promo &amp; Showcase 스레드에서만 허용됩니다.</p>
+
+    <div class="copy"><header>① 출시 후에: 원래 글에 약속 이행 답글 (r/Notion iPad 글, 댓글 두 분에게 각각) <button class="btn" data-copy>복사</button></header><pre>Following up as promised: it's a web app now, so no iPad needed. Pin and hide are in, and you can sync with Notion anytime. notion-mind.com
+
+Would love to hear what's still missing.</pre></div>
+
+    <div class="copy"><header>② r/SideProject 제목 <button class="btn" data-copy>복사</button></header><pre>Reddit killed my first two versions (iPhone, then iPad). Now I'm building the one the comments asked for.</pre></div>
+
+    <div class="copy"><header>② r/SideProject 본문 (갤러리: 1편, 2편 인스타 슬라이드) <button class="btn" data-copy>복사</button></header><pre>Before writing any real code, I posted mockups of a Notion graph view on r/Notion and asked if people would actually use it.
+
+**v1: iPhone app** (5.7K views, 10 comments). Most replies said the same thing in different words: "visually too cluttered", "I'd use it but only on desktop."
+
+**v2: iPad**, tap a node and read the page beside the graph (9.9K views, 24 upvotes). Top comment: "I don't have an iPad, so browser or Android app would be better for me." Another asked to pin and sort pages.
+
+**v3: a web app, in progress.** What I'm building straight from the comments:
+- Hover a node and everything unrelated fades (the clutter problem)
+- Pin and hide nodes (the "pin and sort" ask)
+- Runs in any browser, no install
+
+Still on the list: tracking mentioned pages, which someone asked for in r/notioncreations.
+
+Launching soon. What would make you actually open this every week?</pre></div>
+
+    <div class="copy"><header>③ r/notioncreations (플레어: #Build in Public) 제목 <button class="btn" data-copy>복사</button></header><pre>Update on the Notion graph view: you told me to drop the iPad, so I'm building it for the browser</pre></div>
+
+    <div class="copy"><header>④ 출시 후에: r/Notion Self-promo &amp; Showcase 스레드 댓글 <button class="btn" data-copy>복사</button></header><pre>A few weeks ago I asked here whether you'd use a graph view of your Notion workspace (databases as hubs, relations as edges). You said: not on a phone, not only on iPad. So I built it for the browser: notion-mind.com. Free up to 1,000 pages. Feedback very welcome.</pre></div>
+  </section>
+</div>
+
+<script>
+  // 첨부 슬롯 정의: key 하나가 인스타/X 슬롯 여러 개를 함께 채움
+  const SLOTS = [
+    { key: 'iphone-post',        label: 'iPhone 게시글',         hint: '8/18 r/Notion' },
+    { key: 'iphone-c-cluttered', label: 'iPhone 댓글: cluttered', hint: '"visually too cluttered"' },
+    { key: 'iphone-c-desktop',   label: 'iPhone 댓글: desktop',   hint: '"only on desktop"' },
+    { key: 'iphone-c-mobile',    label: 'iPhone 댓글: mobile',    hint: '"cluttered really fast"' },
+    { key: 'ipad-post',          label: 'iPad 게시글',           hint: '8/21 r/Notion' },
+    { key: 'ipad-c-browser',     label: 'iPad 댓글 + 내 답글',   hint: '"I don\'t have an iPad"' },
+  ];
+  const DEFAULTS = window.SHOTS || {};
+  const images = {};
+  const store = {
+    get(k) { try { return localStorage.getItem('bipkit2:' + k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem('bipkit2:' + k, v); } catch { /* 용량 초과 시 세션 한정 */ } },
+    del(k) { try { localStorage.removeItem('bipkit2:' + k); } catch { /* 무시 */ } },
+  };
+
+  function paint(key) {
+    document.querySelectorAll(`.slot[data-key="${key}"]`).forEach(el => {
+      const src = images[key];
+      el.classList.toggle('empty', !src);
+      el.innerHTML = src ? `<img src="${src}" alt="">` : `${SLOTS.find(s => s.key === key).label}<br>이미지 첨부`;
+    });
+    const tile = document.querySelector(`.drop[data-key="${key}"]`);
+    tile.classList.toggle('filled', !!images[key]);
+    tile.querySelector('.thumb').innerHTML = images[key] ? `<img src="${images[key]}" alt="">` : '';
+  }
+
+  function load(key, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const r = new FileReader();
+    r.onload = () => { images[key] = r.result; store.set(key, r.result); paint(key); };
+    r.readAsDataURL(file);
+  }
+
+  const attach = document.getElementById('attach');
+  SLOTS.forEach(s => {
+    const tile = document.createElement('label');
+    tile.className = 'drop'; tile.dataset.key = s.key;
+    tile.innerHTML = `<b>${s.label}</b><span>${s.hint}</span><div class="thumb"></div><input type="file" accept="image/*">`;
+    if (DEFAULTS[s.key]) {
+      const reset = document.createElement('button');
+      reset.className = 'btn'; reset.textContent = '기본값';
+      reset.onclick = e => { e.preventDefault(); store.del(s.key); images[s.key] = DEFAULTS[s.key]; paint(s.key); };
+      tile.appendChild(reset);
+    }
+    tile.querySelector('input').onchange = e => load(s.key, e.target.files[0]);
+    tile.ondragover = e => { e.preventDefault(); tile.classList.add('over'); };
+    tile.ondragleave = () => tile.classList.remove('over');
+    tile.ondrop = e => { e.preventDefault(); tile.classList.remove('over'); load(s.key, e.dataTransfer.files[0]); };
+    attach.appendChild(tile);
+    images[s.key] = store.get(s.key) || DEFAULTS[s.key];
+    paint(s.key);
+  });
+
+  // 슬라이드 슬롯을 눌러도 해당 첨부 칸의 파일 선택이 열림
+  document.addEventListener('click', e => {
+    const slot = e.target.closest('.slot');
+    if (slot) document.querySelector(`.drop[data-key="${slot.dataset.key}"] input`).click();
+  });
+
+  // PNG 저장: 축소 미리보기 대신 원본 크기로 렌더
+  // Safari 는 첫 렌더에서 SVG(foreignObject) 안의 이미지를 비워 그리므로,
+  // 레이아웃은 html-to-image 로 그리고 캡쳐 이미지는 캔버스에 직접 덧그린다 (크롬에서도 결과 동일)
+  const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  let fontCSS;   // 웹폰트 내장 CSS 는 한 번만 만들어 재사용 (매번 만들면 Safari 에서 장당 수십 초)
+  // Inter 는 문자 묶음(키릴, 그리스 등)별 @font-face 를 전부 내려줘 통째로 내장하면 1.4MB → Safari 가 멈춤.
+  // 슬라이드는 영어뿐이라 Google Fonts CSS 의 "/* latin */" 블록만 골라 woff2 를 base64 로 내장한다.
+  async function latinFontCSS() {
+    const href = document.querySelector('link[href*="fonts.googleapis.com/css2"]').href;
+    const css = await (await fetch(href)).text();
+    const blocks = css.split('/* ').filter(b => b.startsWith('latin */')).map(b => b.slice('latin */'.length));
+    const toData = async url => {
+      const blob = await (await fetch(url)).blob();
+      return new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+    };
+    const out = [];
+    for (const b of blocks) {
+      const url = b.match(/url\((https:[^)]+)\)/)[1];
+      out.push(b.replace(url, await toData(url)));
+    }
+    return out.join('\n');
+  }
+  async function render(slide) {
+    await document.fonts.ready;
+    fontCSS ??= await latinFontCSS();
+    const imgs = [...slide.querySelectorAll('.slot img')];
+    await Promise.all(imgs.map(i => i.decode().catch(() => {})));
+    // 캡쳐는 아래에서 캔버스에 직접 그리므로, 변환 동안엔 같은 크기의 투명 픽셀로 바꿔 SVG 에 수백 KB 가 실리지 않게 함
+    const originals = imgs.map(i => ({ i, src: i.src, w: i.style.width, h: i.style.height }));
+    for (const { i } of originals) { i.style.width = i.offsetWidth + 'px'; i.style.height = i.offsetHeight + 'px'; i.src = BLANK; }
+    let canvas;
+    try {
+      canvas = await htmlToImage.toCanvas(slide, {
+        width: slide.offsetWidth, height: slide.offsetHeight, pixelRatio: 1, style: { transform: 'none' }, fontEmbedCSS: fontCSS,
+      });
+    } finally {
+      for (const o of originals) { o.i.src = o.src; o.i.style.width = o.w; o.i.style.height = o.h; }
+      await Promise.all(imgs.map(i => i.decode().catch(() => {})));
+    }
+    const ctx = canvas.getContext('2d');
+    const sr = slide.getBoundingClientRect();
+    const k = slide.offsetWidth / sr.width;               // 미리보기 축소 배율 되돌림
+    for (const img of imgs) {
+      const r = img.getBoundingClientRect(), b = 1.5;       // .slot img 테두리 두께
+      const x = (r.left - sr.left) * k + b, y = (r.top - sr.top) * k + b;
+      const w = r.width * k - 2 * b, h = r.height * k - 2 * b;
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, parseFloat(getComputedStyle(img).borderRadius) - b); ctx.clip();
+      ctx.drawImage(img, x, y, w, h);
+      ctx.restore();
+    }
+    return canvas.toDataURL('image/png');
+  }
+  // 슬라이드 이미지를 브라우저에서 바꾸지 않았으면 미리 만든 PNG 를 바로 내려주고, 바꾼 슬라이드만 그 자리에서 변환
+  async function save(slide) {
+    const keys = [...slide.querySelectorAll('.slot[data-key]')].map(el => el.dataset.key);
+    const pre = (window.RENDERED || {})[slide.dataset.name];
+    const a = document.createElement('a');
+    a.href = pre && !keys.some(k => store.get(k)) ? pre : await render(slide);
+    a.download = slide.dataset.name + '.png'; a.click();
+  }
+  document.querySelectorAll('.slide').forEach(slide => {
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = `<span>${slide.dataset.name}.png</span>`;
+    const b = document.createElement('button');
+    b.className = 'btn'; b.textContent = 'PNG 저장';
+    b.onclick = () => save(slide);
+    meta.appendChild(b);
+    slide.closest('.item').appendChild(meta);
+  });
+  document.querySelectorAll('[data-save-all]').forEach(btn => btn.onclick = async () => {
+    for (const s of document.querySelectorAll(`.slide.${btn.dataset.saveAll}`)) {
+      await save(s);
+      await new Promise(r => setTimeout(r, 400));
+    }
+  });
+
+  // 복사 + X 글자 수 (URL 은 X 기준 23자로 계산)
+  document.querySelectorAll('.copy').forEach(box => {
+    const pre = box.querySelector('pre');
+    box.querySelector('[data-copy]').onclick = e => {
+      navigator.clipboard.writeText(pre.innerText);
+      e.target.textContent = '복사됨'; setTimeout(() => e.target.textContent = '복사', 1200);
+    };
+    const limit = +box.dataset.limit;
+    if (limit) {
+      const text = pre.innerText.replace(/\b[\w-]+\.(com|io|app)\S*/g, 'x'.repeat(23));
+      const n = [...text].length;
+      const small = box.querySelector('header small');
+      small.textContent = `${n} / ${limit}`;
+      small.classList.toggle('over', n > limit);
+    }
+  });
+</script>
+<template id="minigraph"><div class="mg"><svg viewBox="0 0 904 520" width="904" height="520"><line x1="170" y1="270" x2="300" y2="100" stroke="#D6D5D1" stroke-width="2"/><line x1="170" y1="270" x2="80" y2="430" stroke="#D6D5D1" stroke-width="2"/><line x1="170" y1="270" x2="270" y2="450" stroke="#D6D5D1" stroke-width="2"/><line x1="780" y1="115" x2="760" y2="230" stroke="#D6D5D1" stroke-width="2"/><line x1="780" y1="115" x2="560" y2="40" stroke="#D6D5D1" stroke-width="2"/><line x1="700" y1="460" x2="560" y2="340" stroke="#D6D5D1" stroke-width="2"/><line x1="700" y1="460" x2="810" y2="340" stroke="#D6D5D1" stroke-width="2"/><line x1="300" y1="100" x2="760" y2="230" stroke="#2383E2" stroke-width="4.5" stroke-dasharray="12 9" stroke-linecap="round"/><line x1="300" y1="100" x2="560" y2="340" stroke="#2383E2" stroke-width="4.5" stroke-dasharray="12 9" stroke-linecap="round"/></svg><div class="n db" style="left:170px; top:270px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Projects</div><div class="n hot" style="left:300px; top:100px">App v2 Redesign</div><div class="n " style="left:80px; top:430px">Hiring</div><div class="n " style="left:270px; top:450px">Docs Revamp</div><div class="n db" style="left:780px; top:115px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Clients</div><div class="n " style="left:760px; top:230px">Acme Co</div><div class="n " style="left:560px; top:40px">Bright Labs</div><div class="n db" style="left:700px; top:460px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Meeting Notes</div><div class="n " style="left:560px; top:340px">Kickoff</div><div class="n " style="left:810px; top:340px">Weekly Sync</div><div class="rl" style="left:553px; top:172px">↔ Client</div><div class="rl" style="left:443px; top:232px">↔ Meetings</div></div></template>
+<script>/* 표지 미니 그래프 복제 */ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[data-minigraph]').forEach(el => el.prepend(document.getElementById('minigraph').content.cloneNode(true))));</script>
+</body>
+</html>

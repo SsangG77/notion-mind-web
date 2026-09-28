@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Notion-mind profile image</title>
+<style>
+  /* 앱 디자인 토큰 (CLAUDE.md 디자인 시스템) */
+  :root { --accent: #2383E2; --raised: #2E2C27; --node: #FDFDFC; --db: #F4F3EF; --surface: #F7F6F3; --dot: #E9E9E7; }
+  body { margin: 0; padding: 40px; background: #d9d8d4; font-family: -apple-system, sans-serif; color: #37352F; }
+  .row { display: flex; gap: 40px; align-items: flex-start; margin-bottom: 48px; }
+  .pfp { width: 1080px; height: 1080px; flex: none; }
+  .pfp svg { display: block; }
+  .preview { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+  .preview img { border-radius: 50%; display: block; }
+  .preview span { font-size: 14px; color: #6b6a66; }
+  .dl { font: inherit; font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    background: #2383E2; color: #fff; border: 1.5px solid #2E2C27; box-shadow: 3px 3px 0 #2E2C27; }
+
+  /* 시안별 색: 배경, 블록 면, 블록 그림자/테두리, 실선, 점선 */
+  .light { --bg: var(--surface); --face: var(--node); --dbface: var(--db); --edge: var(--raised); --line: var(--raised); --rel: var(--accent); --hot: var(--accent); --stroke: var(--raised); }
+  .blue  { --bg: var(--accent); --face: #FFFFFF; --dbface: #F4F3EF; --edge: var(--raised); --line: var(--raised); --rel: #FFFFFF; --hot: var(--raised); --stroke: var(--raised); }
+  .dark  { --bg: #191919; --face: #2B2A27; --dbface: #35342F; --edge: #000000; --line: #8A8883; --rel: var(--accent); --hot: var(--accent); --stroke: #4A4844; }
+</style>
+</head>
+<body>
+
+<template id="mark">
+  <svg viewBox="0 0 1080 1080" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1080" height="1080" fill="var(--bg)"/>
+    <!-- 삼각 구도: 위 DB, 아래 페이지 둘. 원형 크롭 안을 꽉 채움 -->
+    <!-- 상하위: DB → 왼쪽 페이지 (실선) -->
+    <line x1="470" y1="360" x2="300" y2="740" stroke="var(--line)" stroke-width="20"/>
+    <!-- relation: 왼쪽 페이지 ↔ 오른쪽 페이지 (굵은 점선, 로고의 핵심) -->
+    <line x1="430" y1="745" x2="650" y2="745" stroke="var(--rel)" stroke-width="30" stroke-dasharray="44 30" stroke-linecap="round" stroke-dashoffset="-8"/>
+    <rect x="364" y="244" width="400" height="220" rx="30" fill="var(--edge)"/><rect class="blk" x="340" y="220" width="400" height="220" rx="30" fill="var(--dbface)" stroke="var(--stroke)" stroke-width="16"/>
+    <g transform="translate(398 270)" fill="none" stroke="var(--line)" stroke-width="15" stroke-linecap="round">
+      <ellipse cx="50" cy="18" rx="50" ry="18"/>
+      <path d="M0 18v76c0 10 22 18 50 18s50-8 50-18V18"/>
+      <path d="M0 56c0 10 22 18 50 18s50-8 50-18"/>
+    </g>
+    <rect x="540" y="290" width="130" height="22" rx="11" fill="var(--line)" opacity=".85"/>
+    <rect x="540" y="340" width="86" height="22" rx="11" fill="var(--line)" opacity=".35"/>
+    <rect x="194" y="684" width="260" height="170" rx="30" fill="var(--edge)"/><rect class="blk" x="170" y="660" width="260" height="170" rx="30" fill="var(--face)" stroke="var(--stroke)" stroke-width="16"/>
+    <rect x="215" y="722" width="150" height="22" rx="11" fill="var(--line)" opacity=".5"/>
+    <rect x="674" y="684" width="260" height="170" rx="30" fill="var(--hot)"/><rect class="blk hot" x="650" y="660" width="260" height="170" rx="30" fill="var(--face)" stroke="var(--hot)" stroke-width="16"/>
+    <rect x="695" y="722" width="150" height="22" rx="11" fill="var(--line)" opacity=".5"/>
+  </svg>
+</template>
+
+<div class="row"><div class="pfp light" data-name="profile-light"></div><div class="preview" data-for="profile-light"></div></div>
+<div class="row"><div class="pfp blue" data-name="profile-blue"></div><div class="preview" data-for="profile-blue"></div></div>
+<div class="row"><div class="pfp dark" data-name="profile-dark"></div><div class="preview" data-for="profile-dark"></div></div>
+
+<script>
+  const tpl = document.getElementById('mark');
+  document.querySelectorAll('.pfp').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
+  // 단독 SVG 는 CSS 변수를 못 읽으므로 계산된 색으로 치환한 data URL
+  function svgUrl(name) {
+    const host = document.querySelector(`[data-name="${name}"]`);
+    const cs = getComputedStyle(host);
+    const src = new XMLSerializer().serializeToString(host.querySelector('svg')).replace(/var\((--[\w-]+)\)/g, (_, v) => cs.getPropertyValue(v).trim());
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+  }
+  // PNG 다운로드: SVG 를 1080 캔버스에 그려 저장
+  function download(name) {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 1080;
+      c.getContext('2d').drawImage(img, 0, 0, 1080, 1080);
+      const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = name + '.png'; a.click();
+    };
+    img.src = svgUrl(name);
+  }
+  // 원형 크롭 미리보기: 인스타 프로필(110), 인스타 피드(32), X 타임라인(48), 레딧(64)
+  document.querySelectorAll('.preview').forEach(p => {
+    const url = svgUrl(p.dataset.for);
+    const btn = document.createElement('button');
+    btn.className = 'dl'; btn.textContent = p.dataset.for + '.png 다운로드';
+    btn.onclick = () => download(p.dataset.for);
+    p.appendChild(btn);
+    [[220, '원형 크롭'], [110, '인스타 프로필 110px'], [64, '레딧 64px'], [48, 'X 타임라인 48px'], [32, '인스타 피드 32px']].forEach(([size, label]) => {
+      p.insertAdjacentHTML('beforeend', `<img src="${url}" width="${size}" height="${size}" alt=""><span>${label}</span>`);
+    });
+  });
+</script>
+</body>
+</html>
