@@ -34,7 +34,7 @@ export default function PageCountChip({
         <span className="text-[11px]">
           <b>{nodeCount.toLocaleString()}</b>
           <span className="text-[#91908C]">
-            {pro ? " 페이지, Pro" : ` / ${FREE_LIMIT.toLocaleString()} 페이지`}
+            {pro ? " 페이지" : ` / ${FREE_LIMIT.toLocaleString()} 페이지`}
           </span>
         </span>
         {!pro && (
@@ -47,7 +47,11 @@ export default function PageCountChip({
         )}
       </span>
       {/* Free 는 개수와 무관하게 항상 노출 — 상한 체감 전에도 Pro 를 보게 */}
-      {!pro && <span className="shrink-0 text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>}
+      {pro ? (
+        <span data-testid="page_count_unlimited" className="shrink-0 text-[10px] font-bold text-[#2383E2]">무제한</span>
+      ) : (
+        <span className="shrink-0 text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>
+      )}
     </Link>
   );
 }

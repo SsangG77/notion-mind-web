@@ -127,7 +127,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
               {yearly
                 ? `월 $${(PRO_PRICE.yearly / 12).toFixed(0)} 꼴, 연 1회 결제`
                 : "매월 자동 갱신, 언제든 해지"}
-              , 세금 별도
+              , 부가세 포함
             </span>
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
