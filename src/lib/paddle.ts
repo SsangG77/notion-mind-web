@@ -7,7 +7,7 @@ export const PADDLE_ENV = (process.env.NEXT_PUBLIC_PADDLE_ENV ?? "sandbox") as "
 // 카탈로그 가격 ID — scripts/seed-paddle-catalog.ts 가 만든 값. 환경별로 다름.
 export const PRICE_IDS = {
   production: {
-    monthly: "pri_01m3f78ngzhmpa83g1hzyhg24y",
+    monthly: "pri_01m3pqh2v852ywseg77pjsjh5n",
     yearly: "pri_01m3f78ns67kg3m9wf0j4abjhd",
   },
   sandbox: {

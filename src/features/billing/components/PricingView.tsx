@@ -19,7 +19,9 @@ const FREE_FEATURES = [
 ];
 
 // Pro 가격 — Paddle 카탈로그와 반드시 일치시킬 것(심사 항목). 통화 USD, 세금은 결제 화면에서 별도 계산
-const PRO_PRICE = { monthly: 5, yearly: 48 } as const;
+const PRO_PRICE = { monthly: 7, yearly: 48 } as const;
+// 연간 할인율 표시 — 월 결제 12번 대비
+const YEARLY_DISCOUNT = Math.round((1 - PRO_PRICE.yearly / (PRO_PRICE.monthly * 12)) * 100);
 
 const PRO_FEATURES = [
   "노드 무제한",
@@ -82,7 +84,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
           onClick={() => setYearly(true)}
           className={`px-4 py-1.5 ${yearly ? "bg-[#F4F3EF] font-semibold dark:bg-[#35342F]" : "text-[#91908C]"}`}
         >
-          연간 <span className="text-[10px] text-[#2383E2]">20% 할인</span>
+          연간 <span className="text-[10px] text-[#2383E2]">{YEARLY_DISCOUNT}% 할인</span>
         </button>
       </div>
 

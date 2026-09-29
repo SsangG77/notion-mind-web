@@ -80,7 +80,7 @@ const FAQ = [
   },
   {
     q: "무료로 쓸 수 있나요?",
-    a: "Free 요금제는 최근 수정순 페이지 1,000개까지, 그래프 기능 전부, 광고 표시 조건으로 무료입니다. Pro는 월 $5 또는 연 $48이며 결제 후 14일 이내 전액 환불됩니다.",
+    a: "Free 요금제는 최근 수정순 페이지 1,000개까지, 그래프 기능 전부, 광고 표시 조건으로 무료입니다. Pro는 월 $7 또는 연 $48이며 결제 후 14일 이내 전액 환불됩니다.",
   },
   {
     q: "연결을 끊으려면?",
@@ -162,7 +162,7 @@ export default function LandingContent() {
           <div className={`${CARD} border-[#2383E2] shadow-[3px_3px_0_#2383E2] dark:border-[#2383E2]`}>
             <h3 className="font-semibold">Pro</h3>
             <p className="mt-1 text-2xl font-bold">
-              $5<span className="text-sm font-normal text-[#91908C]"> / 월, 연 $48</span>
+              $7<span className="text-sm font-normal text-[#91908C]"> / 월, 연 $48</span>
             </p>
             <p className="mt-2 text-sm leading-relaxed text-[#5F5E5A] dark:text-[#B8B7B2]">
               페이지 수 제한 없이(20,000개), 숨김과 핀 영구 저장, 광고 없음. 결제 후 14일 이내 전액 환불.

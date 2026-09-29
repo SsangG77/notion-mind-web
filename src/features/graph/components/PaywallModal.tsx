@@ -41,7 +41,7 @@ export default function PaywallModal({ onClose }: { onClose: () => void }) {
             href="/pricing"
             className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-center text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] dark:border-black dark:shadow-[3px_3px_0_#000]`}
           >
-            월 $5 부터 — 요금제 보기
+            월 $7 부터 — 요금제 보기
           </Link>
           <button
             data-testid="paywall_close_button"
