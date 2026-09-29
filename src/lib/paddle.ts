@@ -11,8 +11,8 @@ export const PRICE_IDS = {
     yearly: "pri_01m3f78ns67kg3m9wf0j4abjhd",
   },
   sandbox: {
-    monthly: process.env.NEXT_PUBLIC_PADDLE_SANDBOX_PRICE_MONTHLY ?? "",
-    yearly: process.env.NEXT_PUBLIC_PADDLE_SANDBOX_PRICE_YEARLY ?? "",
+    monthly: "pri_01m3pr2skwg5q66vxb3rr930wk",
+    yearly: "pri_01m3pr2da5abpgjejabx0azfk5",
   },
 }[PADDLE_ENV];
 

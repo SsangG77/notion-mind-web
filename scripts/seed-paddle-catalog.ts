@@ -4,7 +4,9 @@
 import { Environment, Paddle } from "@paddle/paddle-node-sdk";
 
 const env = process.env.PADDLE_ENV === "production" ? Environment.production : Environment.sandbox;
-const paddle = new Paddle(process.env.PADDLE_API_KEY!, { environment: env });
+// 샌드박스는 별도 계정 — 키도 별도(PADDLE_SANDBOX_API_KEY)
+const key = env === Environment.production ? process.env.PADDLE_API_KEY : (process.env.PADDLE_SANDBOX_API_KEY ?? process.env.PADDLE_API_KEY);
+const paddle = new Paddle(key!, { environment: env });
 
 async function seed() {
   const existing = await paddle.products.list({ include: ["prices"] }).next();

@@ -5,7 +5,9 @@ import { Environment, Paddle } from "@paddle/paddle-node-sdk";
 
 const env = process.env.PADDLE_ENV === "production" ? Environment.production : Environment.sandbox;
 const destination = process.env.WEBHOOK_URL ?? "https://notion-mind.com/api/billing/webhook";
-const paddle = new Paddle(process.env.PADDLE_API_KEY!, { environment: env });
+// 샌드박스는 별도 계정 — 키도 별도(PADDLE_SANDBOX_API_KEY)
+const key = env === Environment.production ? process.env.PADDLE_API_KEY : (process.env.PADDLE_SANDBOX_API_KEY ?? process.env.PADDLE_API_KEY);
+const paddle = new Paddle(key!, { environment: env });
 
 async function main() {
   const existing = await paddle.notificationSettings.list();
@@ -20,7 +22,8 @@ async function main() {
     type: "url",
     subscribedEvents: ["subscription.created", "subscription.updated", "subscription.canceled"],
   });
-  appendFileSync(".env", `\nPADDLE_WEBHOOK_SECRET=${created.endpointSecretKey}\n`);
+  const varName = env === Environment.production ? "PADDLE_WEBHOOK_SECRET" : "PADDLE_SANDBOX_WEBHOOK_SECRET";
+  appendFileSync(".env", `\n${varName}=${created.endpointSecretKey}\n`);
   console.log(JSON.stringify({ env, id: created.id, destination, secretWrittenTo: ".env" }, null, 2));
 }
 
