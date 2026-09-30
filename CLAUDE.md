@@ -41,7 +41,7 @@ src/
 - 점진 로딩: /api/graph 가 커서 배치(100개) 단위 응답 → 클라이언트가 반복 수신하며 그래프 실시간 성장, "페이지 N개 읽는 중" 진행 표시
 - 화면 모서리 배치(2026-09-19, 캔버스 앱 관례 따름 — 전용 헤더 줄 없음): 좌상단 = `⚙ Notion-mind` 박스(앱 이름 겸 설정 버튼) + 검색+필터 통합 블록(구분선으로 분리, Filters/Groups/Display/Forces 골격) / 우상단 = 페이지 수 박스(N/1,000 게이지 + Free 는 항상 "Pro로 전체 보기" 문구, 클릭 시 /pricing) / 좌하단 = 다크 스위치 / 우하단 = 줌 컨트롤. 전부 노드 박스 스타일
 - 설정 패널: 좌측 슬라이드 인·아웃 + 배경 딤. 상단에 워크스페이스 이름(구 헤더가 표시하던 값) · 요금제(→/pricing) · 연결된 페이지 변경(OAuth 재인증으로 페이지 재선택) · 수동 동기화 · 광고 제거/자동 동기화 Pro 스위치(누르면 페이월) · 로그아웃(빨간 텍스트+확인) · 맨 아래 그래프 범례. 높이는 좌하단 다크 스위치 위에서 끝남(bottom 116px)
-- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글. Pro 월 $7 / 연 $48 (USD, 부가세 포함 — `PRO_PRICE`, Paddle 카탈로그 `pri_` ID 는 `lib/paddle.ts` PRICE_IDS 와 일치해야 함). 구독 버튼 = Paddle.js 오버레이(`features/billing/hooks/usePaddle`), `customData.workspace_id` 로 유저 연결. 결제 후 `?checkout=success` 로 돌아와 `/api/billing/status` 폴링 → Pro 반영되면 새로고침
+- 요금제 화면 `/pricing`: Free/Pro 카드 + 월·연 토글(기본 **연간** — 이탈률이 낮아 연간을 앞세움, "연 $36 절약" 배지). Pro 월 $7 / 연 $48 (USD, 부가세 포함 — `PRO_PRICE`, Paddle 카탈로그 `pri_` ID 는 `lib/paddle.ts` PRICE_IDS 와 일치해야 함). 구독 버튼 = Paddle.js 오버레이(`features/billing/hooks/usePaddle`), `customData.workspace_id` 로 유저 연결. 결제 후 `?checkout=success` 로 돌아와 `/api/billing/status` 폴링 → Pro 반영되면 새로고침
 - 노드 상세 패널: 노드 클릭 시 우측 슬라이드 인(설정 패널과 같은 노드 박스 디자인, 딤 없음 — 그래프는 계속 조작 가능). 소속·속성·마지막 수정·관계형 연결·하위·본문 미리보기(24줄) · 하단 "노션에서 열기" + Free 광고 배너. 칩을 누르면 그 노드로 카메라 이동 + 선택 이동. 닫기는 X·ESC·빈 영역 클릭 모두 같은 슬라이드 아웃 경로(빈 영역 클릭은 닫기 요청 카운터로 패널에 전달)
 - 노드 조작: 드래그 = 스프링 물리(2홉 이웃 딸려오기, 핀 제외, 놓으면 출렁이며 정착 후 겹침 분리) · 우클릭 메뉴(숨기기·핀 고정/해제) · 하단 노드 박스 칩 2개 "숨긴 노드 N개, 모두 표시" / "숨긴 목록 보기"(→ 좌측 슬라이드 `HiddenNodesPanel`, 설정 패널과 같은 자리, 딤 없음, 항목별 "표시" 버튼 + 모두 표시. 칩 재클릭으로 닫힘). 좌측 패널은 한 번에 하나 — `lib/leftPanel.ts` 모듈 스토어(settings/hidden/null)로 조정, 설정을 열면 숨긴 목록이 슬라이드 아웃(애니메이션 끝 `onAnimationEnd` 에서 언마운트)
 - 호버 포커스(옵시디언식): 중심+이웃만 선명(호버 레이어 최상단), 나머지 노드 15% 반투명·비연결 선은 배경 근접 고스트색·배경 베일(라이트 7%/다크 35%)
@@ -67,7 +67,8 @@ src/
 - Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
 - 카탈로그·웹훅·토큰 스크립트: `scripts/seed-paddle-catalog.ts`, `add-paddle-price.ts <month|year> <달러>`(새 가격 만들고 `PRICE_IDS` 자동 교체), `register-paddle-webhook.ts`, `create-paddle-client-token.ts`. 기본 sandbox, `PADDLE_ENV=production` 이면 라이브(라이브 쓰기는 사용자가 `!` 로 직접 실행). 샌드박스 가격: 월 $7 pri_01m3pr2skwg5q66vxb3rr930wk / 연 $48 pri_01m3pr2da5abpgjejabx0azfk5, 웹훅 ntfset_01m3pr2vrrj026xa0zdr2we764
 - 노드 상한: Free 1,000 / Pro 20,000 (`assembleGraph` limit, `useGraphData(plan)`). 클라이언트는 상한+1 배치까지 요청(초과 감지), 서버 `/api/graph` 는 배치 번호 `i` 가 Free 상한을 넘으면 요금제 확인 후 빈 응답 — 클라이언트 조작만으로는 더 못 받음
-- 구독 관리: `/api/billing/portal` 이 Paddle 고객 포털 세션(customer_id + subscription_id)을 만들어 리디렉션. 설정 패널(Pro 만)과 요금제 화면 Pro 카드에서 진입
+- 구독 관리: `ManageSubscriptionButton`(설정 패널 Pro 행, 요금제 화면 Pro 카드) → 만류 모달(잃는 것 안내) → 해지 사유(선택, 건너뛰기 가능) → `/api/billing/portal` 이 Paddle 고객 포털 세션을 만들어 새 탭으로. 사유는 `/api/billing/feedback` → Supabase `cancellation_feedback`
+- ⚠️ 해지 자체는 막을 수 없음 — Paddle 이 모든 구독 메일에 해지 링크를 넣고(규정), 구매자는 paddle.net 에서 직접 해지·환불 요청 가능. 약관 제10조와 EU 철회권상으로도 승인제 불가. 이탈 대응은 만류 화면·연간 유도·사유 수집까지
 - Pro 영구 설정: Supabase `workspace_settings`(workspace_id PK, hidden jsonb string[], pinned jsonb {id:{x,y}}). `/api/settings` GET(Free 는 빈 값)/PUT(Pro 만, 20,000개 상한). 클라이언트 `useWorkspaceSettings(plan)` — 로드 후 `saved` 를 LayoutManager 에 넘겨 노드 추가 시 hidden/pinned+좌표 적용(로드 전엔 노드 추가 보류), 숨김/핀/핀 드래그/모두 표시 뒤 `persist(graph)` 가 그래프에서 읽어 800ms 디바운스 PUT. 필터는 UI 골격만 있어 저장 대상 없음
 - 아직 없음: 자동 동기화, 이미지 내보내기, 필터 실기능
 

@@ -8,6 +8,7 @@ import NotionDisclaimer from "@/components/NotionDisclaimer";
 import { PRICE_IDS } from "@/lib/paddle";
 import type { Plan } from "@/lib/billing";
 import { usePaddle } from "../hooks/usePaddle";
+import ManageSubscriptionButton from "./ManageSubscriptionButton";
 
 const FREE_FEATURES = [
   "노드 1,000개 (최근 수정순)",
@@ -20,8 +21,9 @@ const FREE_FEATURES = [
 
 // Pro 가격 — Paddle 카탈로그와 반드시 일치시킬 것(심사 항목). 통화 USD, 세금은 결제 화면에서 별도 계산
 const PRO_PRICE = { monthly: 7, yearly: 48 } as const;
-// 연간 할인율 표시 — 월 결제 12번 대비
+// 연간 할인 — 월 결제 12번 대비. 연간이 기본 선택(이탈률이 낮아 연간을 앞세운다)
 const YEARLY_DISCOUNT = Math.round((1 - PRO_PRICE.yearly / (PRO_PRICE.monthly * 12)) * 100);
+const YEARLY_SAVING = PRO_PRICE.monthly * 12 - PRO_PRICE.yearly;
 
 const PRO_FEATURES = [
   "노드 무제한",
@@ -34,7 +36,7 @@ const PRO_FEATURES = [
 
 /** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
 export default function PricingView({ plan, workspaceId }: { plan: Plan; workspaceId?: string }) {
-  const [yearly, setYearly] = useState(false);
+  const [yearly, setYearly] = useState(true);
   const { ready, openCheckout } = usePaddle();
   const router = useRouter();
   const params = useSearchParams();
@@ -129,6 +131,11 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
                 : "매월 자동 갱신, 언제든 해지"}
               , 부가세 포함
             </span>
+            {yearly && (
+              <span className="mt-1 inline-block rounded-full bg-[#2383E2] px-2 py-0.5 text-[10px] font-semibold text-white">
+                월 결제보다 연 ${YEARLY_SAVING} 절약
+              </span>
+            )}
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
             {PRO_FEATURES.map((f) => (
@@ -139,15 +146,11 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
             ))}
           </ul>
           {isPro ? (
-            <a
-              data-testid="manage_subscription_button"
-              href="/api/billing/portal"
-              target="_blank"
-              rel="noopener"
+            <ManageSubscriptionButton
               className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2.5 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000]`}
             >
-              구독 관리 ↗
-            </a>
+              구독 관리
+            </ManageSubscriptionButton>
           ) : workspaceId ? (
             <button
               data-testid="pricing_subscribe_button"

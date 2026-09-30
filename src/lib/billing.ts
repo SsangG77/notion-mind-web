@@ -72,3 +72,13 @@ export async function putWorkspaceSettings(workspaceId: string, s: WorkspaceSett
     .upsert({ workspace_id: workspaceId, ...s, updated_at: new Date().toISOString() }, { onConflict: "workspace_id" });
   if (error) throw new Error(`workspace_settings upsert failed: ${error.message}`);
 }
+
+// ---------- 해지 사유 ----------
+
+/** 해지 만류 화면에서 받은 응답. 선택 사항이며 해지를 막지 않는다 */
+export async function saveCancellationFeedback(workspaceId: string, reason: string | null, detail: string | null) {
+  const { error } = await supabaseAdmin()
+    .from("cancellation_feedback")
+    .insert({ workspace_id: workspaceId, reason, detail });
+  if (error) throw new Error(`cancellation_feedback insert failed: ${error.message}`);
+}

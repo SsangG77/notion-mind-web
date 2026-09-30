@@ -5,6 +5,7 @@ import Link from "next/link";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import ManageSubscriptionButton from "@/features/billing/components/ManageSubscriptionButton";
 import type { Plan } from "@/lib/billing";
 
 const ROW =
@@ -111,19 +112,13 @@ export default function SettingsPanel({
             </span>
           </Link>
           {plan === "pro" && (
-            <a
-              data-testid="manage_subscription_row"
-              href="/api/billing/portal"
-              target="_blank"
-              rel="noopener"
-              className={`${ROW} hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
-            >
+            <ManageSubscriptionButton className={`${ROW} w-full text-left hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}>
               <span>
                 구독 관리
                 <span className="mt-0.5 block text-[10px] text-[#91908C]">해지, 결제 수단 변경, 영수증</span>
               </span>
-              <span className="text-[#91908C]">↗</span>
-            </a>
+              <span className="text-[#91908C]">›</span>
+            </ManageSubscriptionButton>
           )}
           <div className={ROW}>
             <span>
