@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
-import { DICT, LANG_COOKIE, legalPath, pickLang } from "@/lib/i18n";
+import { DICT, legalPath } from "@/lib/i18n";
+import { currentLang } from "@/lib/lang.server";
 import LandingContent from "@/features/landing/components/LandingContent";
 
 // 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
@@ -46,7 +47,7 @@ export default async function Home({
   const { error } = await searchParams;
   const jar = await cookies();
   if (jar.get("nm_token")?.value) redirect("/graph");
-  const lang = pickLang(jar.get(LANG_COOKIE)?.value);
+  const lang = await currentLang();
   const t = DICT[lang];
 
   return (

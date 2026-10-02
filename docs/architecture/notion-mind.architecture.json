@@ -1,0 +1,404 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Notion-mind 런타임 아키텍처",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1240,
+      650
+    ],
+    "repository": {
+      "url": "https://github.com/SsangG77/notion-mind-web",
+      "provider": "github",
+      "revision": "2662d393292ef1cb43cd86307dc1e3c8c4bbbdef"
+    },
+    "views": [
+      {
+        "id": "graph-load",
+        "label": "그래프 로딩 경로",
+        "focus": [
+          "browser",
+          "api",
+          "crypto",
+          "notionlib",
+          "notion"
+        ],
+        "note": "브라우저가 커서 배치 단위로 /api/graph 를 반복 호출하고, 서버는 쿠키 토큰을 복호화해 노션 search 를 중계한다."
+      },
+      {
+        "id": "auth",
+        "label": "노션 OAuth 인증",
+        "focus": [
+          "pages",
+          "api",
+          "notionlib",
+          "notion",
+          "crypto",
+          "cookie"
+        ],
+        "note": "로그인 → 노션 승인 → 콜백에서 토큰 교환 → AES-256-GCM 암호화 → httpOnly 쿠키. 자체 계정·DB 없음."
+      },
+      {
+        "id": "planned",
+        "label": "미구현 (env 키만 존재)",
+        "focus": [
+          "api",
+          "supabase",
+          "stripe"
+        ],
+        "note": "Supabase·Stripe 는 .env.example 에 키 이름만 있고 호출 코드가 없다. 배포 대상도 미정."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "그래프 화면",
+      "sublabel": "Sigma.js WebGL · d3-force",
+      "pos": [
+        40,
+        296
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/features/graph/components/GraphView.tsx",
+          "label": "GraphView"
+        },
+        {
+          "path": "src/features/graph/lib/simulation.ts",
+          "label": "simulation"
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "localStorage",
+      "sublabel": "뷰포트 · 테마",
+      "pos": [
+        40,
+        516
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/features/graph/components/ViewportMemory.tsx"
+        },
+        {
+          "path": "src/features/graph/hooks/useTheme.ts"
+        }
+      ]
+    },
+    {
+      "id": "pages",
+      "type": "frontend",
+      "label": "페이지 라우트 (RSC)",
+      "sublabel": "/ · /graph · /pricing",
+      "brand": "next-js",
+      "pos": [
+        360,
+        76
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/app/page.tsx",
+          "label": "로그인"
+        },
+        {
+          "path": "src/app/graph/page.tsx",
+          "label": "그래프"
+        },
+        {
+          "path": "src/app/pricing/page.tsx",
+          "label": "요금제"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Route Handlers",
+      "sublabel": "auth · graph · node",
+      "brand": "next-js",
+      "pos": [
+        360,
+        296
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/graph/route.ts",
+          "label": "graph"
+        },
+        {
+          "path": "src/app/api/auth/callback/route.ts",
+          "label": "callback"
+        },
+        {
+          "path": "src/app/api/node/[id]/route.ts",
+          "label": "node"
+        }
+      ]
+    },
+    {
+      "id": "crypto",
+      "type": "security",
+      "label": "토큰 암호화",
+      "sublabel": "AES-256-GCM",
+      "pos": [
+        360,
+        516
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/lib/crypto.ts"
+        }
+      ]
+    },
+    {
+      "id": "cookie",
+      "type": "security",
+      "label": "세션 쿠키",
+      "sublabel": "nm_token · httpOnly 30일",
+      "pos": [
+        680,
+        76
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/auth/callback/route.ts",
+          "line": 22,
+          "end_line": 37
+        }
+      ]
+    },
+    {
+      "id": "notionlib",
+      "type": "backend",
+      "label": "노션 Service",
+      "sublabel": "OAuth · search · 상세",
+      "pos": [
+        680,
+        296
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "src/lib/notion.ts"
+        }
+      ]
+    },
+    {
+      "id": "supabase",
+      "type": "database",
+      "label": "Supabase",
+      "sublabel": "호출 코드 없음",
+      "tag": "미구현",
+      "brand": "supabase",
+      "pos": [
+        680,
+        516
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": ".env.example",
+          "line": 6,
+          "end_line": 9
+        }
+      ]
+    },
+    {
+      "id": "notion",
+      "type": "external",
+      "label": "Notion API",
+      "sublabel": "search · pages · blocks",
+      "brand": "notion",
+      "pos": [
+        1000,
+        296
+      ],
+      "size": [
+        200,
+        72
+      ]
+    },
+    {
+      "id": "stripe",
+      "type": "external",
+      "label": "Stripe",
+      "sublabel": "호출 코드 없음 · 연결 없음",
+      "tag": "미구현",
+      "brand": "stripe",
+      "pos": [
+        1000,
+        516
+      ],
+      "size": [
+        200,
+        72
+      ],
+      "sources": [
+        {
+          "path": ".env.example",
+          "line": 14,
+          "end_line": 17
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "브라우저",
+      "wraps": [
+        "browser",
+        "storage"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "Next.js 서버 (배포 대상 미정)",
+      "wraps": [
+        "pages",
+        "api",
+        "crypto",
+        "cookie",
+        "notionlib",
+        "supabase"
+      ],
+      "pad": 24
+    }
+  ],
+  "connections": [
+    {
+      "id": "browser-pages",
+      "from": "browser",
+      "to": "pages",
+      "label": "GET / · /graph",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelSegment": 1
+    },
+    {
+      "id": "pages-cookie",
+      "from": "pages",
+      "to": "cookie",
+      "label": "nm_token 검사"
+    },
+    {
+      "id": "browser-api",
+      "from": "browser",
+      "to": "api",
+      "label": "/api/graph · /api/node",
+      "variant": "emphasis",
+      "labelDy": 30
+    },
+    {
+      "id": "api-crypto",
+      "from": "api",
+      "to": "crypto",
+      "label": "decrypt",
+      "labelDy": 24,
+      "labelDx": -34
+    },
+    {
+      "id": "api-cookie",
+      "from": "api",
+      "to": "cookie",
+      "label": "콜백: Set-Cookie",
+      "labelSegment": 1
+    },
+    {
+      "id": "api-notionlib",
+      "from": "api",
+      "to": "notionlib",
+      "label": "search · detail 중계",
+      "variant": "emphasis",
+      "labelDy": 30
+    },
+    {
+      "id": "notionlib-notion",
+      "from": "notionlib",
+      "to": "notion",
+      "label": "HTTPS Bearer",
+      "variant": "emphasis"
+    },
+    {
+      "id": "browser-storage",
+      "from": "browser",
+      "to": "storage",
+      "label": "저장 · 복원",
+      "labelDy": 24
+    },
+    {
+      "id": "api-supabase",
+      "from": "api",
+      "to": "supabase",
+      "label": "계획: 영구 저장",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "데이터 흐름",
+      "items": [
+        "/api/graph 가 노션 search 를 커서 배치(100개)로 중계 — 클라이언트가 반복 호출해 점진 조립",
+        "노드 클릭 시 /api/node/:id 가 pages·data_sources·blocks 를 읽어 상세 패널에 전달",
+        "배치·핀·숨김 상태는 서버 저장 없음 — 세션 한정"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "인증·보안",
+      "items": [
+        "노션 OAuth 단일 — 자체 계정 없음",
+        "액세스 토큰은 AES-256-GCM 암호화 후 httpOnly 쿠키(30일)에만 보관",
+        "OAuth state 는 10분 쿠키로 CSRF 검사 · Notion-Version 2026-03-11"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "미구현 · 미정",
+      "items": [
+        "Supabase·Stripe 는 .env.example 에 키 이름만 — 호출 코드 없음, Stripe 는 연결선 없음",
+        "광고 배너는 플레이스홀더(네트워크 미정)",
+        "배포 대상 미정 (Vercel 유력)"
+      ]
+    }
+  ]
+}

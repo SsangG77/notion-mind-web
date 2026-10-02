@@ -1,0 +1,97 @@
+# Notion-mind guide
+
+Notion-mind is a web tool that lays the pages and databases of your Notion workspace out as a single node graph. Inside Notion, pages only ever appear as a folder tree; the real workspace is a web of database membership, nested subpages, and relation properties pointing sideways. This guide walks from first sign-in through reading and handling the graph.
+
+## 1. Getting started: sign in with Notion
+
+There is no separate signup. Press "Continue with Notion" on the first screen and Notion's own consent page opens.
+
+1. Sign in to Notion. If your browser is already signed in, this step is skipped.
+2. Choose a workspace. If you belong to several, pick the one you want to see as a graph.
+3. Choose which pages to share. "All pages" brings the whole workspace; picking specific pages brings only those and their subpages.
+4. Press "Allow access" and you land back in Notion-mind with the graph open.
+
+The permission Notion-mind receives is read-only. It never changes a page and never creates one. You can withdraw the access at any time from "Connected apps" in your Notion settings.
+
+## 2. Reading the first screen
+
+Right after sign-in you see "Reading your workspace", and the graph grows live as pages arrive a hundred at a time. A large workspace can take tens of seconds to finish, and a "Reading N pages" indicator sits at the top meanwhile.
+
+The graph has three kinds of thing in it.
+
+- **Nodes (blocks)**: one page is one white block. Databases are a slightly darker grey block with a disc icon. Long titles wrap to two lines and clip; hovering expands the block to show the whole title.
+- **Solid lines**: membership. The line joining a database to a page inside it is black; the line joining a page to a subpage or database nested in it is grey.
+- **Dotted lines**: pages connected through a database relation property. These sideways links are the ones a tree view never shows.
+
+A physics simulation decides the layout. A database with many children gets them arranged in concentric rings around it, and pages with no connections drift outward. Nodes wobbling for the first few seconds before settling is normal.
+
+## 3. Moving around
+
+### Panning and zooming
+
+- Drag empty space to move the view.
+- Zoom with the scroll wheel or a trackpad pinch. The controls at the bottom right also give you plus and minus buttons and a vertical slider, and the bottom button returns you to 100%.
+- Zoom far enough out and blocks collapse into small squares so you can read the overall shape. Zoom back in and the titles return.
+- The last camera position and zoom are remembered in your browser, so you start where you left off.
+
+### Hovering
+
+Hover a node and only it and its direct neighbours stay sharp; everything else fades. The connecting lines turn blue. Use it to see at a glance where a particular page is entangled.
+
+### Dragging nodes
+
+Nodes can be dragged. Neighbours follow on springs, and when you let go everything wobbles and settles again. If you want a specific arrangement, pin the node in place as described below.
+
+### Right-click menu: hide and pin
+
+Right-click a node for a menu.
+
+- **Hide**: removes the node from the graph. Useful for clearing away pages you do not care about. While anything is hidden, two chips appear at the bottom of the screen: "N hidden, show all" and "View hidden". The list lets you bring back individual nodes.
+- **Pin**: the physics simulation stops moving that node. It stays exactly where you dropped it. Right-click again and choose "Unpin" to release it.
+
+On the Free plan, hidden nodes and pins last only for the current browser session and reset on refresh. On Pro they are stored on the server and come back on your next visit and on other devices.
+
+## 4. The node detail panel
+
+Click a node and a detail panel slides in from the right. The graph stays usable while it is open.
+
+- Where the node lives (which database or page contains it)
+- Database property values
+- Last edited time
+- Related pages and subpages. Clicking any of them flies the camera to that node.
+- A body preview (first 24 lines)
+- An "Open in Notion" button
+
+Close it with the X, the ESC key, or by clicking empty space in the graph.
+
+## 5. Search and settings
+
+Type part of a title into the search box at the top left and the view jumps to the matching node.
+
+The "Notion-mind" logo box at the top left is the settings button. Opening it gives you:
+
+- The name of the connected workspace
+- Your plan, and the way to subscribe or manage a subscription
+- Connected pages: returns you to Notion's consent screen to change which pages are shared
+- Sync now: re-reads the graph after you have added or moved pages in Notion. The last sync time is shown.
+- Language: Korean or English for the whole interface
+- Sign out
+
+The switch at the bottom left toggles light and dark mode. It follows your system setting to begin with.
+
+## 6. Plans
+
+- **Free**: shows up to 1,000 pages, most recently edited first. Every graph feature works, and an ad sits at the bottom of the screen. The page-count box at the top right shows where you are against the limit.
+- **Pro**: no practical page limit (20,000), hidden nodes and pins stored for good, and no ads. $7 a month or $48 a year, fully refundable within 14 days of payment. See the [pricing page](/pricing) and the [refund policy](/eu/refund) for details.
+
+## 7. Disconnecting and your data
+
+Notion-mind does not store your workspace content on a server. It reads the titles, properties and relations the graph needs from Notion and passes them straight to your browser. Signing out deletes the access token held in your browser, and removing Notion-mind under "Connected apps" in Notion blocks access completely. The [privacy notice](/eu/privacy) has the full detail.
+
+## 8. When something goes wrong
+
+- **Only a few pages appear**: most likely you shared only some pages on Notion's consent screen. Use "Connected pages" in settings to choose again.
+- **A page you just made is missing**: press "Sync now" in settings. Notion's search API takes a few seconds to pick up brand new pages.
+- **"Could not open page" or a sign-in error**: if your browser blocks cookies, the session cannot be kept. Allow cookies for notion-mind.com and try again.
+- **The screen looks frozen**: a workspace with thousands of pages takes a while on the first batch. Wait for the progress indicator at the top to disappear.
+- Anything else: write to sangjincha719@gmail.com.

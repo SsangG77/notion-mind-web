@@ -79,11 +79,12 @@ src/
 
 ## 화면 언어 (2026-10-02)
 - 한국어/영어 전환. 설정 패널 "언어" 줄에서 고르고, 쿠키 `nm_lang` 하나로 서버 컴포넌트와 클라이언트가 같은 값을 본다(기본 ko). 전환은 쿠키 쓰고 `router.refresh()`
-- 문구는 `lib/i18n.ts` 사전(앱 UI) + `features/landing/content.ts`(홈 소개 분량이 커서 분리). 클라이언트는 `features/i18n/LangProvider` 의 `useT()`, 서버 컴포넌트는 쿠키를 직접 읽어 `DICT[lang]`
+- 문구는 `lib/i18n.ts` 사전(앱 UI) + `features/landing/content.ts`(홈 소개) + `content/docs/{guide,faq}.{ko,en}.mdx`(문서는 두 벌을 정적 import 하고 언어로 고름). 클라이언트는 `features/i18n/LangProvider` 의 `useT()`, 서버 컴포넌트는 `lib/lang.server.ts` 의 `currentLang()`
+- 쿠키가 없는 첫 방문은 `Accept-Language` 헤더로 정함 — 서버에서 결정하므로 깜빡임 없음. 로그인 전에는 설정 패널이 없으니 이 자동 판정이 유일한 경로
 - trade-off: `/ko` `/en` 접두사를 쓰는 정식 i18n 라우팅 대신 쿠키 — URL·노션 OAuth 콜백·법률 문서 경로를 그대로 둔다. 대신 언어별 URL 공유·검색 노출은 안 됨
 - 법률 문서는 제 로케일을 유지(한국어판 `/privacy` 는 앱이 영어여도 한국어). `ArticleShell lang` 으로 면책 문구까지 문서 언어를 따름. 앱 언어에 맞는 약관 경로는 `legalPath(lang, doc)`
 - Pro 가격 숫자는 `lib/pricing.ts` (`PRO_PRICE`, `YEARLY_DISCOUNT`, `YEARLY_SAVING`) 한 곳 — 요금제·페이월·홈이 같이 읽는다. Paddle 카탈로그와 일치해야 함
-- ⚠️ 아직 한국어만: `/guide` `/faq` 본문(MDX), 쿠키 배너(브라우저 언어로 자체 판단)
+- 번역 범위: 앱 UI 전체, 홈 소개, `/guide` `/faq` 본문, 쿠키 배너까지 모두 같은 설정을 따름
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)

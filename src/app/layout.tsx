@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/legal/CookieBanner";
 import AdSenseLoader from "@/components/AdSenseLoader";
 import { ADSENSE_CLIENT } from "@/components/adsense";
 import { LangProvider } from "@/features/i18n/LangProvider";
-import { LANG_COOKIE, pickLang } from "@/lib/i18n";
+import { currentLang } from "@/lib/lang.server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,8 +25,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // 선택한 화면 언어 — 쿠키 하나로 서버·클라이언트가 같은 값을 본다
-  const lang = pickLang((await cookies()).get(LANG_COOKIE)?.value);
+  // 화면 언어 — 설정에서 고른 쿠키, 없으면 브라우저 언어
+  const lang = await currentLang();
   return (
     <html
       lang={lang}

@@ -1,0 +1,113 @@
+# Common questions
+
+## About the service
+
+### What does Notion-mind do?
+
+It draws the pages and databases of your Notion workspace as a single node graph, showing which pages belong to which database and which pages point at each other through relation properties. It exists to surface the sideways links the Notion sidebar never shows.
+
+### Is this an official Notion product?
+
+No. Notion-mind is an independent service with no affiliation to Notion Labs, Inc. Notion and the Notion logo are trademarks of Notion Labs, Inc. Notion-mind is an outside tool built on the API Notion publishes.
+
+### How is this different from Notion's own views?
+
+Notion has no way to see a whole workspace as a graph. Each database has table, board and gallery views, but the structure that runs between databases and pages never appears on one screen. Notion-mind fills that gap and does nothing else.
+
+### Is it like Obsidian's graph view?
+
+Same idea. Obsidian graphs the links between notes; Notion-mind graphs Notion's membership and relation properties. The focus behaviour, where hovering keeps only the neighbours sharp, is borrowed from Obsidian too.
+
+## Account and permissions
+
+### Do I need to sign up?
+
+No. Sign in with your Notion account and you are in. There is no separate email or password.
+
+### What permissions does it ask for?
+
+Read only. It reads the titles, properties, relations and a little body text from the pages you allowed on Notion's consent screen. It does not edit, create or delete anything.
+
+### Can I share only some pages?
+
+Yes. Choose "Select pages" on Notion's consent screen and only those pages and their subpages appear in the graph. You can change the selection later from "Connected pages" in the settings panel.
+
+### How do I disconnect?
+
+Signing out from the settings panel deletes the access token stored in your browser. To cut access off entirely on Notion's side, remove Notion-mind under Settings > Connected apps in Notion.
+
+### Does it work with team workspaces?
+
+Yes, though the graph is limited to the pages the person who authorised it can see. A Pro subscription applies to the workspace, so if one person on a team workspace subscribes, everyone connecting through that workspace gets Pro.
+
+## About the graph
+
+### Only a handful of pages appear.
+
+Usually this means only some pages were shared on the consent screen. Choose "All pages" from "Connected pages" in settings. The Free plan also shows at most the 1,000 most recently edited pages, so a bigger workspace shows a limit marker in the page-count box at the top right.
+
+### A page I just created is missing.
+
+Press "Sync now" in the settings panel. Notion's search API takes a few seconds to reflect new pages.
+
+### The nodes keep moving.
+
+A physics simulation decides the layout, so things wobble for a few seconds before settling. Dragging a node starts the motion again, and it settles once you let go. To hold a node still, right-click it and choose Pin.
+
+### What are the dotted lines?
+
+They join pages connected by a database relation property. Solid lines are membership: a page inside a database, or a subpage inside a page.
+
+### If I hide a node, is it deleted from Notion?
+
+No. Hiding only clears it from this graph view and has no effect on Notion at all. "View hidden" at the bottom brings anything back.
+
+### Is a large workspace slow?
+
+Pages arrive a hundred at a time and the graph draws progressively, so something is on screen immediately. A workspace with thousands of pages can take tens of seconds to finish, and Notion's API rate limit means it cannot go faster.
+
+## Pricing and payment
+
+### Is there a free plan?
+
+Yes. Free covers up to 1,000 pages, every graph feature, and shows ads.
+
+### What does Pro add?
+
+No practical page limit (20,000), hidden nodes and pins stored on the server so they survive refreshes and follow you to other devices, and no ads. $7 a month or $48 a year.
+
+### How do I pay?
+
+Press "Subscribe to Pro" on the pricing page and a checkout from our payment provider Paddle opens. You can pay by credit card, debit card, PayPal and the other methods Paddle supports. Paddle handles your card details directly; Notion-mind never stores them. Prices are in US dollars, and the tax for your country is shown at checkout.
+
+### Can I get a refund?
+
+Within 14 days of payment, yes, in full and without being asked why. Renewal payments carry the same 14-day window. See the [refund policy](/eu/refund).
+
+### How do I cancel?
+
+Use "Manage subscription" in the settings panel or on the pricing page to reach the Paddle customer portal and cancel there. Cancelling keeps Pro running until the end of the period you already paid for, with nothing charged after that.
+
+## Privacy and security
+
+### Is my Notion content stored on your server?
+
+No. The titles, properties and relations the graph needs are read from Notion and passed to your browser; nothing is kept on the server. The only things stored server-side are your subscription status and, on Pro, your hidden nodes and pins. The [privacy notice](/eu/privacy) has the detail.
+
+### Where is the access token?
+
+Encrypted and held only in a browser cookie. Signing out deletes it immediately, and it expires after 30 days even if you never sign out.
+
+### What does the advertising use?
+
+Ads on the Free plan come from Google AdSense. Accepting in the cookie banner allows personalised ads; refusing leaves only generic ones. Visitors in Europe additionally see Google's own consent dialog.
+
+## Anything else
+
+### Which browsers are supported?
+
+Recent versions of Chrome, Safari, Edge and Firefox with WebGL. Mobile browsers open the app, but the graph interactions are built for a desktop with a mouse or trackpad.
+
+### How do I get in touch?
+
+Write to sangjincha719@gmail.com. Feature ideas and bug reports are both welcome.

@@ -195,6 +195,13 @@ const ko = {
   faq: "자주 묻는 질문",
   contact: "문의",
   otherLanguage: "English",
+  startWithNotion: "Notion으로 시작",
+
+  // 쿠키 배너
+  cookieBody:
+    "Free 이용자에게 광고를 보여주기 위해 광고 쿠키를 사용합니다. 로그인 등 필수 쿠키는 동의 없이 항상 사용됩니다.",
+  cookieAccept: "동의",
+  cookieReject: "거부",
 
   // 면책
   disclaimer:
@@ -371,6 +378,12 @@ const en: Shape = {
   faq: "FAQ",
   contact: "Contact",
   otherLanguage: "한국어",
+  startWithNotion: "Start with Notion",
+
+  cookieBody:
+    "We use advertising cookies to show ads to Free users. Strictly necessary cookies, such as the sign-in session, are always used.",
+  cookieAccept: "Accept",
+  cookieReject: "Reject",
 
   disclaimer:
     "Notion-mind is an independent service, not affiliated with Notion Labs, Inc. Notion and the Notion logo are trademarks of Notion Labs, Inc.",
