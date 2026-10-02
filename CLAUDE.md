@@ -86,6 +86,13 @@ src/
 - Pro 가격 숫자는 `lib/pricing.ts` (`PRO_PRICE`, `YEARLY_DISCOUNT`, `YEARLY_SAVING`) 한 곳 — 요금제·페이월·홈이 같이 읽는다. Paddle 카탈로그와 일치해야 함
 - 번역 범위: 앱 UI 전체, 홈 소개, `/guide` `/faq` 본문, 쿠키 배너까지 모두 같은 설정을 따름
 
+## 개발 모드 (2026-10-02)
+- 구독 없이 Pro/Free 화면을 오가기 위한 장치(캡처, 검증용). 숨은 경로 `/dev` 에서 비밀번호를 넣으면 열리고, 그때부터 **설정 패널에 요금제 토글이 나타난다**. 열기 전에는 토글 자체가 렌더되지 않음
+- 비밀번호는 `DEV_UNLOCK_SECRET` 환경변수에만 있음. 미설정이면 `/dev` 는 404 이고 기능 전체가 꺼짐. 클라이언트 번들에 안 들어감(빌드 산출물로 확인)
+- 열쇠는 httpOnly 쿠키 `nm_dev` 에 AES-GCM 으로 봉인(토큰과 같은 키). 만료를 봉인 안에 넣어 서버가 직접 검사 — 위조·만료 쿠키는 무시하고 Free 로 떨어짐. 유효기간 7일
+- 요금제 판정은 `lib/plan.server.ts` 한 곳으로 모음: 서버 컴포넌트는 `currentPlan()`, 라우트 핸들러는 `planFor(req.cookies)`. 개발 모드가 열려 있으면 구독 상태를 덮어씀. ⚠️ 새 코드에서 `getPlan()` 을 직접 부르면 개발 모드가 무시된다
+- `/dev` 는 robots.txt 로 차단, 어디에서도 링크하지 않음
+
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
 - Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 거부 시 `requestNonPersonalizedAds=1`, 미응답 시 `pauseAdRequests=1`. EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기

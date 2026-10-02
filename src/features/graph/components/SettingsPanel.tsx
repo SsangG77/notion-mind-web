@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
@@ -38,6 +39,7 @@ export default function SettingsPanel({
   onReload,
   workspace,
   plan,
+  devMode,
 }: {
   onClose: () => void;
   loading: boolean;
@@ -46,11 +48,24 @@ export default function SettingsPanel({
   /** 연결된 노션 워크스페이스 이름 — 상단 헤더가 사라져 이 패널이 표시 자리 */
   workspace?: string;
   plan: Plan;
+  /** 개발 모드가 열려 있을 때만 요금제 토글이 보인다 */
+  devMode: boolean;
 }) {
   const t = useT();
   const lang = useLang();
   const setLang = useSetLang();
+  const router = useRouter();
   const [paywall, setPaywall] = useState(false);
+  const callDev = async (body: Record<string, unknown>) => {
+    await fetch("/api/dev", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }).catch(() => {});
+    router.refresh();
+  };
+  const setDevPlan = (p: Plan) => callDev({ plan: p });
+  const lockDev = () => callDev({ action: "lock" });
   const [closing, setClosing] = useState(false);
   // 닫기 애니메이션이 끝난 뒤 실제 언마운트
   const close = () => {
@@ -168,6 +183,41 @@ export default function SettingsPanel({
             </span>
             <ProSwitch testid="auto_sync_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
           </div>
+          {/* 개발 모드 — /dev 에서 비밀번호로 연 사람에게만 보인다 */}
+          {devMode && (
+            <div className={ROW}>
+              <span>
+                {t.devMode}
+                <span className="mt-0.5 block text-[10px] text-[#91908C]">{t.devModeHint}</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="flex overflow-hidden rounded-md border border-[#E9E9E7] text-xs dark:border-[#2F2F2F]">
+                  {(["free", "pro"] as const).map((p) => (
+                    <button
+                      key={p}
+                      data-testid={`dev_plan_${p}_button`}
+                      onClick={() => setDevPlan(p)}
+                      aria-pressed={plan === p}
+                      className={`px-2.5 py-1 ${
+                        plan === p
+                          ? "bg-[#2383E2] font-semibold text-white"
+                          : "hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
+                      }`}
+                    >
+                      {p === "pro" ? t.pro : t.free}
+                    </button>
+                  ))}
+                </span>
+                <button
+                  data-testid="dev_lock_button"
+                  onClick={lockDev}
+                  className="text-[10px] text-[#91908C] underline"
+                >
+                  {t.turnOff}
+                </button>
+              </span>
+            </div>
+          )}
           {/* 화면 언어 — 쿠키에 저장되고 서버 컴포넌트까지 같이 바뀐다 */}
           <div className={ROW}>
             <span>{t.language}</span>

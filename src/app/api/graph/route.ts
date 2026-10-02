@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/crypto";
 import { searchPage } from "@/lib/notion";
-import { getPlan } from "@/lib/billing";
+import { planFor } from "@/lib/plan.server";
 import { FREE_NODE_LIMIT } from "@/features/graph/lib/assembleGraph";
 import { LANG_COOKIE, pickLang } from "@/lib/i18n";
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const batchIndex = Number(req.nextUrl.searchParams.get("i") ?? 0);
     // 상한 다음 배치(초과 감지용 1페이지)까지는 허용, 그 뒤부터 차단
     if (batchIndex * 100 > FREE_NODE_LIMIT) {
-      const plan = await getPlan(req.cookies.get("nm_ws")?.value);
+      const plan = await planFor(req.cookies);
       if (plan === "free") return NextResponse.json({ items: [], nextCursor: null });
     }
     // 제목 없는 페이지의 대체 문구가 응답에 섞이므로 화면 언어를 함께 넘긴다

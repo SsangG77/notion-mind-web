@@ -39,7 +39,16 @@ const SIGMA_SETTINGS = {
   stagePadding: 60,
 };
 
-export default function GraphView({ workspace, plan }: { workspace?: string; plan: Plan }) {
+export default function GraphView({
+  workspace,
+  plan,
+  devMode,
+}: {
+  workspace?: string;
+  plan: Plan;
+  /** 개발 모드가 열려 있을 때만 설정 패널에 요금제 토글을 보여준다 */
+  devMode: boolean;
+}) {
   const t = useT();
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
@@ -94,6 +103,7 @@ export default function GraphView({ workspace, plan }: { workspace?: string; pla
           onReload={reload}
           workspace={workspace}
           plan={plan}
+          devMode={devMode}
         />
         <ThemeToggle dark={dark} onToggle={toggle} />
         <PageCountChip
