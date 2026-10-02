@@ -17,7 +17,7 @@ export default function UnlockForm() {
     const res = await fetch("/api/dev", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ password, plan: "pro" }),
+      body: JSON.stringify({ password }),
     }).catch(() => null);
     if (!res?.ok) {
       setState("error");

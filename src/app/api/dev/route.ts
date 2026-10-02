@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const plan = body.plan === "free" ? "free" : "pro";
+  // 잠금 해제만으로는 Pro 가 켜지지 않는다 — 설정 패널의 토글로 켠다
+  const plan = body.plan === "pro" ? "pro" : "free";
   const res = NextResponse.json({ ok: true, devMode: true, plan });
   res.cookies.set(DEV_COOKIE, sealDevCookie(plan), DEV_COOKIE_OPTIONS);
   return res;
