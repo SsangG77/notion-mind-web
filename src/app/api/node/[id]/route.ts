@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/crypto";
 import { fetchNodeDetail } from "@/lib/notion";
+import { LANG_COOKIE, pickLang } from "@/lib/i18n";
 
 // 노드 상세 — 속성·수정일·본문 미리보기 (사이드패널)
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -11,7 +12,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   try {
     const { id } = await ctx.params;
     const kind = req.nextUrl.searchParams.get("kind") === "database" ? "database" : "page";
-    const detail = await fetchNodeDetail(decrypt(tokenCookie), id, kind);
+    // 속성 이름·대체 제목이 응답에 포함되므로 화면 언어를 함께 넘긴다
+    const lang = pickLang(req.cookies.get(LANG_COOKIE)?.value);
+    const detail = await fetchNodeDetail(decrypt(tokenCookie), id, kind, lang);
     return NextResponse.json(detail);
   } catch (e) {
     return NextResponse.json(

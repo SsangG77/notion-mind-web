@@ -78,6 +78,10 @@ const ko = {
   detailMore: "…이어지는 내용은 노션에서",
   openInNotion: "노션에서 열기 ↗",
   untitled: "무제",
+  unnamedPerson: "사용자",
+  relationCount: (n: number) => `${n}개 연결`,
+  propDescription: "설명",
+  propSchema: "속성",
   adSlot: "AD — 광고 영역 (Free)",
 
   // 설정 패널
@@ -265,6 +269,10 @@ const en: Shape = {
   detailMore: "…continue reading in Notion",
   openInNotion: "Open in Notion ↗",
   untitled: "Untitled",
+  unnamedPerson: "User",
+  relationCount: (n: number) => `${n} linked`,
+  propDescription: "Description",
+  propSchema: "Properties",
   adSlot: "AD — ad slot (Free)",
 
   plan: "Plan",

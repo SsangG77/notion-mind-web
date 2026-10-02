@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import type { Plan } from "@/lib/billing";
+import { useT } from "@/features/i18n/LangProvider";
 
 const FREE_LIMIT = 1000;
 
@@ -19,6 +20,7 @@ export default function PageCountChip({
   truncated: boolean;
   plan: Plan;
 }) {
+  const t = useT();
   if (nodeCount === 0) return null;
   const over = truncated || nodeCount >= FREE_LIMIT * 0.8;
   const pro = plan === "pro";
@@ -28,13 +30,13 @@ export default function PageCountChip({
       data-testid="page_count_chip"
       href="/pricing"
       className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-3 z-10 flex h-9 w-[276px] items-center gap-2.5 px-3`}
-      title="요금제 보기"
+      title={t.viewPlans}
     >
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-[5px] leading-none">
         <span className="text-[11px]">
           <b>{nodeCount.toLocaleString()}</b>
           <span className="text-[#91908C]">
-            {pro ? " 페이지" : ` / ${FREE_LIMIT.toLocaleString()} 페이지`}
+            {pro ? t.pageCountPages : t.pageCountSuffix(FREE_LIMIT.toLocaleString())}
           </span>
         </span>
         {!pro && (
@@ -48,9 +50,11 @@ export default function PageCountChip({
       </span>
       {/* Free 는 개수와 무관하게 항상 노출 — 상한 체감 전에도 Pro 를 보게 */}
       {pro ? (
-        <span data-testid="page_count_unlimited" className="shrink-0 text-[10px] font-bold text-[#2383E2]">무제한</span>
+        <span data-testid="page_count_unlimited" className="shrink-0 text-[10px] font-bold text-[#2383E2]">
+          {t.unlimited}
+        </span>
       ) : (
-        <span className="shrink-0 text-[10px] font-bold text-[#2383E2]">Pro로 전체 보기</span>
+        <span className="shrink-0 text-[10px] font-bold text-[#2383E2]">{t.seeAllWithPro}</span>
       )}
     </Link>
   );

@@ -6,18 +6,18 @@ type Page = "privacy" | "terms" | "refund";
 
 const NAV: Record<Locale, { privacy: string; terms: string; refund: string; other: string; otherHref: (p: Page) => string; cookies: string }> = {
   ko: {
-    privacy: "개인정보 처리방침",
-    terms: "이용약관",
-    refund: "환불정책",
+    privacy: "개인정보 처리방침", // i18n-allow: 한국어판 문서의 자체 라벨
+    terms: "이용약관", // i18n-allow: 한국어판 문서의 자체 라벨
+    refund: "환불정책", // i18n-allow: 한국어판 문서의 자체 라벨
     other: "English (EU)",
     otherHref: (p) => `/eu/${p}`,
-    cookies: "쿠키 설정",
+    cookies: "쿠키 설정", // i18n-allow: 한국어판 문서의 자체 라벨
   },
   en: {
     privacy: "Privacy Notice",
     terms: "Terms of Service",
     refund: "Refund Policy",
-    other: "한국어",
+    other: "한국어", // i18n-allow: 영문판에서 한국어판으로 가는 링크
     otherHref: (p) => `/${p}`,
     cookies: "Cookie settings",
   },

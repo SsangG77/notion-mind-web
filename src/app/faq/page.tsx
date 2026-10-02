@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const lang = await currentLang();
   return lang === "en"
     ? { title: "FAQ — Notion-mind", description: "Questions and answers about the service, permissions, the graph, pricing and privacy" }
-    : { title: "자주 묻는 질문 — Notion-mind", description: "Notion-mind 서비스, 권한, 그래프, 요금과 결제, 개인정보에 대한 질문과 답" };
+    : { title: "자주 묻는 질문 — Notion-mind", description: "Notion-mind 서비스, 권한, 그래프, 요금과 결제, 개인정보에 대한 질문과 답" }; // i18n-allow: 한국어판 문서의 제목, 바로 위 줄에서 언어로 갈라짐
 }
 
 export default async function Page() {

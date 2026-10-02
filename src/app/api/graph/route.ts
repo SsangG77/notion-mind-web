@@ -3,6 +3,7 @@ import { decrypt } from "@/lib/crypto";
 import { searchPage } from "@/lib/notion";
 import { getPlan } from "@/lib/billing";
 import { FREE_NODE_LIMIT } from "@/features/graph/lib/assembleGraph";
+import { LANG_COOKIE, pickLang } from "@/lib/i18n";
 
 // 커서 단위 배치 응답 — 클라이언트가 반복 호출하며 그래프를 점진 조립
 export async function GET(req: NextRequest) {
@@ -19,7 +20,9 @@ export async function GET(req: NextRequest) {
       const plan = await getPlan(req.cookies.get("nm_ws")?.value);
       if (plan === "free") return NextResponse.json({ items: [], nextCursor: null });
     }
-    const batch = await searchPage(decrypt(tokenCookie), cursor);
+    // 제목 없는 페이지의 대체 문구가 응답에 섞이므로 화면 언어를 함께 넘긴다
+    const lang = pickLang(req.cookies.get(LANG_COOKIE)?.value);
+    const batch = await searchPage(decrypt(tokenCookie), lang, cursor);
     return NextResponse.json(batch);
   } catch (e) {
     return NextResponse.json(

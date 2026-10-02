@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Notion-mind",
-  description: "노션 워크스페이스를 그래프로 보는 웹 앱",
+  description: "노션 워크스페이스를 그래프로 보는 웹 앱", // i18n-allow: 사이트 기본 설명, 메타데이터 다국어는 별도 작업
   // AdSense 사이트 소유 확인용 메타 태그 — 스크립트는 쿠키 동의 후에만 붙어서 크롤러가 못 보므로 이걸로 확인
   other: { "google-adsense-account": ADSENSE_CLIENT },
 };

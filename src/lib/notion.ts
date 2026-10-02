@@ -56,6 +56,7 @@ export async function exchangeCode(code: string): Promise<TokenResponse> {
 // ---------- 그래프 수집 ----------
 
 import type { GraphBatch, GraphItem } from "@/types/graph";
+import { DICT, type Dict, type Lang } from "./i18n";
 
 interface RichText {
   plain_text: string;
@@ -86,16 +87,16 @@ interface SearchItem {
   >;
 }
 
-function itemTitle(item: SearchItem): string {
+function itemTitle(item: SearchItem, d: Dict): string {
   if (item.object === "page") {
     for (const prop of Object.values(item.properties ?? {})) {
       if (prop.type === "title") {
-        return prop.title?.map((t) => t.plain_text).join("") || "무제";
+        return prop.title?.map((t) => t.plain_text).join("") || d.untitled;
       }
     }
-    return "무제";
+    return d.untitled;
   }
-  return item.title?.map((t) => t.plain_text).join("") || "무제";
+  return item.title?.map((t) => t.plain_text).join("") || d.untitled;
 }
 
 // data_source_id 우선 — DB 소속 페이지의 parent에는 둘 다 오지만 노드는 data_source 기준
@@ -114,7 +115,12 @@ function itemParentId(item: SearchItem): string | null {
  * 노션 검색 1페이지(최대 100개)를 그래프 항목으로 줄여 반환 — 점진 로딩 단위.
  * 최근 수정순 정렬. 그래프 조립(엣지 생성)은 클라이언트 순수 함수가 담당.
  */
-export async function searchPage(accessToken: string, cursor?: string): Promise<GraphBatch> {
+export async function searchPage(
+  accessToken: string,
+  lang: Lang,
+  cursor?: string,
+): Promise<GraphBatch> {
+  const d = DICT[lang];
   const res = await fetch(`${NOTION_API}/search`, {
     method: "POST",
     headers: {
@@ -151,7 +157,7 @@ export async function searchPage(accessToken: string, cursor?: string): Promise<
     items.push({
       id: it.id,
       kind: it.object,
-      title: itemTitle(it),
+      title: itemTitle(it, d),
       url: it.url ?? null,
       parentId: itemParentId(it),
       parentIsDb:
@@ -219,7 +225,7 @@ function plain(rich: RichText[] | undefined): string {
 }
 
 /** 속성 값을 사람이 읽는 한 줄로 — 빈 값은 "" */
-function propertyValue(prop: Record<string, unknown>): string {
+function propertyValue(prop: Record<string, unknown>, d: Dict): string {
   const type = prop.type as string;
   const v = prop[type];
   switch (type) {
@@ -239,7 +245,7 @@ function propertyValue(prop: Record<string, unknown>): string {
       return d.end ? `${d.start} → ${d.end}` : d.start;
     }
     case "people":
-      return ((v as Array<{ name?: string }>) ?? []).map((p) => p.name ?? "사용자").join(", ");
+      return ((v as Array<{ name?: string }>) ?? []).map((p) => p.name ?? d.unnamedPerson).join(", ");
     case "checkbox":
       return v ? "✓" : "—";
     case "url":
@@ -247,7 +253,7 @@ function propertyValue(prop: Record<string, unknown>): string {
     case "phone_number":
       return (v as string) ?? "";
     case "relation":
-      return ((v as unknown[]) ?? []).length ? `${((v as unknown[]) ?? []).length}개 연결` : "";
+      return ((v as unknown[]) ?? []).length ? d.relationCount(((v as unknown[]) ?? []).length) : "";
     case "formula": {
       const f = v as { type: string; [k: string]: unknown };
       const inner = f?.[f?.type];
@@ -281,6 +287,7 @@ export async function fetchNodeDetail(
   accessToken: string,
   id: string,
   kind: "page" | "database",
+  lang: Lang,
 ): Promise<NodeDetail> {
   const metaRes = await api(accessToken, kind === "page" ? `/pages/${id}` : `/data_sources/${id}`);
   if (!metaRes.ok) {
@@ -294,23 +301,24 @@ export async function fetchNodeDetail(
     properties?: Record<string, Record<string, unknown>>;
   };
 
-  let title = "무제";
+  const d = DICT[lang];
+  let title = d.untitled;
   const properties: NodeProperty[] = [];
   if (kind === "page") {
     for (const [name, prop] of Object.entries(meta.properties ?? {})) {
       if (prop.type === "title") {
-        title = plain(prop.title as RichText[]) || "무제";
+        title = plain(prop.title as RichText[]) || d.untitled;
         continue;
       }
-      const value = propertyValue(prop);
+      const value = propertyValue(prop, d);
       if (value) properties.push({ name, value });
     }
   } else {
-    title = plain(meta.title) || "무제";
+    title = plain(meta.title) || d.untitled;
     const desc = plain(meta.description);
-    if (desc) properties.push({ name: "설명", value: desc });
+    if (desc) properties.push({ name: d.propDescription, value: desc });
     const schema = Object.keys(meta.properties ?? {});
-    if (schema.length) properties.push({ name: "속성", value: schema.join(", ") });
+    if (schema.length) properties.push({ name: d.propSchema, value: schema.join(", ") });
   }
 
   // 본문 — DB(data_source)는 자식 블록이 없으므로 페이지만 조회

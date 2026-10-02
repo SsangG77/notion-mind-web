@@ -95,6 +95,7 @@ src/
 
 ## 명령
 - `npm run dev` / `npm run build` / `npm run lint` (리포 루트 = 웹 앱)
+- `npm run check:ui-strings` — 화면 문구가 코드에 하드코딩됐는지 검사(`lint` 가 같이 돌림). **번역 작업의 완료 판정은 사람이 만든 목록이 아니라 이 명령의 0건으로 한다.** 의도된 예외는 그 줄에 `i18n-allow: 사유` 주석
 
 ## 주의
 - 구 iOS 앱은 GitHub SsangG77/notion-mind 리포에 보존 (로컬에는 없음)
