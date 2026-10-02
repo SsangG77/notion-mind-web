@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
-import { DICT, legalPath } from "@/lib/i18n";
+import { DICT, LANG_LABEL, langHref, legalPath } from "@/lib/i18n";
 import { currentLang } from "@/lib/lang.server";
 import LandingContent from "@/features/landing/components/LandingContent";
 
@@ -46,8 +46,8 @@ export default async function Home({
 }) {
   const { error } = await searchParams;
   const jar = await cookies();
-  if (jar.get("nm_token")?.value) redirect("/graph");
   const lang = await currentLang();
+  if (jar.get("nm_token")?.value) redirect(langHref(lang, "/graph"));
   const t = DICT[lang];
 
   return (
@@ -135,13 +135,13 @@ export default async function Home({
       {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
       <footer className="flex flex-col items-center gap-2 px-6 pb-8 text-center">
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
-          <a href="/guide" className="hover:underline">
+          <a href={langHref(lang, "/guide")} className="hover:underline">
             {t.guide}
           </a>
-          <a href="/faq" className="hover:underline">
+          <a href={langHref(lang, "/faq")} className="hover:underline">
             {t.faq}
           </a>
-          <a href="/pricing" className="hover:underline">
+          <a href={langHref(lang, "/pricing")} className="hover:underline">
             {t.pricingTitle}
           </a>
           <a href={legalPath(lang, "terms")} className="hover:underline">
@@ -155,6 +155,14 @@ export default async function Home({
           </a>
           <a href="mailto:sangjincha719@gmail.com" className="hover:underline">
             {t.contact} sangjincha719@gmail.com
+          </a>
+          {/* 언어 전환 — 로그인 전에는 설정 패널이 없으므로 여기가 유일한 경로 */}
+          <a
+            href={langHref(lang === "ko" ? "en" : "ko", "/")}
+            className="hover:underline"
+            data-testid="home_locale_switch"
+          >
+            {LANG_LABEL[lang === "ko" ? "en" : "ko"]}
           </a>
         </nav>
         <NotionDisclaimer />

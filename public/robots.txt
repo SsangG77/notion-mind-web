@@ -2,4 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /graph
+Disallow: /ko/graph
 Disallow: /dev
+Disallow: /ko/dev

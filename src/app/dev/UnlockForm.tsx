@@ -24,7 +24,7 @@ export default function UnlockForm() {
       setPassword("");
       return;
     }
-    router.replace("/graph");
+    router.replace("/graph");  // 개발 페이지는 영어 전용
     router.refresh();
   };
 

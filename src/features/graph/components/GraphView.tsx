@@ -14,6 +14,8 @@ import LayoutManager from "./LayoutManager";
 import RelationEdgesLayer from "./RelationEdgesLayer";
 import NodeInteractions from "./NodeInteractions";
 import NodeDetailPanel, { type Selection } from "./NodeDetailPanel";
+import { useLang } from "@/features/i18n/LangProvider";
+import { langHref } from "@/lib/i18n";
 import PageCountChip from "./PageCountChip";
 import ThemeToggle from "./ThemeToggle";
 import TopBar from "./TopBar";
@@ -50,6 +52,7 @@ export default function GraphView({
   unlocked: boolean;
 }) {
   const t = useT();
+  const lang = useLang();
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
   const { saved, persist } = useWorkspaceSettings(plan);
@@ -139,7 +142,7 @@ export default function GraphView({
           <p className="rounded-lg border border-[#E9E9E7] bg-[#F7F6F3] px-4 py-2 text-sm text-[#37352F] dark:border-[#2F2F2F] dark:bg-[#202020] dark:text-[#EDEDEC]">
             {t.graphError(error)}
           </p>
-          <Link href="/" className="text-sm text-[#2383E2]">
+          <Link href={langHref(lang, "/")} className="text-sm text-[#2383E2]">
             {t.graphRelogin}
           </Link>
         </Overlay>

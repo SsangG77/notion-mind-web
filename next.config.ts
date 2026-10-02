@@ -14,12 +14,19 @@ const withMDX = createMDX({
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
   async redirects() {
-    return ALIAS_HOSTS.map((host) => ({
-      source: "/:path*",
-      has: [{ type: "host" as const, value: host }],
-      destination: `https://${CANONICAL_HOST}/:path*`,
-      permanent: true,
-    }));
+    return [
+      ...ALIAS_HOSTS.map((host) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value: host }],
+        destination: `https://${CANONICAL_HOST}/:path*`,
+        permanent: true,
+      })),
+      // 영문 법률 문서가 /eu 에서 루트로 옮겨졌다. 옛 주소는 영구 리디렉션으로 보낸다
+      // (결제사 심사에 제출한 주소라 끊기면 안 된다)
+      { source: "/eu/privacy", destination: "/privacy", permanent: true },
+      { source: "/eu/terms", destination: "/terms", permanent: true },
+      { source: "/eu/refund", destination: "/refund", permanent: true },
+    ];
   },
 };
 

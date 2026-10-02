@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
-import { useT } from "@/features/i18n/LangProvider";
+import { useLang, useT } from "@/features/i18n/LangProvider";
+import { langHref } from "@/lib/i18n";
 import { PRO_PRICE } from "@/lib/pricing";
 
 /** Pro 페이월 — 노드 박스 디자인 모달. 결제는 요금제 화면에서 */
 export default function PaywallModal({ onClose }: { onClose: () => void }) {
   const t = useT();
+  const lang = useLang();
   return (
     <div
       data-testid="paywall_modal"
@@ -33,7 +35,7 @@ export default function PaywallModal({ onClose }: { onClose: () => void }) {
         <div className="px-5 pb-5">
           <Link
             data-testid="paywall_subscribe_button"
-            href="/pricing"
+            href={langHref(lang, "/pricing")}
             className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-center text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] dark:border-black dark:shadow-[3px_3px_0_#000]`}
           >
             {t.paywallCta(PRO_PRICE.monthly)}

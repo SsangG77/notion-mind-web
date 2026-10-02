@@ -78,13 +78,17 @@ src/
 - 근거 문서: notion.so/Notion-Trademark-Usage-Guidelines-9826313c686a4f6e9d8a48347162714b
 
 ## 화면 언어 (2026-10-02)
-- 한국어/영어 전환. 설정 패널 "언어" 줄에서 고르고, 쿠키 `nm_lang` 하나로 서버 컴포넌트와 클라이언트가 같은 값을 본다(기본 ko). 전환은 쿠키 쓰고 `router.refresh()`
-- 문구는 `lib/i18n.ts` 사전(앱 UI) + `features/landing/content.ts`(홈 소개) + `content/docs/{guide,faq}.{ko,en}.mdx`(문서는 두 벌을 정적 import 하고 언어로 고름). 클라이언트는 `features/i18n/LangProvider` 의 `useT()`, 서버 컴포넌트는 `lib/lang.server.ts` 의 `currentLang()`
-- 쿠키가 없는 첫 방문은 `Accept-Language` 헤더로 정함 — 서버에서 결정하므로 깜빡임 없음. 로그인 전에는 설정 패널이 없으니 이 자동 판정이 유일한 경로
-- trade-off: `/ko` `/en` 접두사를 쓰는 정식 i18n 라우팅 대신 쿠키 — URL·노션 OAuth 콜백·법률 문서 경로를 그대로 둔다. 대신 언어별 URL 공유·검색 노출은 안 됨
-- 법률 문서는 제 로케일을 유지(한국어판 `/privacy` 는 앱이 영어여도 한국어). `ArticleShell lang` 으로 면책 문구까지 문서 언어를 따름. 앱 언어에 맞는 약관 경로는 `legalPath(lang, doc)`
-- Pro 가격 숫자는 `lib/pricing.ts` (`PRO_PRICE`, `YEARLY_DISCOUNT`, `YEARLY_SAVING`) 한 곳 — 요금제·페이월·홈이 같이 읽는다. Paddle 카탈로그와 일치해야 함
-- 번역 범위: 앱 UI 전체, 홈 소개, `/guide` `/faq` 본문, 쿠키 배너까지 모두 같은 설정을 따름
+- **언어는 주소가 정한다** — 접두사 없는 주소는 영어, `/ko/*` 는 한국어. `middleware.ts` 가 `/ko` 를 떼고 같은 경로로 rewrite 하면서 요청 헤더 `x-nm-lang` 에 언어를 심고, 서버 컴포넌트는 `lib/lang.server.ts` 의 `currentLang()`, 클라이언트는 `features/i18n/LangProvider` 의 `useT()` 로 받는다. 페이지 파일은 한 벌만 둔다
+- 기본값은 영어(`pickLang` 이 "ko" 가 아니면 en). 루트가 영어이므로 표시가 없으면 영어다
+- 내부 링크는 `langHref(lang, path)` 로 만든다. 하드코딩 경로를 쓰면 한국어 화면에서 영어로 튄다. 법률 문서 경로는 `legalPath(lang, doc)`(= `langHref` 를 씀)
+- 쿠키 `nm_lang` 은 내용을 결정하지 않는다. "직접 골랐다"는 표시로만 남아, 루트 자동 이동에서 제외하는 데 쓴다. 전환 버튼은 쿠키를 적고 짝 URL 로 이동(`useSetLang`)
+- 루트에 Accept-Language 가 ko 인 브라우저로 처음 들어오면 `/ko` 로 307. **Googlebot 은 Accept-Language 를 보내지 않으므로**(구글 공식) 이 분기에 안 걸리고 항상 영어를 본다. UA 를 보고 가르는 게 아니라 클로킹이 아님
+- 언어 전환 경로: 공개 페이지는 푸터, 문서, 법률 문서의 내비 링크(`home_locale_switch`, `doc_locale_switch`, `legal_locale_switch`), 앱 안에서는 설정 패널
+- 요금제 의존 API 와 언어 의존 API 는 주소에 표시를 이어 붙여 호출한다 — `lib/apiUrl.ts` 의 `apiUrl(path, lang?)` 이 `dev` 와 `lang` 을 함께 붙인다(`/api/graph`, `/api/node/[id]`, `/api/settings`, `/api/billing/status`). 쿠키로 읽으면 화면과 서버 판정이 어긋난다
+- 문구는 `lib/i18n.ts` 사전(앱 UI) + `features/landing/content.ts`(홈 소개) + `content/docs/{guide,faq}.{ko,en}.mdx` + `content/legal/`(한국어 루트, 영문 `eu/` 폴더 — 폴더명만 옛 이름이고 주소는 루트다). 문서는 두 벌을 정적 import 하고 언어로 고른다
+- 법률 문서 주소: 영문 `/privacy` `/terms` `/refund`, 한국어 `/ko/...`. 옛 `/eu/*` 는 `next.config.ts` 에서 301 — 결제사 심사에 제출한 주소라 끊으면 안 된다. **Paddle 대시보드에 등록된 URL 도 루트 경로로 갱신해야 함**
+- Pro 가격 숫자는 `lib/pricing.ts` (`PRO_PRICE`, `YEARLY_DISCOUNT`, `YEARLY_SAVING`) 한 곳 — 요금제, 페이월, 홈이 같이 읽는다. Paddle 카탈로그와 일치해야 함
+- trade-off: 영어를 루트에 둬서 기존 주소가 전부 살아남고 리디렉션이 거의 없다. 대신 두 언어가 대칭이 아니라 3개 국어가 되면 어색해진다
 
 ## 개발 모드 (2026-10-02)
 - 구독 없이 Pro/Free 화면을 오가기 위한 장치(캡처, 검증용). 숨은 경로 `/dev` 에서 비밀번호를 넣으면 **설정 패널에 요금제 토글이 나타날 뿐이고, Pro 는 꺼진 상태로 시작**한다. 켜고 끄는 건 그 토글. 열기 전에는 토글 자체가 렌더되지 않음

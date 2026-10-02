@@ -1,14 +1,20 @@
-// 화면 문구 사전. 서버·클라이언트 양쪽에서 쓰므로 next/headers 같은 서버 전용 모듈을 import 하지 않는다.
-// 선택한 언어는 쿠키 하나(nm_lang)에 담고, 서버 컴포넌트는 쿠키를 직접 읽고 클라이언트는 LangProvider 로 받는다.
-// trade-off: 라우트에 /ko /en 접두사를 붙이는 정식 i18n 라우팅 대신 쿠키로 — URL·OAuth 콜백·법률 문서 경로를 건드리지 않는다.
+// 화면 문구 사전. 서버와 클라이언트 양쪽에서 쓰므로 next/headers 같은 서버 전용 모듈을 import 하지 않는다.
+// 언어는 주소가 정한다 — 접두사가 없으면 영어, /ko/* 면 한국어. middleware 가 읽어 헤더로 넘기고
+// 서버 컴포넌트는 currentLang(), 클라이언트는 LangProvider 로 받는다.
+// trade-off: 영어를 루트에 둬서 기존 주소가 전부 살아남는다. 대신 두 언어가 대칭이 아니다.
 export type Lang = "ko" | "en";
 
 export const LANG_COOKIE = "nm_lang";
+/** 한국어 주소 접두사 — 영어는 접두사 없음(루트) */
+export const LANG_PREFIX = "/ko";
+/** middleware 가 주소에서 읽은 언어를 서버 컴포넌트로 넘기는 요청 헤더 */
+export const LANG_HEADER = "x-nm-lang";
 export const LANGS: readonly Lang[] = ["ko", "en"];
 export const LANG_LABEL: Record<Lang, string> = { ko: "한국어", en: "English" };
 
+/** 접두사도 표시도 없으면 영어 — 루트가 영어이므로 기본값이 en 이다 */
 export function pickLang(value: string | null | undefined): Lang {
-  return value === "en" ? "en" : "ko";
+  return value === "ko" ? "ko" : "en";
 }
 
 /** 브라우저 언어로 첫 기본값 결정 — 쿠키가 아직 없을 때만 */
@@ -408,5 +414,18 @@ export type Dict = Shape;
 
 /** 법률 문서는 한국어판과 영문판 경로가 다르다 */
 export function legalPath(lang: Lang, doc: "terms" | "privacy" | "refund"): string {
-  return lang === "en" ? `/eu/${doc}` : `/${doc}`;
+  return langHref(lang, `/${doc}`);
+}
+
+/**
+ * 접두사 없는 경로를 그 언어의 주소로 바꾼다. 언어 전환과 hreflang 이 같은 함수를 쓴다.
+ * 넘어온 경로에 이미 접두사가 붙어 있어도 한 번만 붙도록 먼저 떼어낸다.
+ */
+export function langHref(lang: Lang, pathname: string): string {
+  const bare =
+    pathname === LANG_PREFIX || pathname.startsWith(`${LANG_PREFIX}/`)
+      ? pathname.slice(LANG_PREFIX.length) || "/"
+      : pathname;
+  if (lang === "en") return bare;
+  return bare === "/" ? LANG_PREFIX : `${LANG_PREFIX}${bare}`;
 }

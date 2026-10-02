@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GraphBatch, GraphData, GraphItem } from "@/types/graph";
 import type { Plan } from "@/lib/billing";
 import { assembleGraph, FREE_NODE_LIMIT, PRO_NODE_LIMIT } from "../lib/assembleGraph";
-import { withDev } from "@/lib/devParam";
+import { apiUrl } from "@/lib/apiUrl";
+import { useLang } from "@/features/i18n/LangProvider";
 
 interface State {
   data: GraphData | null;
@@ -22,6 +23,7 @@ const maxBatches = (limit: number) => Math.ceil(limit / 100) + 1;
 
 /** 커서 배치를 반복 수신하며 그래프를 점진 조립. reload()로 재동기화. 상한은 요금제에 따름 */
 export function useGraphData(plan: Plan): State & { reload: () => void } {
+  const lang = useLang();
   const limit = plan === "pro" ? PRO_NODE_LIMIT : FREE_NODE_LIMIT;
   const MAX_BATCHES = maxBatches(limit);
   const [state, setState] = useState<State>({
@@ -41,8 +43,9 @@ export function useGraphData(plan: Plan): State & { reload: () => void } {
     let cursor: string | null = null;
     try {
       for (let i = 0; i < MAX_BATCHES; i++) {
-        const url = withDev(
+        const url = apiUrl(
           cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}&i=${i}` : "/api/graph",
+          lang,
         );
         const res = await fetch(url);
         if (!res.ok) {
@@ -71,7 +74,7 @@ export function useGraphData(plan: Plan): State & { reload: () => void } {
         }));
       }
     }
-  }, [limit, MAX_BATCHES]);
+  }, [limit, MAX_BATCHES, lang]);
 
   useEffect(() => {
     const ids = runId; // 언마운트 시 진행 중 로드 무효화

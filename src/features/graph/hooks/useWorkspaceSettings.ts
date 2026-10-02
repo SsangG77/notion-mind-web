@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type Graph from "graphology";
 import type { Plan } from "@/lib/billing";
 import { EMPTY_SETTINGS, type WorkspaceSettings } from "@/lib/billing";
-import { withDev } from "@/lib/devParam";
+import { apiUrl } from "@/lib/apiUrl";
 
 /**
  * Pro 영구 설정(숨김·핀). 로드 시 한 번 받아 LayoutManager 가 노드 추가할 때 적용하고,
@@ -17,7 +17,7 @@ export function useWorkspaceSettings(plan: Plan) {
   useEffect(() => {
     if (plan !== "pro") return;
     let alive = true;
-    fetch(withDev("/api/settings"))
+    fetch(apiUrl("/api/settings"))
       .then((r) => r.json())
       .then((s: WorkspaceSettings) => alive && setSaved(s))
       .catch(() => alive && setSaved(EMPTY_SETTINGS));
@@ -37,7 +37,7 @@ export function useWorkspaceSettings(plan: Plan) {
           if (a.hidden) next.hidden.push(id);
           if (a.pinned) next.pinned[id] = { x: a.x as number, y: a.y as number };
         });
-        fetch(withDev("/api/settings"), {
+        fetch(apiUrl("/api/settings"), {
           method: "PUT",
           headers: { "content-type": "application/json" },
           body: JSON.stringify(next),

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LANDING } from "../content";
-import type { Lang } from "@/lib/i18n";
+import { langHref, type Lang } from "@/lib/i18n";
 import { PRO_PRICE } from "@/lib/pricing";
 
 // 홈 하단 소개 — 서버 렌더 텍스트. 광고 심사와 검색 크롤러는 로그인 뒤 그래프를 못 보므로 여기서 서비스를 설명한다
@@ -81,7 +81,7 @@ export default function LandingContent({ lang }: { lang: Lang }) {
           </div>
         </div>
         <p className="mt-3 text-sm">
-          <Link href="/pricing" className="text-[#2383E2] underline">
+          <Link href={langHref(lang, "/pricing")} className="text-[#2383E2] underline">
             {c.pricingMore}
           </Link>
         </p>
@@ -98,11 +98,11 @@ export default function LandingContent({ lang }: { lang: Lang }) {
           ))}
         </dl>
         <p className="mt-4 text-sm">
-          <Link href="/faq" className="text-[#2383E2] underline">
+          <Link href={langHref(lang, "/faq")} className="text-[#2383E2] underline">
             {c.faqMore}
           </Link>
           {" , "}
-          <Link href="/guide" className="text-[#2383E2] underline">
+          <Link href={langHref(lang, "/guide")} className="text-[#2383E2] underline">
             {c.guideMore}
           </Link>
         </p>

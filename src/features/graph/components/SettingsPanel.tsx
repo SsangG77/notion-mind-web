@@ -9,8 +9,8 @@ import NotionDisclaimer from "@/components/NotionDisclaimer";
 import ManageSubscriptionButton from "@/features/billing/components/ManageSubscriptionButton";
 import type { Plan } from "@/lib/billing";
 import { useLang, useSetLang, useT } from "@/features/i18n/LangProvider";
-import { LANG_LABEL, LANGS, legalPath } from "@/lib/i18n";
-import { DEV_PARAM } from "@/lib/devParam";
+import { LANG_LABEL, LANGS, langHref, legalPath } from "@/lib/i18n";
+import { DEV_PARAM } from "@/lib/apiUrl";
 
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
@@ -126,7 +126,7 @@ export default function SettingsPanel({
         <div className="min-h-0 flex-1 overflow-y-auto text-sm">
           <Link
             data-testid="plan_row"
-            href="/pricing"
+            href={langHref(lang, "/pricing")}
             className={`${ROW} hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
           >
             <span>{t.plan}</span>

@@ -1,7 +1,7 @@
 import ArticleShell from "@/components/ArticleShell";
-import { DICT, type Lang } from "@/lib/i18n";
+import { DICT, LANG_LABEL, langHref, type Lang } from "@/lib/i18n";
 
-/** 공개 문서(가이드, FAQ) — 설정 패널에서 고른 언어를 따른다 */
+/** 공개 문서(가이드, FAQ) — 주소의 언어를 따른다 */
 export default function DocLayout({
   lang,
   page,
@@ -12,13 +12,19 @@ export default function DocLayout({
   children: React.ReactNode;
 }) {
   const t = DICT[lang];
+  const other: Lang = lang === "ko" ? "en" : "ko";
   return (
     <ArticleShell
       lang={lang}
       nav={[
-        { href: "/guide", label: t.guide, active: page === "guide" },
-        { href: "/faq", label: t.faq, active: page === "faq" },
-        { href: "/pricing", label: t.pricingTitle },
+        { href: langHref(lang, "/guide"), label: t.guide, active: page === "guide" },
+        { href: langHref(lang, "/faq"), label: t.faq, active: page === "faq" },
+        { href: langHref(lang, "/pricing"), label: t.pricingTitle },
+        {
+          href: langHref(other, `/${page}`),
+          label: LANG_LABEL[other],
+          testid: "doc_locale_switch",
+        },
       ]}
       trailing={{ href: "/api/auth/login", label: t.startWithNotion }}
     >

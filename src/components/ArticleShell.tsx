@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
 import type { Lang } from "@/lib/i18n";
+import { langHref } from "@/lib/i18n";
 
 export interface ShellLink {
   href: string;
@@ -30,7 +31,7 @@ export default function ArticleShell({
     <div className="nm-dotgrid min-h-screen bg-white px-4 py-10 text-[#37352F] dark:bg-[#191919] dark:text-[#EDEDEC]">
       <article className="mx-auto max-w-[760px] rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#FDFDFC] px-6 py-8 shadow-[5px_5px_0_#2E2C27] sm:px-10 dark:border-black dark:bg-[#2B2A27] dark:shadow-[5px_5px_0_#000]">
         <nav className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#91908C]">
-          <Link href="/" className="font-semibold text-[#37352F] dark:text-[#EDEDEC]">
+          <Link href={langHref(lang, "/")} className="font-semibold text-[#37352F] dark:text-[#EDEDEC]">
             Notion-mind
           </Link>
           {nav.map((l) => (

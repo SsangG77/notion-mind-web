@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import type { Plan } from "@/lib/billing";
-import { useT } from "@/features/i18n/LangProvider";
+import { useLang, useT } from "@/features/i18n/LangProvider";
+import { langHref } from "@/lib/i18n";
 
 const FREE_LIMIT = 1000;
 
@@ -21,6 +22,7 @@ export default function PageCountChip({
   plan: Plan;
 }) {
   const t = useT();
+  const lang = useLang();
   if (nodeCount === 0) return null;
   const over = truncated || nodeCount >= FREE_LIMIT * 0.8;
   const pro = plan === "pro";
@@ -28,7 +30,7 @@ export default function PageCountChip({
   return (
     <Link
       data-testid="page_count_chip"
-      href="/pricing"
+      href={langHref(lang, "/pricing")}
       className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-3 z-10 flex h-9 w-[276px] items-center gap-2.5 px-3`}
       title={t.viewPlans}
     >
