@@ -9,33 +9,14 @@ import { PRICE_IDS } from "@/lib/paddle";
 import type { Plan } from "@/lib/billing";
 import { usePaddle } from "../hooks/usePaddle";
 import ManageSubscriptionButton from "./ManageSubscriptionButton";
-
-const FREE_FEATURES = [
-  "노드 1,000개 (최근 수정순)",
-  "워크스페이스 1개",
-  "그래프 전 기능 (관계형 포함)",
-  "수동 동기화",
-  "핀·숨김은 세션 한정",
-  "광고 표시",
-];
-
-// Pro 가격 — Paddle 카탈로그와 반드시 일치시킬 것(심사 항목). 통화 USD, 세금은 결제 화면에서 별도 계산
-const PRO_PRICE = { monthly: 7, yearly: 48 } as const;
-// 연간 할인 — 월 결제 12번 대비. 연간이 기본 선택(이탈률이 낮아 연간을 앞세운다)
-const YEARLY_DISCOUNT = Math.round((1 - PRO_PRICE.yearly / (PRO_PRICE.monthly * 12)) * 100);
-const YEARLY_SAVING = PRO_PRICE.monthly * 12 - PRO_PRICE.yearly;
-
-const PRO_FEATURES = [
-  "노드 무제한",
-  "핀·숨김·필터 영구 저장",
-  "자동 동기화",
-  "이미지 내보내기",
-  "광고 제거",
-  "워크스페이스 3개+",
-];
+import { useLang, useT } from "@/features/i18n/LangProvider";
+import { legalPath } from "@/lib/i18n";
+import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_SAVING } from "@/lib/pricing";
 
 /** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
 export default function PricingView({ plan, workspaceId }: { plan: Plan; workspaceId?: string }) {
+  const t = useT();
+  const lang = useLang();
   const [yearly, setYearly] = useState(true);
   const { ready, openCheckout } = usePaddle();
   const router = useRouter();
@@ -65,11 +46,11 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
         href="/graph"
         className="self-start text-sm text-[#91908C] hover:text-[#37352F] dark:hover:text-[#EDEDEC]"
       >
-        ← 그래프로
+        {t.backToGraph}
       </Link>
 
-      <h1 className="mt-6 text-2xl font-bold tracking-tight">요금제</h1>
-      <p className="mt-1 text-sm text-[#91908C]">워크스페이스 전체를 제한 없이 펼쳐보세요</p>
+      <h1 className="mt-6 text-2xl font-bold tracking-tight">{t.pricingTitle}</h1>
+      <p className="mt-1 text-sm text-[#91908C]">{t.pricingSubtitle}</p>
 
       {/* 월/연 토글 */}
       <div className={`${BLOCK} mt-6 flex overflow-hidden text-sm`}>
@@ -78,7 +59,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
           onClick={() => setYearly(false)}
           className={`px-4 py-1.5 ${!yearly ? "bg-[#F4F3EF] font-semibold dark:bg-[#35342F]" : "text-[#91908C]"}`}
         >
-          월간
+          {t.monthly}
         </button>
         <span className="w-px bg-[#E9E9E7] dark:bg-[#2F2F2F]" />
         <button
@@ -86,7 +67,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
           onClick={() => setYearly(true)}
           className={`px-4 py-1.5 ${yearly ? "bg-[#F4F3EF] font-semibold dark:bg-[#35342F]" : "text-[#91908C]"}`}
         >
-          연간 <span className="text-[10px] text-[#2383E2]">{YEARLY_DISCOUNT}% 할인</span>
+          {t.yearly} <span className="text-[10px] text-[#2383E2]">{t.discountOff(YEARLY_DISCOUNT)}</span>
         </button>
       </div>
 
@@ -97,15 +78,15 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
             <span className="text-lg font-bold">Free</span>
             {!isPro && (
               <span className="rounded-full bg-[#F4F3EF] px-2.5 py-0.5 text-xs font-semibold dark:bg-[#35342F]">
-                현재 사용 중
+                {t.currentPlan}
               </span>
             )}
           </div>
           <p className="mt-2 text-2xl font-bold">
-            $0<span className="text-sm font-normal text-[#91908C]"> / 월</span>
+            $0<span className="text-sm font-normal text-[#91908C]">{t.perMonth}</span>
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
-            {FREE_FEATURES.map((f) => (
+            {t.freeFeatures.map((f) => (
               <li key={f} className="flex items-center gap-2">
                 <span className="text-[#91908C]">✓</span>
                 {f}
@@ -119,26 +100,24 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold">Pro</span>
             <span className="rounded-full bg-[#2383E2] px-2.5 py-0.5 text-xs font-semibold text-white">
-              {isPro ? "현재 사용 중" : "추천"}
+              {isPro ? t.currentPlan : t.recommended}
             </span>
           </div>
           <p className="mt-2 text-2xl font-bold" data-testid="pro_price">
             ${yearly ? PRO_PRICE.yearly : PRO_PRICE.monthly}
-            <span className="text-sm font-normal text-[#91908C]"> / {yearly ? "년" : "월"}</span>
+            <span className="text-sm font-normal text-[#91908C]">{yearly ? t.perYear : t.perMonth}</span>
             <span className="block text-xs font-normal text-[#91908C]">
-              {yearly
-                ? `월 $${(PRO_PRICE.yearly / 12).toFixed(0)} 꼴, 연 1회 결제`
-                : "매월 자동 갱신, 언제든 해지"}
-              , 부가세 포함
+              {yearly ? t.yearlyNote((PRO_PRICE.yearly / 12).toFixed(0)) : t.monthlyNote}
+              {t.taxIncluded}
             </span>
             {yearly && (
               <span className="mt-1 inline-block rounded-full bg-[#2383E2] px-2 py-0.5 text-[10px] font-semibold text-white">
-                월 결제보다 연 ${YEARLY_SAVING} 절약
+                {t.yearlySaving(YEARLY_SAVING)}
               </span>
             )}
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
-            {PRO_FEATURES.map((f) => (
+            {t.proFeatures.map((f) => (
               <li key={f} className="flex items-center gap-2">
                 <span className="text-[#2383E2]">✓</span>
                 {f}
@@ -149,7 +128,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
             <ManageSubscriptionButton
               className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2.5 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000]`}
             >
-              구독 관리
+              {t.manageSubscription}
             </ManageSubscriptionButton>
           ) : workspaceId ? (
             <button
@@ -158,7 +137,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
               onClick={() => openCheckout(priceId, workspaceId, () => setWaiting(true))}
               className={`${BLOCK_PRESS} mt-6 w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] disabled:cursor-wait disabled:opacity-70 dark:border-black dark:shadow-[3px_3px_0_#000]`}
             >
-              {waiting ? "결제 확인 중…" : ready ? "Pro 구독하기" : "결제 모듈 로딩…"}
+              {waiting ? t.checkoutConfirming : ready ? t.subscribePro : t.checkoutLoading}
             </button>
           ) : (
             <a
@@ -166,13 +145,13 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
               href="/api/auth/login"
               className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-center text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] dark:border-black dark:shadow-[3px_3px_0_#000]`}
             >
-              Notion으로 로그인 후 구독
+              {t.loginToSubscribe}
             </a>
           )}
           <p className="mt-3 text-center text-[10px] text-[#91908C]">
-            결제 후 14일 이내 전액 환불,{" "}
-            <Link href="/refund" className="underline">
-              환불정책
+            {t.refundNote}
+            <Link href={legalPath(lang, "refund")} className="underline">
+              {t.refund}
             </Link>
           </p>
         </div>

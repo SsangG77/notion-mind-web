@@ -6,6 +6,7 @@ import { useState } from "react";
 import SearchPanel from "./SearchPanel";
 import SettingsPanel from "./SettingsPanel";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import { useT } from "@/features/i18n/LangProvider";
 
 /** 상단 바 — 앱 이름(=설정) + 검색(+필터). 전부 노드 박스 스타일 */
 export default function TopBar({
@@ -21,6 +22,7 @@ export default function TopBar({
   workspace?: string;
   plan: Plan;
 }) {
+  const t = useT();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const openSettings = () => {
     setLeftPanel("settings"); // 숨긴 목록 패널이 열려 있으면 닫힘
@@ -37,7 +39,7 @@ export default function TopBar({
       <div className="pointer-events-auto flex items-start gap-2">
         <button
           data-testid="settings_button"
-          title="설정"
+          title={t.settings}
           onClick={() => (settingsOpen ? closeSettings() : openSettings())}
           className={`${BLOCK} ${BLOCK_PRESS} flex h-9 items-center gap-2 px-3 text-sm font-semibold`}
         >

@@ -6,6 +6,7 @@ import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
 import { useNodeDetail } from "../hooks/useNodeDetail";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import { useLang, useT } from "@/features/i18n/LangProvider";
 
 export interface Selection {
   id: string;
@@ -62,6 +63,8 @@ export default function NodeDetailPanel({
   closeRequest: number;
   plan: Plan;
 }) {
+  const t = useT();
+  const lang = useLang();
   const sigma = useSigma();
   const graph = sigma.getGraph();
   const { detail, error, loading } = useNodeDetail(selection.id, selection.type);
@@ -93,6 +96,7 @@ export default function NodeDetailPanel({
   const attrs = graph.hasNode(selection.id) ? graph.getNodeAttributes(selection.id) : null;
   const fallbackTitle = (attrs?.label as string) ?? "";
 
+  const untitled = t.untitled; // forEachEdge 콜백의 target 인자 이름이 t 라 미리 꺼내 둔다
   const parents: Chip[] = [];
   const relations: Chip[] = [];
   const children: Chip[] = [];
@@ -102,7 +106,7 @@ export default function NodeDetailPanel({
       if (!graph.hasNode(otherId)) return;
       const chip: Chip = {
         id: otherId,
-        label: (graph.getNodeAttribute(otherId, "label") as string) ?? "무제",
+        label: (graph.getNodeAttribute(otherId, "label") as string) ?? untitled,
         type: graph.getNodeAttribute(otherId, "nodeType") as NodeType,
       };
       if (ea.kind === "relation") relations.push(chip);
@@ -129,7 +133,7 @@ export default function NodeDetailPanel({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <span className="text-[11px] font-semibold text-[#91908C]">
-              {selection.type === "database" ? "데이터베이스" : "페이지"}
+              {selection.type === "database" ? t.database : t.page}
             </span>
             <h2 className="mt-0.5 break-words text-base font-bold leading-snug">
               {detail?.title ?? fallbackTitle}
@@ -139,7 +143,7 @@ export default function NodeDetailPanel({
             data-testid="detail_close_button"
             onClick={close}
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
-            aria-label="닫기"
+            aria-label={t.close}
           >
             ✕
           </button>
@@ -148,20 +152,20 @@ export default function NodeDetailPanel({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {parents.length > 0 && (
-          <Section title="소속">
+          <Section title={t.detailParent}>
             <ChipList items={parents} onJump={jump} />
           </Section>
         )}
 
         {loading && (
-          <p className="px-4 py-3 text-xs text-[#91908C]">상세를 불러오는 중…</p>
+          <p className="px-4 py-3 text-xs text-[#91908C]">{t.detailLoading}</p>
         )}
         {error && (
-          <p className="px-4 py-3 text-xs text-[#D44C47]">불러오지 못했습니다: {error}</p>
+          <p className="px-4 py-3 text-xs text-[#D44C47]">{t.detailError(error)}</p>
         )}
 
         {detail && detail.properties.length > 0 && (
-          <Section title="속성">
+          <Section title={t.detailProperties}>
             <dl className="space-y-1.5 text-sm">
               {detail.properties.map((p) => (
                 <div key={p.name} className="flex gap-2">
@@ -174,9 +178,9 @@ export default function NodeDetailPanel({
         )}
 
         {detail?.lastEdited && (
-          <Section title="마지막 수정">
+          <Section title={t.detailLastEdited}>
             <p className="text-sm">
-              {new Date(detail.lastEdited).toLocaleString("ko-KR", {
+              {new Date(detail.lastEdited).toLocaleString(lang === "ko" ? "ko-KR" : "en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -188,19 +192,19 @@ export default function NodeDetailPanel({
         )}
 
         {relations.length > 0 && (
-          <Section title={`관계형 연결 ${relations.length}`}>
+          <Section title={t.detailRelations(relations.length)}>
             <ChipList items={relations} onJump={jump} />
           </Section>
         )}
 
         {children.length > 0 && (
-          <Section title={`하위 ${children.length}`}>
+          <Section title={t.detailChildren(children.length)}>
             <ChipList items={children} onJump={jump} />
           </Section>
         )}
 
         {detail && detail.excerpt.length > 0 && (
-          <Section title="본문">
+          <Section title={t.detailBody}>
             <div className="space-y-1 text-sm leading-6">
               {detail.excerpt.map((line, i) => (
                 <p key={i} className="break-words">
@@ -208,7 +212,7 @@ export default function NodeDetailPanel({
                 </p>
               ))}
               {detail.excerptTruncated && (
-                <p className="pt-1 text-xs text-[#91908C]">…이어지는 내용은 노션에서</p>
+                <p className="pt-1 text-xs text-[#91908C]">{t.detailMore}</p>
               )}
             </div>
           </Section>
@@ -224,7 +228,7 @@ export default function NodeDetailPanel({
           rel="noreferrer"
           className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000] dark:hover:bg-[#3D3C36]`}
         >
-          노션에서 열기 ↗
+          {t.openInNotion}
         </a>
       </div>
       {/* Free 전용 패널 하단 배너 — 네트워크 미정, 플레이스홀더 */}
@@ -233,7 +237,7 @@ export default function NodeDetailPanel({
           data-testid="ad_banner_detail"
           className="flex h-[52px] shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
         >
-          <span className="text-xs tracking-wide text-[#91908C]">AD — 광고 영역 (Free)</span>
+          <span className="text-xs tracking-wide text-[#91908C]">{t.adSlot}</span>
         </div>
       )}
     </div>

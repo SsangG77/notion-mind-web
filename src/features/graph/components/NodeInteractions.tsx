@@ -10,6 +10,7 @@ import type { NodeType } from "@/types/graph";
 import { cool, getSimNode, reheat } from "../lib/simulation";
 import { getCompactS, MIN_BLOCK_S, setFocus } from "../drawNode";
 import { T } from "../tokens";
+import { useT } from "@/features/i18n/LangProvider";
 
 interface Menu {
   x: number;
@@ -37,6 +38,7 @@ export default function NodeInteractions({
   /** 숨김·핀이 바뀐 뒤 호출 — Pro 는 서버 저장, Free 는 no-op */
   onPersist: (graph: Graph) => void;
 }) {
+  const t = useT();
   const sigma = useSigma();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [hiddenCount, setHiddenCount] = useState(0);
@@ -275,7 +277,7 @@ export default function NodeInteractions({
   const hiddenRows = (): HiddenNodeRow[] => {
     const rows: HiddenNodeRow[] = [];
     graph.forEachNode((id, a) => {
-      if (a.hidden) rows.push({ id, title: (a.label as string) ?? "무제", isDb: a.nodeType === "database" });
+      if (a.hidden) rows.push({ id, title: (a.label as string) ?? t.untitled, isDb: a.nodeType === "database" });
     });
     return rows;
   };
@@ -302,14 +304,14 @@ export default function NodeInteractions({
             className="block w-full px-3 py-1.5 text-left hover:bg-[#F7F6F3] dark:hover:bg-[#2B2A27]"
             onClick={() => hideNode(menu.node)}
           >
-            숨기기
+            {t.hideNode}
           </button>
           <button
             data-testid="menu_toggle_pin"
             className="block w-full px-3 py-1.5 text-left hover:bg-[#F7F6F3] dark:hover:bg-[#2B2A27]"
             onClick={() => togglePin(menu.node, menu.pinned)}
           >
-            {menu.pinned ? "핀 해제" : "핀 고정"}
+            {menu.pinned ? t.unpin : t.pin}
           </button>
         </div>
       )}
@@ -320,7 +322,7 @@ export default function NodeInteractions({
             className={`${BLOCK} ${BLOCK_PRESS} px-3 py-1.5 hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
             onClick={showAll}
           >
-            숨긴 노드 {hiddenCount}개, 모두 표시
+            {t.hiddenShowAll(hiddenCount)}
           </button>
           <button
             data-testid="hidden_list_chip"
@@ -333,7 +335,7 @@ export default function NodeInteractions({
               }
             }}
           >
-            {listOpen ? "숨긴 목록 닫기" : "숨긴 목록 보기"}
+            {listOpen ? t.hiddenListClose : t.hiddenListOpen}
           </button>
         </div>
       )}

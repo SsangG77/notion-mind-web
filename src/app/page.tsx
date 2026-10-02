@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import { DICT, LANG_COOKIE, legalPath, pickLang } from "@/lib/i18n";
 import LandingContent from "@/features/landing/components/LandingContent";
 
 // 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
@@ -45,6 +46,8 @@ export default async function Home({
   const { error } = await searchParams;
   const jar = await cookies();
   if (jar.get("nm_token")?.value) redirect("/graph");
+  const lang = pickLang(jar.get(LANG_COOKIE)?.value);
+  const t = DICT[lang];
 
   return (
     <main className="bg-white nm-dotgrid dark:bg-[#191919]">
@@ -86,33 +89,32 @@ export default async function Home({
             Notion-mind
           </h1>
           <p className="-mt-3 max-w-[300px] text-center text-sm text-[#37352F]">
-            노션 워크스페이스의 페이지와 데이터베이스를 하나의 노드 그래프로
-            펼쳐 보는 도구
+            {t.tagline}
           </p>
           <a
             href="/api/auth/login"
             data-testid="login_notion_button"
             className="rounded-lg bg-[#2383E2] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1b74cb]"
           >
-            Notion으로 계속하기
+            {t.continueWithNotion}
           </a>
           <p className="text-sm text-[#91908C]">
-            노션 계정으로 로그인합니다 — 별도 가입 없음
+            {t.noSignup}
           </p>
           <p className="-mt-2 text-[11px] text-[#91908C]">
-            계속하면{" "}
-            <a href="/terms" className="underline">
-              이용약관
+            {t.agreePrefix}
+            <a href={legalPath(lang, "terms")} className="underline">
+              {t.terms}
             </a>
-            과{" "}
-            <a href="/privacy" className="underline">
-              개인정보 처리방침
+            {t.agreeMiddle}
+            <a href={legalPath(lang, "privacy")} className="underline">
+              {t.privacy}
             </a>
-            에 동의하는 것입니다
+            {t.agreeSuffix}
           </p>
           {error && (
             <p className="rounded-lg border border-[#E9E9E7] bg-white px-4 py-2 text-sm text-[#37352F]">
-              연결에 실패했습니다: {error}
+              {t.loginError(error)}
             </p>
           )}
         </div>
@@ -121,40 +123,37 @@ export default async function Home({
           href="#intro"
           className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] text-[#91908C] hover:underline"
         >
-          어떤 도구인지 보기 ↓
+          {t.seeWhatItDoes}
         </a>
       </section>
 
       <div id="intro">
-        <LandingContent />
+        <LandingContent lang={lang} />
       </div>
 
       {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
       <footer className="flex flex-col items-center gap-2 px-6 pb-8 text-center">
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
           <a href="/guide" className="hover:underline">
-            사용 가이드
+            {t.guide}
           </a>
           <a href="/faq" className="hover:underline">
-            자주 묻는 질문
+            {t.faq}
           </a>
           <a href="/pricing" className="hover:underline">
-            요금제
+            {t.pricingTitle}
           </a>
-          <a href="/terms" className="hover:underline">
-            이용약관
+          <a href={legalPath(lang, "terms")} className="hover:underline">
+            {t.terms}
           </a>
-          <a href="/privacy" className="hover:underline">
-            개인정보 처리방침
+          <a href={legalPath(lang, "privacy")} className="hover:underline">
+            {t.privacy}
           </a>
-          <a href="/refund" className="hover:underline">
-            환불정책
-          </a>
-          <a href="/eu/terms" className="hover:underline">
-            English
+          <a href={legalPath(lang, "refund")} className="hover:underline">
+            {t.refund}
           </a>
           <a href="mailto:sangjincha719@gmail.com" className="hover:underline">
-            문의 sangjincha719@gmail.com
+            {t.contact} sangjincha719@gmail.com
           </a>
         </nav>
         <NotionDisclaimer />

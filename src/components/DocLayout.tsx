@@ -4,6 +4,7 @@ import ArticleShell from "@/components/ArticleShell";
 export default function DocLayout({ page, children }: { page: "guide" | "faq"; children: React.ReactNode }) {
   return (
     <ArticleShell
+      lang="ko"
       nav={[
         { href: "/guide", label: "사용 가이드", active: page === "guide" },
         { href: "/faq", label: "자주 묻는 질문", active: page === "faq" },

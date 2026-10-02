@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/legal/CookieBanner";
 import AdSenseLoader from "@/components/AdSenseLoader";
 import { ADSENSE_CLIENT } from "@/components/adsense";
+import { LangProvider } from "@/features/i18n/LangProvider";
+import { LANG_COOKIE, pickLang } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,16 +25,20 @@ export const metadata: Metadata = {
   other: { "google-adsense-account": ADSENSE_CLIENT },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // 선택한 화면 언어 — 쿠키 하나로 서버·클라이언트가 같은 값을 본다
+  const lang = pickLang((await cookies()).get(LANG_COOKIE)?.value);
   return (
     <html
-      lang="en"
+      lang={lang}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <CookieBanner />
-        <AdSenseLoader />
+        <LangProvider lang={lang}>
+          {children}
+          <CookieBanner />
+          <AdSenseLoader />
+        </LangProvider>
       </body>
     </html>
   );

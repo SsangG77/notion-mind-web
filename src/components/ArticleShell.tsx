@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
+import type { Lang } from "@/lib/i18n";
 
 export interface ShellLink {
   href: string;
@@ -10,11 +11,14 @@ export interface ShellLink {
 
 /** 긴 글 공통 틀 — 노드 박스 카드 안에 prose 본문. 약관, 가이드, FAQ 가 같이 씀 */
 export default function ArticleShell({
+  lang,
   nav,
   trailing,
   footer,
   children,
 }: {
+  /** 이 문서의 언어 — 앱 UI 언어와 별개 */
+  lang: Lang;
   nav: ShellLink[];
   /** 내비 오른쪽 끝 링크(언어 전환 등) */
   trailing?: ShellLink;
@@ -45,7 +49,7 @@ export default function ArticleShell({
         </div>
         <footer className="mt-10 border-t border-[#E9E9E7] pt-4 text-xs text-[#91908C] dark:border-[#2F2F2F]">
           {footer}
-          <NotionDisclaimer className={footer ? "mt-3" : ""} />
+          <NotionDisclaimer className={footer ? "mt-3" : ""} lang={lang} />
         </footer>
       </article>
     </div>

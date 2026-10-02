@@ -37,6 +37,7 @@ export default function LegalLayout({
   const base = locale === "ko" ? "" : "/eu";
   return (
     <ArticleShell
+      lang={locale}
       nav={[
         { href: `${base}/privacy`, label: t.privacy, active: page === "privacy" },
         { href: `${base}/terms`, label: t.terms, active: page === "terms" },

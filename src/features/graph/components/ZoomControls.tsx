@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import { BLOCK } from "@/components/blockStyle";
+import { useT } from "@/features/i18n/LangProvider";
 
 // 박스 안쪽 버튼 — 색은 박스(BLOCK)에서 상속, 호버만 서피스색
 const BTN =
@@ -11,6 +12,7 @@ const BTN =
 const TRACK_H = 96; // 슬라이더 트랙 높이(px)
 
 export default function ZoomControls() {
+  const txt = useT(); // 슬라이더 위치 변수 t 와 겹치지 않게
   const sigma = useSigma();
   const camera = useCallback(() => sigma.getCamera(), [sigma]);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ export default function ZoomControls() {
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           role="slider"
-          aria-label="줌"
+          aria-label={txt.zoom}
           aria-valuenow={percent}
           className="relative my-2 w-9 cursor-pointer touch-none"
           style={{ height: TRACK_H }}
@@ -110,7 +112,7 @@ export default function ZoomControls() {
           data-testid="zoom_reset_button"
           className={`${BTN} border-t border-[#E9E9E7] dark:border-[#2F2F2F]`}
           onClick={() => camera().animatedReset({ duration: 300 })}
-          title="기본 배율 (100%)"
+          title={txt.zoomReset}
         >
           ⤢
         </button>

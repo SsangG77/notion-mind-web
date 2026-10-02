@@ -21,6 +21,7 @@ import ZoomControls from "./ZoomControls";
 import ThemeSync from "./ThemeSync";
 import ViewportMemory from "./ViewportMemory";
 import type { Plan } from "@/lib/billing";
+import { useT } from "@/features/i18n/LangProvider";
 
 const SIGMA_SETTINGS = {
   defaultDrawNodeLabel: drawNodeLabel,
@@ -39,6 +40,7 @@ const SIGMA_SETTINGS = {
 };
 
 export default function GraphView({ workspace, plan }: { workspace?: string; plan: Plan }) {
+  const t = useT();
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
   const { saved, persist } = useWorkspaceSettings(plan);
@@ -106,8 +108,8 @@ export default function GraphView({ workspace, plan }: { workspace?: string; pla
       {/* 첫 배치 전 로딩 */}
       {loading && !data && (
         <Overlay>
-          <p className="text-sm text-[#37352F] dark:text-[#EDEDEC]">워크스페이스를 읽는 중…</p>
-          <p className="text-xs text-[#91908C]">페이지가 많으면 시간이 걸립니다</p>
+          <p className="text-sm text-[#37352F] dark:text-[#EDEDEC]">{t.graphLoading}</p>
+          <p className="text-xs text-[#91908C]">{t.graphLoadingHint}</p>
         </Overlay>
       )}
 
@@ -118,34 +120,34 @@ export default function GraphView({ workspace, plan }: { workspace?: string; pla
           className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#E9E9E7] bg-white/90 px-4 py-1.5 text-xs text-[#37352F] shadow-sm backdrop-blur dark:border-[#2F2F2F] dark:bg-[#202020]/90 dark:text-[#EDEDEC]"
         >
           <span className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-[#2383E2] border-t-transparent" />
-          페이지 {data.total.toLocaleString()}개 읽는 중…
+          {t.graphReadingPages(data.total.toLocaleString())}
         </div>
       )}
 
       {error && (
         <Overlay>
           <p className="rounded-lg border border-[#E9E9E7] bg-[#F7F6F3] px-4 py-2 text-sm text-[#37352F] dark:border-[#2F2F2F] dark:bg-[#202020] dark:text-[#EDEDEC]">
-            그래프를 불러오지 못했습니다: {error}
+            {t.graphError(error)}
           </p>
           <Link href="/" className="text-sm text-[#2383E2]">
-            다시 로그인
+            {t.graphRelogin}
           </Link>
         </Overlay>
       )}
 
       {empty && (
         <Overlay>
-          <p className="text-sm text-[#37352F] dark:text-[#EDEDEC]">표시할 페이지가 없습니다</p>
+          <p className="text-sm text-[#37352F] dark:text-[#EDEDEC]">{t.graphEmpty}</p>
           <p className="text-xs text-[#91908C]">
-            노션 연결 설정에서 공유한 페이지가 있는지 확인하세요
+            {t.graphEmptyHint}
           </p>
         </Overlay>
       )}
 
       {!loading && data?.truncated && (
         <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-full border border-[#E9E9E7] bg-[#F7F6F3] px-4 py-1.5 text-xs text-[#37352F] dark:border-[#2F2F2F] dark:bg-[#202020] dark:text-[#EDEDEC]">
-          {data.nodes.length.toLocaleString()} / {data.total.toLocaleString()} 표시 중 —{" "}
-          <span className="font-semibold text-[#2383E2]">전체는 Pro</span>
+          {t.graphTruncated(data.nodes.length.toLocaleString(), data.total.toLocaleString())}
+          <span className="font-semibold text-[#2383E2]">{t.graphTruncatedPro}</span>
         </div>
       )}
     </div>

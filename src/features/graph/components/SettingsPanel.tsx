@@ -7,6 +7,8 @@ import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
 import ManageSubscriptionButton from "@/features/billing/components/ManageSubscriptionButton";
 import type { Plan } from "@/lib/billing";
+import { useLang, useSetLang, useT } from "@/features/i18n/LangProvider";
+import { LANG_LABEL, LANGS, legalPath } from "@/lib/i18n";
 
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
@@ -45,6 +47,9 @@ export default function SettingsPanel({
   workspace?: string;
   plan: Plan;
 }) {
+  const t = useT();
+  const lang = useLang();
+  const setLang = useSetLang();
   const [paywall, setPaywall] = useState(false);
   const [closing, setClosing] = useState(false);
   // 닫기 애니메이션이 끝난 뒤 실제 언마운트
@@ -54,7 +59,7 @@ export default function SettingsPanel({
     setTimeout(onClose, 200);
   };
   const syncTime = lastSync
-    ? new Date(lastSync).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
+    ? new Date(lastSync).toLocaleTimeString(lang === "ko" ? "ko-KR" : "en-US", { hour: "2-digit", minute: "2-digit" })
     : null;
 
   return (
@@ -75,7 +80,7 @@ export default function SettingsPanel({
       >
         <div className={`${ROW} shrink-0`}>
           <span className="min-w-0">
-            <span className="block text-sm font-semibold">설정</span>
+            <span className="block text-sm font-semibold">{t.settings}</span>
             {workspace && (
               <span className="mt-0.5 block truncate text-[10px] text-[#91908C]">
                 {workspace}
@@ -86,7 +91,7 @@ export default function SettingsPanel({
             data-testid="settings_close_button"
             onClick={close}
             className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
-            aria-label="닫기"
+            aria-label={t.close}
           >
             ✕
           </button>
@@ -98,7 +103,7 @@ export default function SettingsPanel({
             href="/pricing"
             className={`${ROW} hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
           >
-            <span>요금제</span>
+            <span>{t.plan}</span>
             <span className="flex items-center gap-1.5">
               <span
                 data-testid="plan_badge"
@@ -106,7 +111,7 @@ export default function SettingsPanel({
                   plan === "pro" ? "bg-[#2383E2] text-white" : "bg-[#F4F3EF] dark:bg-[#35342F]"
                 }`}
               >
-                {plan === "pro" ? "Pro" : "Free"}
+                {plan === "pro" ? t.pro : t.free}
               </span>
               <span className="text-[#91908C]">›</span>
             </span>
@@ -114,17 +119,17 @@ export default function SettingsPanel({
           {plan === "pro" && (
             <ManageSubscriptionButton className={`${ROW} w-full text-left hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}>
               <span>
-                구독 관리
-                <span className="mt-0.5 block text-[10px] text-[#91908C]">해지, 결제 수단 변경, 영수증</span>
+                {t.manageSubscription}
+                <span className="mt-0.5 block text-[10px] text-[#91908C]">{t.manageSubscriptionHint}</span>
               </span>
               <span className="text-[#91908C]">›</span>
             </ManageSubscriptionButton>
           )}
           <div className={ROW}>
             <span>
-              연결된 페이지
+              {t.connectedPages}
               <span className="mt-0.5 block text-[10px] text-[#91908C]">
-                그래프에 넣을 페이지·DB를 다시 고름
+                {t.connectedPagesHint}
               </span>
             </span>
             <a
@@ -132,14 +137,14 @@ export default function SettingsPanel({
               href="/api/auth/login"
               className="shrink-0 rounded-md border border-[#E9E9E7] px-2.5 py-1 text-xs hover:bg-[#F4F3EF] dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
             >
-              변경
+              {t.change}
             </a>
           </div>
           <div className={ROW}>
             <span>
-              수동 동기화
+              {t.manualSync}
               {syncTime && (
-                <span className="ml-1 block text-[10px] text-[#91908C]">마지막 {syncTime}</span>
+                <span className="ml-1 block text-[10px] text-[#91908C]">{t.lastSync(syncTime)}</span>
               )}
             </span>
             <button
@@ -148,60 +153,82 @@ export default function SettingsPanel({
               onClick={onReload}
               className="rounded-md border border-[#E9E9E7] px-2.5 py-1 text-xs hover:bg-[#F4F3EF] disabled:opacity-50 dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
             >
-              {loading ? "동기화 중…" : "↻ 동기화"}
+              {loading ? t.syncing : t.syncNow}
             </button>
           </div>
           <div className={ROW}>
             <span>
-              광고 제거 <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
+              {t.removeAds} <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
             <ProSwitch testid="ad_free_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
           </div>
           <div className={ROW}>
             <span>
-              자동 동기화 <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
+              {t.autoSync} <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
             <ProSwitch testid="auto_sync_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
+          </div>
+          {/* 화면 언어 — 쿠키에 저장되고 서버 컴포넌트까지 같이 바뀐다 */}
+          <div className={ROW}>
+            <span>{t.language}</span>
+            <span className="flex overflow-hidden rounded-md border border-[#E9E9E7] text-xs dark:border-[#2F2F2F]">
+              {LANGS.map((l) => (
+                <button
+                  key={l}
+                  data-testid={`lang_${l}_button`}
+                  onClick={() => setLang(l)}
+                  aria-pressed={lang === l}
+                  className={`px-2.5 py-1 ${
+                    lang === l
+                      ? "bg-[#2383E2] font-semibold text-white"
+                      : "hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
+                  }`}
+                >
+                  {LANG_LABEL[l]}
+                </button>
+              ))}
+            </span>
           </div>
           {/* 로그아웃 — 목록 마지막, 파괴적 액션 = 빨간 텍스트 + 확인 단계 (HIG) */}
           <a
             data-testid="logout_button"
             href="/api/auth/logout"
             onClick={(e) => {
-              if (!window.confirm("로그아웃할까요?")) e.preventDefault();
+              if (!window.confirm(t.logoutConfirm)) e.preventDefault();
             }}
             className="block px-4 py-3 text-sm text-[#D44C47] hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
           >
-            로그아웃
+            {t.logout}
           </a>
         </div>
 
         <div className="shrink-0 border-t border-[#E9E9E7] p-3 dark:border-[#2F2F2F]">
           {/* 그래프 범례 — 패널 맨 아래 */}
           <div>
-            <p className="mb-2 text-xs font-semibold text-[#91908C]">그래프 범례</p>
+            <p className="mb-2 text-xs font-semibold text-[#91908C]">{t.legend}</p>
             <div className="space-y-1.5 text-[12px] leading-5">
               <div className="flex items-center gap-2">
                 <span className="inline-block h-0 w-6 border-t-[1.5px] border-[#2E2C27] dark:border-[#8D8A83]" />
-                DB 소속 페이지
+                {t.legendDbChild}
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-0 w-6 border-t-[1.5px] border-[#C9C7C1] dark:border-[#4A4844]" />
-                페이지 안 페이지·DB
+                {t.legendPageChild}
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-0 w-6 border-t-[1.5px] border-dashed border-[#C9C7C1] dark:border-[#4A4844]" />
-                관계형(relation)
+                {t.legendRelation}
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-0 w-6 border-t-[1.5px] border-[#2383E2]" />
-                호버한 노드의 연결
+                {t.legendHover}
               </div>
             </div>
           </div>
           <div className="mt-3 flex gap-3 border-t border-[#E9E9E7] pt-3 text-[10px] text-[#91908C] dark:border-[#2F2F2F]">
-            <Link href="/terms" className="underline">이용약관</Link>
-            <Link href="/privacy" className="underline">개인정보 처리방침</Link>
+            <Link href={legalPath(lang, "terms")} className="underline">{t.terms}</Link>
+            <Link href={legalPath(lang, "privacy")} className="underline">{t.privacy}</Link>
+            <Link href={legalPath(lang, "refund")} className="underline">{t.refund}</Link>
           </div>
           <NotionDisclaimer className="mt-2 text-[10px]" />
         </div>

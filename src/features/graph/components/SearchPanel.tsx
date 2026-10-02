@@ -3,11 +3,13 @@
 import { useMemo, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
+import { useT } from "@/features/i18n/LangProvider";
 
 const SECTIONS = ["Filters", "Groups", "Display", "Forces"];
 
 /** 검색 + 필터 통합 바 — 하나의 노드 블록 안에서 구분선으로 분리 */
 export default function SearchPanel() {
+  const t = useT();
   const sigma = useSigma();
   const [q, setQ] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -46,13 +48,13 @@ export default function SearchPanel() {
           data-testid="graph_search_input"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="페이지 검색"
+          placeholder={t.searchPlaceholder}
           className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-[#91908C]"
         />
         <span className="h-5 w-px shrink-0 bg-[#E9E9E7] dark:bg-[#2F2F2F]" />
         <button
           data-testid="filter_button"
-          title="필터"
+          title={t.filter}
           onClick={() => setFilterOpen((v) => !v)}
           className={`${BLOCK_PRESS} flex h-9 w-9 shrink-0 items-center justify-center hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
         >
@@ -94,7 +96,7 @@ export default function SearchPanel() {
               className="flex items-center justify-between border-b border-[#E9E9E7] py-1.5 last:border-0 dark:border-[#2F2F2F]"
             >
               <span>{s}</span>
-              <span className="text-[11px] text-[#91908C]">준비 중</span>
+              <span className="text-[11px] text-[#91908C]">{t.comingSoon}</span>
             </div>
           ))}
         </div>

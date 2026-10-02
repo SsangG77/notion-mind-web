@@ -1,6 +1,7 @@
 "use client";
 
 import { BLOCK } from "@/components/blockStyle";
+import { useT } from "@/features/i18n/LangProvider";
 
 export interface HiddenNodeRow {
   id: string;
@@ -31,6 +32,7 @@ export default function HiddenNodesPanel({
   /** 슬라이드 아웃 완료 — 언마운트 시점 */
   onClosed: () => void;
 }) {
+  const t = useT();
   const close = onClose;
 
   return (
@@ -42,19 +44,19 @@ export default function HiddenNodesPanel({
       }}
     >
       <div className={`${ROW} shrink-0 py-3`}>
-        <span className="text-sm font-semibold">숨긴 노드 {rows.length}개</span>
+        <span className="text-sm font-semibold">{t.hiddenPanelTitle(rows.length)}</span>
         <button
           data-testid="hidden_panel_close_button"
           onClick={close}
           className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
-          aria-label="닫기"
+          aria-label={t.close}
         >
           ✕
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto text-sm">
         {rows.length === 0 && (
-          <p className="px-4 py-6 text-center text-xs text-[#91908C]">숨긴 노드가 없습니다</p>
+          <p className="px-4 py-6 text-center text-xs text-[#91908C]">{t.hiddenPanelEmpty}</p>
         )}
         {rows.map((r) => (
           <div key={r.id} className={ROW} data-testid="hidden_node_row">
@@ -67,7 +69,7 @@ export default function HiddenNodesPanel({
               onClick={() => onUnhide(r.id)}
               className="shrink-0 rounded-md border border-[#E9E9E7] px-2.5 py-1 text-xs hover:bg-[#F4F3EF] dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
             >
-              표시
+              {t.show}
             </button>
           </div>
         ))}
@@ -79,7 +81,7 @@ export default function HiddenNodesPanel({
             onClick={onShowAll}
             className="w-full rounded-md border border-[#E9E9E7] py-1.5 text-xs hover:bg-[#F4F3EF] dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
           >
-            모두 표시
+            {t.showAll}
           </button>
         </div>
       )}
