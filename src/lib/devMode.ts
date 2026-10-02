@@ -3,21 +3,22 @@ import { decrypt, encrypt } from "./crypto";
 import type { Plan } from "./billing";
 
 /**
- * 개발 모드 — 구독 없이 Pro/Free 화면을 오가기 위한 장치(캡처·검증용).
- * 비밀번호는 설정 패널에 토글을 꺼내는 데까지만 쓰이고, Pro 온오프는 그 토글이 한다.
+ * 개발 모드 — 구독 없이 Pro/Free 화면을 오가기 위한 장치(캡처, 검증용).
+ *
+ * 두 가지가 모두 있어야 적용된다.
+ * 1. 쿠키 nm_dev — "비밀번호를 안다"는 증명. /dev 에서 받는다
+ * 2. 주소의 ?dev=pro 또는 ?dev=free — 이 요청에 적용하라는 표시
+ *
+ * 그래서 링크를 타고 나가 파라미터가 떨어지면 그 즉시 일반 모드로 돌아간다.
+ * 쿠키만으로는 아무것도 바뀌지 않는다.
  *
  * 안전 장치
- * - 잠금 해제는 서버에서만 판정하고, 비밀번호는 DEV_UNLOCK_SECRET 환경변수에만 둔다. 미설정이면 기능 자체가 꺼진다.
- * - 열쇠는 httpOnly 쿠키에 AES-GCM 으로 담아 브라우저에서 위조할 수 없게 한다(토큰과 같은 키를 씀).
- * - 만료를 쿠키 안에 같이 넣어 서버가 직접 확인한다. 쿠키 maxAge 만 믿지 않는다.
+ * - 비밀번호는 DEV_UNLOCK_SECRET 환경변수에만 둔다. 미설정이면 기능 자체가 꺼진다.
+ * - 쿠키는 AES-GCM 으로 봉인(토큰과 같은 키)하고 만료를 안에 넣어 서버가 직접 검사한다.
  */
 export const DEV_COOKIE = "nm_dev";
+export const DEV_PARAM = "dev";
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
-interface DevPayload {
-  plan: Plan;
-  exp: number;
-}
 
 export const devModeConfigured = (): boolean => !!process.env.DEV_UNLOCK_SECRET;
 
@@ -31,20 +32,26 @@ export function checkSecret(input: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-export function sealDevCookie(plan: Plan): string {
-  return encrypt(JSON.stringify({ plan, exp: Date.now() + TTL_MS } satisfies DevPayload));
+export function sealDevCookie(): string {
+  return encrypt(JSON.stringify({ exp: Date.now() + TTL_MS }));
 }
 
-/** 쿠키에서 꺼낸 개발 모드 요금제. 꺼져 있거나 위조·만료면 null */
-export function readDevPlan(cookieValue: string | undefined): Plan | null {
-  if (!cookieValue || !devModeConfigured()) return null;
+/** 쿠키가 우리가 발급한 것이고 아직 안 만료됐는지 */
+export function isUnlocked(cookieValue: string | undefined): boolean {
+  if (!cookieValue || !devModeConfigured()) return false;
   try {
-    const p = JSON.parse(decrypt(cookieValue)) as DevPayload;
-    if (p.exp < Date.now()) return null;
-    return p.plan === "pro" ? "pro" : "free";
+    const { exp } = JSON.parse(decrypt(cookieValue)) as { exp: number };
+    return exp > Date.now();
   } catch {
-    return null;
+    return false;
   }
+}
+
+/** 주소의 dev 파라미터가 가리키는 요금제. 없거나 이상하면 null */
+export function planFromParam(value: string | null | undefined): Plan | null {
+  if (value === "pro") return "pro";
+  if (value === "free") return "free";
+  return null;
 }
 
 export const DEV_COOKIE_OPTIONS = {

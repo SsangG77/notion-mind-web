@@ -15,14 +15,14 @@ export default function TopBar({
   onReload,
   workspace,
   plan,
-  devMode,
+  unlocked,
 }: {
   loading: boolean;
   lastSync: number | null;
   onReload: () => void;
   workspace?: string;
   plan: Plan;
-  devMode: boolean;
+  unlocked: boolean;
 }) {
   const t = useT();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -71,7 +71,7 @@ export default function TopBar({
             onReload={onReload}
             workspace={workspace}
             plan={plan}
-            devMode={devMode}
+            unlocked={unlocked}
           />
         )}
       </div>

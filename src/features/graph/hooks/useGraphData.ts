@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GraphBatch, GraphData, GraphItem } from "@/types/graph";
 import type { Plan } from "@/lib/billing";
 import { assembleGraph, FREE_NODE_LIMIT, PRO_NODE_LIMIT } from "../lib/assembleGraph";
+import { withDev } from "@/lib/devParam";
 
 interface State {
   data: GraphData | null;
@@ -40,7 +41,9 @@ export function useGraphData(plan: Plan): State & { reload: () => void } {
     let cursor: string | null = null;
     try {
       for (let i = 0; i < MAX_BATCHES; i++) {
-        const url = cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}&i=${i}` : "/api/graph";
+        const url = withDev(
+          cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}&i=${i}` : "/api/graph",
+        );
         const res = await fetch(url);
         if (!res.ok) {
           const body = (await res.json().catch(() => null)) as { error?: string } | null;

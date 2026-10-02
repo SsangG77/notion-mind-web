@@ -42,12 +42,12 @@ const SIGMA_SETTINGS = {
 export default function GraphView({
   workspace,
   plan,
-  devMode,
+  unlocked,
 }: {
   workspace?: string;
   plan: Plan;
   /** 개발 모드가 열려 있을 때만 설정 패널에 요금제 토글을 보여준다 */
-  devMode: boolean;
+  unlocked: boolean;
 }) {
   const t = useT();
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
@@ -103,7 +103,7 @@ export default function GraphView({
           onReload={reload}
           workspace={workspace}
           plan={plan}
-          devMode={devMode}
+          unlocked={unlocked}
         />
         <ThemeToggle dark={dark} onToggle={toggle} />
         <PageCountChip

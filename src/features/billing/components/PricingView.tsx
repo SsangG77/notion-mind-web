@@ -12,6 +12,7 @@ import ManageSubscriptionButton from "./ManageSubscriptionButton";
 import { useLang, useT } from "@/features/i18n/LangProvider";
 import { legalPath } from "@/lib/i18n";
 import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_SAVING } from "@/lib/pricing";
+import { withDev } from "@/lib/devParam";
 
 /** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
 export default function PricingView({ plan, workspaceId }: { plan: Plan; workspaceId?: string }) {
@@ -27,7 +28,7 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
     if (!waiting) return;
     let tries = 0;
     const id = setInterval(async () => {
-      const r = await fetch("/api/billing/status").then((r) => r.json()).catch(() => null);
+      const r = await fetch(withDev("/api/billing/status")).then((r) => r.json()).catch(() => null);
       if (r?.plan === "pro" || ++tries > 20) {
         clearInterval(id);
         setWaiting(false);

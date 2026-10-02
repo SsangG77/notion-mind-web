@@ -5,7 +5,7 @@ import { planFor } from "@/lib/plan.server";
 // Pro 전용 영구 설정. Free 는 GET 빈 값 / PUT 403 — 클라이언트는 세션 한정으로 동작
 export async function GET(req: NextRequest) {
   const ws = req.cookies.get("nm_ws")?.value;
-  if (!ws || (await planFor(req.cookies)) !== "pro") return NextResponse.json(EMPTY_SETTINGS);
+  if (!ws || (await planFor(req)) !== "pro") return NextResponse.json(EMPTY_SETTINGS);
   try {
     return NextResponse.json(await getWorkspaceSettings(ws));
   } catch (e) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const ws = req.cookies.get("nm_ws")?.value;
   if (!ws) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if ((await planFor(req.cookies)) !== "pro") return NextResponse.json({ error: "pro_only" }, { status: 403 });
+  if ((await planFor(req)) !== "pro") return NextResponse.json({ error: "pro_only" }, { status: 403 });
   const body = (await req.json().catch(() => null)) as Partial<WorkspaceSettings> | null;
   if (!body || !Array.isArray(body.hidden) || typeof body.pinned !== "object" || body.pinned === null) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });

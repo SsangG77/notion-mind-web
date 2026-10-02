@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
@@ -10,6 +10,7 @@ import ManageSubscriptionButton from "@/features/billing/components/ManageSubscr
 import type { Plan } from "@/lib/billing";
 import { useLang, useSetLang, useT } from "@/features/i18n/LangProvider";
 import { LANG_LABEL, LANGS, legalPath } from "@/lib/i18n";
+import { DEV_PARAM } from "@/lib/devParam";
 
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
@@ -39,7 +40,7 @@ export default function SettingsPanel({
   onReload,
   workspace,
   plan,
-  devMode,
+  unlocked,
 }: {
   onClose: () => void;
   loading: boolean;
@@ -48,24 +49,34 @@ export default function SettingsPanel({
   /** 연결된 노션 워크스페이스 이름 — 상단 헤더가 사라져 이 패널이 표시 자리 */
   workspace?: string;
   plan: Plan;
-  /** 개발 모드가 열려 있을 때만 요금제 토글이 보인다 */
-  devMode: boolean;
+/** 비밀번호를 입력해 둔 사람에게만 요금제 토글이 보인다 */
+  unlocked: boolean;
 }) {
   const t = useT();
   const lang = useLang();
   const setLang = useSetLang();
   const router = useRouter();
   const [paywall, setPaywall] = useState(false);
-  const callDev = async (body: Record<string, unknown>) => {
+  const pathname = usePathname();
+  const params = useSearchParams();
+  // 개발 모드는 주소에 남는다 — 링크를 타고 나가면 표시가 떨어져 저절로 일반 모드로 돌아간다
+  const devParam = params.get(DEV_PARAM);
+  const setDevPlan = (p: Plan | null) => {
+    const next = new URLSearchParams(params.toString());
+    if (p) next.set(DEV_PARAM, p);
+    else next.delete(DEV_PARAM);
+    const q = next.toString();
+    router.replace(q ? `${pathname}?${q}` : pathname);
+    router.refresh();
+  };
+  const lockDev = async () => {
     await fetch("/api/dev", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ action: "lock" }),
     }).catch(() => {});
-    router.refresh();
+    setDevPlan(null);
   };
-  const setDevPlan = (p: Plan) => callDev({ plan: p });
-  const lockDev = () => callDev({ action: "lock" });
   const [closing, setClosing] = useState(false);
   // 닫기 애니메이션이 끝난 뒤 실제 언마운트
   const close = () => {
@@ -184,7 +195,7 @@ export default function SettingsPanel({
             <ProSwitch testid="auto_sync_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
           </div>
           {/* 개발 모드 — /dev 에서 비밀번호로 연 사람에게만 보인다 */}
-          {devMode && (
+          {unlocked && (
             <div className={ROW}>
               <span>
                 {t.devMode}
@@ -197,9 +208,9 @@ export default function SettingsPanel({
                       key={p}
                       data-testid={`dev_plan_${p}_button`}
                       onClick={() => setDevPlan(p)}
-                      aria-pressed={plan === p}
+                      aria-pressed={devParam === p}
                       className={`px-2.5 py-1 ${
-                        plan === p
+                        devParam === p
                           ? "bg-[#2383E2] font-semibold text-white"
                           : "hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]"
                       }`}
