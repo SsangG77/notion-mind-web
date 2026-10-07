@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
 import { DICT, LANG_LABEL, langHref, legalPath } from "@/lib/i18n";
 import { currentLang } from "@/lib/lang.server";
+import { pageMeta } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMeta(await currentLang(), "/");
+}
 import LandingContent from "@/features/landing/components/LandingContent";
 
 // 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
@@ -86,12 +92,11 @@ export default async function Home({
 
         {/* 중앙 대형 노드 */}
         <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
-          <h1 className="text-2xl font-bold tracking-tight text-[#37352F]">
+          {/* 설명을 제목 안에 둔다 — 브랜드명만 있는 h1 은 검색 의도와 안 맞는다. 보이는 모습은 그대로 */}
+          <h1 className="flex flex-col items-center gap-2 text-2xl font-bold tracking-tight text-[#37352F]">
             Notion-mind
+            <span className="max-w-[300px] text-center text-sm font-normal">{t.tagline}</span>
           </h1>
-          <p className="-mt-3 max-w-[300px] text-center text-sm text-[#37352F]">
-            {t.tagline}
-          </p>
           <a
             href="/api/auth/login"
             data-testid="login_notion_button"

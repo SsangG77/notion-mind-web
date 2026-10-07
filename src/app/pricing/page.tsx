@@ -3,6 +3,13 @@ import { cookies } from "next/headers";
 import PricingView from "@/features/billing/components/PricingView";
 import AdBanner from "@/components/AdBanner";
 import { currentPlan } from "@/lib/plan.server";
+import { currentLang } from "@/lib/lang.server";
+import { pageMeta } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMeta(await currentLang(), "/pricing");
+}
 
 // 화면 5. 요금제 — Free/Pro 카드. 로그인 상태면 체크아웃 가능, 아니면 로그인 유도
 export default async function PricingPage({

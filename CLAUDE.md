@@ -102,10 +102,19 @@ src/
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 거부 시 `requestNonPersonalizedAds=1`, 미응답 시 `pauseAdRequests=1`. EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
+
+## 검색 노출 (2026-10-08)
+- 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 7개 × 두 언어 = 14개. `/graph` 와 `/dev` 는 robots.txt 차단 + noindex
+- 페이지 메타데이터는 `pageMeta(lang, path)` 한 곳에서 나온다 — 제목, 설명, 자기 참조 canonical, hreflang(en/ko/x-default), OG, 트위터 카드. 새 공개 페이지를 만들면 `PUBLIC_PATHS` 와 `META` 에 추가하고 `generateMetadata` 에서 `pageMeta` 를 부른다
+- 검색 결과 노출 문구는 `lib/seo.ts` 의 `META` 에 둔다(화면 사전 `i18n.ts` 와 분리 — 길이 제약과 쓰임이 다름). 문구 가드 예외 파일
+- `app/sitemap.ts` 가 14개 주소를 `lastmod` 와 언어 대체 주소까지 생성. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
+- 구조화 데이터는 Organization(layout)과 BreadcrumbList(문서, 법률 페이지)만. FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
+- OG 이미지는 `app/opengraph-image.tsx` 가 생성(이미지 파일 없음). 글꼴 파일을 안 받으려고 영문만 씀
+- `npm run check:seo [주소]` — 14개 주소에 title, description, canonical, hreflang, og 가 다 있는지, sitemap 개수가 맞는지 검사. **완료 판정은 이 명령의 0건으로 한다.** 서버가 떠 있어야 해서 `lint` 에는 안 묶임
 
 ## 명령
 - `npm run dev` / `npm run build` / `npm run lint` (리포 루트 = 웹 앱)

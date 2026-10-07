@@ -6,6 +6,7 @@ import AdSenseLoader from "@/components/AdSenseLoader";
 import { ADSENSE_CLIENT } from "@/components/adsense";
 import { LangProvider } from "@/features/i18n/LangProvider";
 import { currentLang } from "@/lib/lang.server";
+import { SITE_NAME, SITE_URL, organizationJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,10 +18,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// 상대 주소를 절대 주소로 바꾸는 기준. canonical 과 OG 주소가 이걸 쓴다
 export const metadata: Metadata = {
-  title: "Notion-mind",
-  description: "노션 워크스페이스를 그래프로 보는 웹 앱", // i18n-allow: 사이트 기본 설명, 메타데이터 다국어는 별도 작업
-  // AdSense 사이트 소유 확인용 메타 태그 — 스크립트는 쿠키 동의 후에만 붙어서 크롤러가 못 보므로 이걸로 확인
+  metadataBase: new URL(SITE_URL),
+  title: { template: `%s — ${SITE_NAME}`, default: SITE_NAME },
+  // AdSense 사이트 소유 확인용 메타 태그
   other: { "google-adsense-account": ADSENSE_CLIENT },
 };
 
@@ -33,6 +35,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <LangProvider lang={lang}>
           {children}
           <CookieBanner />
