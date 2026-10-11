@@ -44,3 +44,6 @@ next-env.d.ts
 # local tool state
 .gstack/
 .claude/settings.local.json
+
+# Playwright MCP 가 남기는 세션 기록
+.playwright-mcp/

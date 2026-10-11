@@ -41,6 +41,14 @@ for (const path of ["/graph", "/ko/graph", "/dev", "/ko/dev"]) {
     problems.push(`${path} → 200 인데 noindex 가 없음`);
 }
 
+const robots = await fetch(`${BASE}/robots.txt`);
+if (!robots.ok) problems.push(`/robots.txt → HTTP ${robots.status}`);
+else {
+  const txt = await robots.text();
+  if (!/^Sitemap:\s*https?:\/\/\S+sitemap\.xml/im.test(txt))
+    problems.push("robots.txt 에 전체 주소로 된 Sitemap 줄이 없음");
+}
+
 const sm = await fetch(`${BASE}/sitemap.xml`);
 if (!sm.ok) problems.push(`/sitemap.xml → HTTP ${sm.status}`);
 else {

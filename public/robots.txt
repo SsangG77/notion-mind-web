@@ -5,3 +5,5 @@ Disallow: /graph
 Disallow: /ko/graph
 Disallow: /dev
 Disallow: /ko/dev
+
+Sitemap: https://notion-mind.com/sitemap.xml

@@ -114,6 +114,7 @@ src/
 - `app/sitemap.ts` 가 14개 주소를 `lastmod` 와 언어 대체 주소까지 생성. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
 - 구조화 데이터는 Organization(layout)과 BreadcrumbList(문서, 법률 페이지)만. FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
 - OG 이미지는 `app/opengraph-image.tsx` 가 생성(이미지 파일 없음). 글꼴 파일을 안 받으려고 영문만 씀
+- `public/robots.txt` 는 `/api`, `/graph`, `/dev`(양 언어)를 막고 맨 아래 `Sitemap:` 줄로 sitemap 위치를 알린다 — 구글은 이 줄의 주소가 전체 주소일 것을 요구
 - `npm run check:seo [주소]` — 14개 주소에 title, description, canonical, hreflang, og 가 다 있는지, sitemap 개수가 맞는지 검사. **완료 판정은 이 명령의 0건으로 한다.** 서버가 떠 있어야 해서 `lint` 에는 안 묶임
 
 ## 명령
