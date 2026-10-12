@@ -8,6 +8,7 @@ import "@react-sigma/core/lib/style.css";
 import { useGraphData } from "../hooks/useGraphData";
 import { useTheme } from "../hooks/useTheme";
 import { useWorkspaceSettings } from "../hooks/useWorkspaceSettings";
+import { useAutoSync } from "../hooks/useAutoSync";
 import { drawNodeHover, drawNodeLabel, setSelected } from "../drawNode";
 import ContainerResize from "./ContainerResize";
 import LayoutManager from "./LayoutManager";
@@ -55,7 +56,8 @@ export default function GraphView({
   const lang = useLang();
   const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
   const { dark, toggle } = useTheme();
-  const { saved, persist } = useWorkspaceSettings(plan);
+  const { saved, persist, autoSync, setAutoSync } = useWorkspaceSettings(plan);
+  useAutoSync(plan, autoSync, reload);
   // 그래프 인스턴스는 한 번만 생성 — 배치·재동기화는 LayoutManager가 내용만 갱신
   const graph = useMemo(() => new Graph(), []);
   useEffect(() => {
@@ -107,6 +109,8 @@ export default function GraphView({
           workspace={workspace}
           plan={plan}
           unlocked={unlocked}
+          autoSync={autoSync}
+          onAutoSync={setAutoSync}
         />
         <ThemeToggle dark={dark} onToggle={toggle} />
         <PageCountChip

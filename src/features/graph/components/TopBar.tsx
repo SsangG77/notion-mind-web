@@ -16,6 +16,8 @@ export default function TopBar({
   workspace,
   plan,
   unlocked,
+  autoSync,
+  onAutoSync,
 }: {
   loading: boolean;
   lastSync: number | null;
@@ -23,6 +25,8 @@ export default function TopBar({
   workspace?: string;
   plan: Plan;
   unlocked: boolean;
+  autoSync: boolean;
+  onAutoSync: (on: boolean) => void;
 }) {
   const t = useT();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -72,6 +76,8 @@ export default function TopBar({
             workspace={workspace}
             plan={plan}
             unlocked={unlocked}
+            autoSync={autoSync}
+            onAutoSync={onAutoSync}
           />
         )}
       </div>

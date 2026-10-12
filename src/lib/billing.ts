@@ -52,24 +52,37 @@ export async function upsertSubscription(row: SubscriptionRow) {
 export interface WorkspaceSettings {
   hidden: string[];
   pinned: Record<string, { x: number; y: number }>;
+  /** 자동 동기화 켜짐 여부 — Pro 전용 */
+  autoSync: boolean;
 }
 
-export const EMPTY_SETTINGS: WorkspaceSettings = { hidden: [], pinned: {} };
+export const EMPTY_SETTINGS: WorkspaceSettings = { hidden: [], pinned: {}, autoSync: false };
 
 export async function getWorkspaceSettings(workspaceId: string): Promise<WorkspaceSettings> {
   const { data, error } = await supabaseAdmin()
     .from("workspace_settings")
-    .select("hidden, pinned")
+    .select("hidden, pinned, auto_sync")
     .eq("workspace_id", workspaceId)
     .maybeSingle();
   if (error) throw new Error(`workspace_settings read failed: ${error.message}`);
-  return (data as WorkspaceSettings | null) ?? EMPTY_SETTINGS;
+  if (!data) return EMPTY_SETTINGS;
+  const row = data as { hidden: string[]; pinned: WorkspaceSettings["pinned"]; auto_sync: boolean };
+  return { hidden: row.hidden, pinned: row.pinned, autoSync: row.auto_sync };
 }
 
 export async function putWorkspaceSettings(workspaceId: string, s: WorkspaceSettings) {
   const { error } = await supabaseAdmin()
     .from("workspace_settings")
-    .upsert({ workspace_id: workspaceId, ...s, updated_at: new Date().toISOString() }, { onConflict: "workspace_id" });
+    .upsert(
+      {
+        workspace_id: workspaceId,
+        hidden: s.hidden,
+        pinned: s.pinned,
+        auto_sync: s.autoSync,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "workspace_id" },
+    );
   if (error) throw new Error(`workspace_settings upsert failed: ${error.message}`);
 }
 

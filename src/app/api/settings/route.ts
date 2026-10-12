@@ -19,13 +19,19 @@ export async function PUT(req: NextRequest) {
   if (!ws) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if ((await planFor(req)) !== "pro") return NextResponse.json({ error: "pro_only" }, { status: 403 });
   const body = (await req.json().catch(() => null)) as Partial<WorkspaceSettings> | null;
-  if (!body || !Array.isArray(body.hidden) || typeof body.pinned !== "object" || body.pinned === null) {
+  if (
+    !body ||
+    !Array.isArray(body.hidden) ||
+    typeof body.pinned !== "object" ||
+    body.pinned === null ||
+    typeof body.autoSync !== "boolean"
+  ) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
   // 크기 상한 — 한 워크스페이스가 DB 를 무한히 키우지 못하게
   if (body.hidden.length > 20000 || Object.keys(body.pinned).length > 20000) {
     return NextResponse.json({ error: "too_large" }, { status: 413 });
   }
-  await putWorkspaceSettings(ws, { hidden: body.hidden, pinned: body.pinned });
+  await putWorkspaceSettings(ws, { hidden: body.hidden, pinned: body.pinned, autoSync: body.autoSync });
   return NextResponse.json({ ok: true });
 }

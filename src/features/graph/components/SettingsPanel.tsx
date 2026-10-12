@@ -15,12 +15,22 @@ import { DEV_PARAM } from "@/lib/apiUrl";
 const ROW =
   "flex items-center justify-between border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]";
 
-/** Pro 전용 기능 스위치 — Free 가 켜려고 하면 페이월, Pro 는 켜짐 고정(개별 끄기는 추후) */
-function ProSwitch({ testid, on, onAttempt }: { testid: string; on: boolean; onAttempt: () => void }) {
+/** Pro 전용 기능 스위치 — Free 가 켜려고 하면 페이월. onTurnOff 를 주면 Pro 가 끌 수도 있다 */
+function ProSwitch({
+  testid,
+  on,
+  onAttempt,
+  onTurnOff,
+}: {
+  testid: string;
+  on: boolean;
+  onAttempt: () => void;
+  onTurnOff?: () => void;
+}) {
   return (
     <button
       data-testid={testid}
-      onClick={on ? undefined : onAttempt}
+      onClick={on ? onTurnOff : onAttempt}
       className={`relative h-[18px] w-[34px] rounded-full ${on ? "bg-[#2383E2]" : "bg-[#E9E9E7] dark:bg-black"}`}
       aria-checked={on}
       role="switch"
@@ -41,6 +51,8 @@ export default function SettingsPanel({
   workspace,
   plan,
   unlocked,
+  autoSync,
+  onAutoSync,
 }: {
   onClose: () => void;
   loading: boolean;
@@ -51,6 +63,9 @@ export default function SettingsPanel({
   plan: Plan;
 /** 비밀번호를 입력해 둔 사람에게만 요금제 토글이 보인다 */
   unlocked: boolean;
+  /** 자동 동기화(Pro) 현재 상태와 토글 */
+  autoSync: boolean;
+  onAutoSync: (on: boolean) => void;
 }) {
   const t = useT();
   const lang = useLang();
@@ -192,7 +207,12 @@ export default function SettingsPanel({
             <span>
               {t.autoSync} <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
-            <ProSwitch testid="auto_sync_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
+            <ProSwitch
+              testid="auto_sync_switch"
+              on={plan === "pro" && autoSync}
+              onAttempt={() => (plan === "pro" ? onAutoSync(true) : setPaywall(true))}
+              onTurnOff={plan === "pro" ? () => onAutoSync(false) : undefined}
+            />
           </div>
           {/* 개발 모드 — /dev 에서 비밀번호로 연 사람에게만 보인다 */}
           {unlocked && (
