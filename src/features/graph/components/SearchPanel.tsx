@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import { useT } from "@/features/i18n/LangProvider";
-
-const SECTIONS = ["Filters", "Groups", "Display", "Forces"];
+import { applyOrphanFilter, clearOrphanFilter, orphanCount } from "../lib/orphanFilter";
 
 /** 검색 + 필터 통합 바 — 하나의 노드 블록 안에서 구분선으로 분리 */
 export default function SearchPanel() {
@@ -13,6 +12,22 @@ export default function SearchPanel() {
   const sigma = useSigma();
   const [q, setQ] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [orphansOnly, setOrphansOnly] = useState(false);
+
+  // 패널을 열 때 몇 개가 남는지 미리 보여준다 — 켜 봐야 아는 건 불친절하다
+  const orphans = useMemo(
+    () => (filterOpen ? orphanCount(sigma.getGraph()) : 0),
+    [filterOpen, sigma],
+  );
+
+  const toggleOrphans = () => {
+    const graph = sigma.getGraph();
+    const next = !orphansOnly;
+    if (next) applyOrphanFilter(graph);
+    else clearOrphanFilter(graph);
+    setOrphansOnly(next);
+    sigma.refresh();
+  };
 
   const results = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -90,15 +105,29 @@ export default function SearchPanel() {
           data-testid="filter_panel"
           className={`${BLOCK} absolute right-0 top-11 w-52 px-3 py-2 text-sm`}
         >
-          {SECTIONS.map((s) => (
-            <div
-              key={s}
-              className="flex items-center justify-between border-b border-[#E9E9E7] py-1.5 last:border-0 dark:border-[#2F2F2F]"
-            >
-              <span>{s}</span>
-              <span className="text-[11px] text-[#91908C]">{t.comingSoon}</span>
-            </div>
-          ))}
+          <button
+            data-testid="filter_orphans_toggle"
+            onClick={toggleOrphans}
+            aria-pressed={orphansOnly}
+            className="flex w-full items-center justify-between gap-2 py-1.5 text-left"
+          >
+            <span>
+              {t.filterOrphans}
+              <span className="mt-0.5 block text-[10px] text-[#91908C]">{t.filterOrphansHint}</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-2">
+              <span className="text-[11px] text-[#91908C]">
+                {t.filterOrphansCount(orphans.toLocaleString())}
+              </span>
+              <span
+                className={`relative h-[18px] w-[34px] shrink-0 rounded-full ${orphansOnly ? "bg-[#2383E2]" : "bg-[#E9E9E7] dark:bg-black"}`}
+              >
+                <span
+                  className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow ${orphansOnly ? "left-[18px]" : "left-[2px]"}`}
+                />
+              </span>
+            </span>
+          </button>
         </div>
       )}
     </div>

@@ -52,7 +52,7 @@ export default function NodeInteractions({
     const recount = () => {
       let c = 0;
       g.forEachNode((_, a) => {
-        if (a.hidden) c++;
+        if (a.hidden && !a.filteredOut) c++;
       });
       setHiddenCount(c);
     };
@@ -277,7 +277,8 @@ export default function NodeInteractions({
   const hiddenRows = (): HiddenNodeRow[] => {
     const rows: HiddenNodeRow[] = [];
     graph.forEachNode((id, a) => {
-      if (a.hidden) rows.push({ id, title: (a.label as string) ?? t.untitled, isDb: a.nodeType === "database" });
+      if (a.hidden && !a.filteredOut)
+        rows.push({ id, title: (a.label as string) ?? t.untitled, isDb: a.nodeType === "database" });
     });
     return rows;
   };
