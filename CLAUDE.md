@@ -85,7 +85,8 @@ src/
 - 내부 링크는 `langHref(lang, path)` 로 만든다. 하드코딩 경로를 쓰면 한국어 화면에서 영어로 튄다. 법률 문서 경로는 `legalPath(lang, doc)`(= `langHref` 를 씀)
 - 쿠키 `nm_lang` 은 내용을 결정하지 않는다. "직접 골랐다"는 표시로만 남아, 루트 자동 이동에서 제외하는 데 쓴다. 전환 버튼은 쿠키를 적고 짝 URL 로 이동(`useSetLang`)
 - 루트에 Accept-Language 가 ko 인 브라우저로 처음 들어오면 `/ko` 로 307. **Googlebot 은 Accept-Language 를 보내지 않으므로**(구글 공식) 이 분기에 안 걸리고 항상 영어를 본다. UA 를 보고 가르는 게 아니라 클로킹이 아님
-- 언어 전환 경로: 공개 페이지는 푸터, 문서, 법률 문서의 내비 링크(`home_locale_switch`, `doc_locale_switch`, `legal_locale_switch`), 앱 안에서는 설정 패널
+- 언어 전환은 전부 `features/i18n/setLang.ts` 의 `goToLang()` 을 거친다. 로그인 카드 우상단, 문서, 법률 문서는 `LangToggle` 컴포넌트(설정 패널과 같은 토글 모양), 앱 안에서는 설정 패널의 `useSetLang`
+- ⚠️ 언어 전환을 **링크로 만들지 말 것.** `<a href="/">` 로 두면 쿠키가 안 적혀서 미들웨어가 브라우저 언어를 보고 `/ko` 로 되돌린다(영어로 못 감). 그리고 `router.push` 로는 루트 레이아웃이 다시 안 그려져 옛 언어가 남는다. `goToLang` 이 쿠키를 적고 **전체 로드**로 이동하는 이유 — `/api/graph` 와 `/api/node` 가 언어별 문구를 서버에서 만들어 보내므로 데이터도 다시 받아야 맞다
 - 요금제 의존 API 와 언어 의존 API 는 주소에 표시를 이어 붙여 호출한다 — `lib/apiUrl.ts` 의 `apiUrl(path, lang?)` 이 `dev` 와 `lang` 을 함께 붙인다(`/api/graph`, `/api/node/[id]`, `/api/settings`, `/api/billing/status`). 쿠키로 읽으면 화면과 서버 판정이 어긋난다
 - 문구는 `lib/i18n.ts` 사전(앱 UI) + `features/landing/content.ts`(홈 소개) + `content/docs/{guide,faq}.{ko,en}.mdx` + `content/legal/`(한국어 루트, 영문 `eu/` 폴더 — 폴더명만 옛 이름이고 주소는 루트다). 문서는 두 벌을 정적 import 하고 언어로 고른다
 - 법률 문서 주소: 영문 `/privacy` `/terms` `/refund`, 한국어 `/ko/...`. 옛 `/eu/*` 는 `next.config.ts` 에서 301 — 결제사 심사에 제출한 주소라 끊으면 안 된다. **Paddle 대시보드에 등록된 URL 도 루트 경로로 갱신해야 함**

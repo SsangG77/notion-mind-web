@@ -1,6 +1,7 @@
 import ArticleShell from "@/components/ArticleShell";
 import CookieSettingsLink from "./CookieSettingsLink";
-import { LANG_LABEL, langHref, type Lang } from "@/lib/i18n";
+import { langHref, type Lang } from "@/lib/i18n";
+import LangToggle from "@/features/i18n/LangToggle";
 
 type Page = "privacy" | "terms" | "refund";
 
@@ -30,21 +31,16 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   const t = NAV[lang];
-  const other: Lang = lang === "ko" ? "en" : "ko";
   const href = (p: Page) => langHref(lang, `/${p}`);
   return (
     <ArticleShell
       lang={lang}
+      langToggle={<LangToggle lang={lang} path={`/${page}`} />}
       nav={[
         { href: href("privacy"), label: t.privacy, active: page === "privacy" },
         { href: href("terms"), label: t.terms, active: page === "terms" },
         { href: href("refund"), label: t.refund, active: page === "refund" },
       ]}
-      trailing={{
-        href: langHref(other, `/${page}`),
-        label: LANG_LABEL[other],
-        testid: "legal_locale_switch",
-      }}
       footer={<CookieSettingsLink label={t.cookies} />}
     >
       {children}

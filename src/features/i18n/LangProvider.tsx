@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { DICT, LANG_COOKIE, langHref, type Dict, type Lang } from "@/lib/i18n";
+import { usePathname } from "next/navigation";
+import { DICT, langHref, type Dict, type Lang } from "@/lib/i18n";
+import { goToLang } from "./setLang";
 
 const LangContext = createContext<Lang>("en");
 
@@ -14,15 +15,8 @@ export function LangProvider({ lang, children }: { lang: Lang; children: React.R
 export const useLang = (): Lang => useContext(LangContext);
 export const useT = (): Dict => DICT[useContext(LangContext)];
 
-/**
- * 언어 전환 — 같은 화면의 다른 언어 주소로 이동한다. 주소가 언어를 정하므로 쿠키로는 바꿀 수 없다.
- * 쿠키는 "직접 골랐다"는 표시로만 남겨, 다음에 루트로 들어와도 자동 이동에 끌려가지 않게 한다.
- */
+/** 언어 전환 — 같은 화면의 다른 언어 주소로. 이유는 goToLang 주석 참고 */
 export function useSetLang() {
-  const router = useRouter();
   const pathname = usePathname();
-  return (next: Lang) => {
-    document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-    router.push(langHref(next, pathname));
-  };
+  return (next: Lang) => goToLang(next, langHref(next, pathname));
 }

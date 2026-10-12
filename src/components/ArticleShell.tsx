@@ -15,14 +15,17 @@ export default function ArticleShell({
   lang,
   nav,
   trailing,
+  langToggle,
   footer,
   children,
 }: {
   /** 이 문서의 언어 — 앱 UI 언어와 별개 */
   lang: Lang;
   nav: ShellLink[];
-  /** 내비 오른쪽 끝 링크(언어 전환 등) */
+  /** 내비 오른쪽 끝 링크 */
   trailing?: ShellLink;
+  /** 언어 전환 토글 — 쿠키를 적어야 해서 링크가 아닌 클라이언트 컴포넌트가 온다 */
+  langToggle?: React.ReactNode;
   /** 푸터 첫 줄(쿠키 설정 등) */
   footer?: React.ReactNode;
   children: React.ReactNode;
@@ -39,8 +42,13 @@ export default function ArticleShell({
               {l.label}
             </Link>
           ))}
+          {langToggle && <span className="ml-auto">{langToggle}</span>}
           {trailing && (
-            <Link href={trailing.href} className="ml-auto" data-testid={trailing.testid}>
+            <Link
+              href={trailing.href}
+              className={langToggle ? "" : "ml-auto"}
+              data-testid={trailing.testid}
+            >
               {trailing.label}
             </Link>
           )}

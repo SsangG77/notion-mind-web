@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
-import { DICT, LANG_LABEL, LANGS, langHref, legalPath } from "@/lib/i18n";
+import { DICT, langHref, legalPath } from "@/lib/i18n";
 import { currentLang } from "@/lib/lang.server";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -10,6 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMeta(await currentLang(), "/");
 }
 import LandingContent from "@/features/landing/components/LandingContent";
+import LangToggle from "@/features/i18n/LangToggle";
 
 // 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
 // 그 아래로 서비스 소개 텍스트(광고 심사, 검색 노출용 — 로그인 뒤 그래프는 크롤러가 못 봄)
@@ -94,22 +95,8 @@ export default async function Home({
         <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
           {/* 언어 — 설정 패널과 같은 토글 모양. 로그인 전에는 설정 패널이 없으므로 첫 화면에 둔다.
               서버 컴포넌트라 쿠키 대신 짝 주소로 가는 링크다 */}
-          <span className="absolute right-3 top-3 flex overflow-hidden rounded-md border border-[#E9E9E7] text-xs">
-            {LANGS.map((l) => (
-              <a
-                key={l}
-                href={langHref(l, "/")}
-                data-testid={`home_lang_${l}_button`}
-                aria-current={lang === l ? "true" : undefined}
-                className={`px-2.5 py-1 ${
-                  lang === l
-                    ? "bg-[#2383E2] font-semibold text-white"
-                    : "text-[#37352F] hover:bg-[#FDFDFC]"
-                }`}
-              >
-                {LANG_LABEL[l]}
-              </a>
-            ))}
+          <span className="absolute right-3 top-3">
+            <LangToggle lang={lang} />
           </span>
           {/* 설명을 제목 안에 둔다 — 브랜드명만 있는 h1 은 검색 의도와 안 맞는다. 보이는 모습은 그대로 */}
           <h1 className="flex flex-col items-center gap-2 text-2xl font-bold tracking-tight text-[#37352F]">
@@ -179,14 +166,6 @@ export default async function Home({
           </a>
           <a href="mailto:sangjincha719@gmail.com" className="hover:underline">
             {t.contact} sangjincha719@gmail.com
-          </a>
-          {/* 언어 전환 — 로그인 전에는 설정 패널이 없으므로 여기가 유일한 경로 */}
-          <a
-            href={langHref(lang === "ko" ? "en" : "ko", "/")}
-            className="hover:underline"
-            data-testid="home_locale_switch"
-          >
-            {LANG_LABEL[lang === "ko" ? "en" : "ko"]}
           </a>
         </nav>
         <NotionDisclaimer />
