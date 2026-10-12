@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LANDING } from "../content";
 import { langHref, type Lang } from "@/lib/i18n";
-import { PRO_PRICE } from "@/lib/pricing";
+import { PRO_PRICE, YEARLY_PER_MONTH } from "@/lib/pricing";
 
 // 홈 하단 소개 — 서버 렌더 텍스트. 광고 심사와 검색 크롤러는 로그인 뒤 그래프를 못 보므로 여기서 서비스를 설명한다
 const H2 = "text-xl font-bold tracking-tight";
@@ -10,7 +10,6 @@ const CARD =
 
 export default function LandingContent({ lang }: { lang: Lang }) {
   const c = LANDING[lang];
-  const perMonth = Math.round(PRO_PRICE.yearly / 12);
   return (
     <div className="mx-auto max-w-[880px] space-y-16 px-6 py-16 text-[#37352F] dark:text-[#EDEDEC]">
       <section data-testid="landing_intro">
@@ -72,7 +71,7 @@ export default function LandingContent({ lang }: { lang: Lang }) {
           <div className={`${CARD} border-[#2383E2] shadow-[3px_3px_0_#2383E2] dark:border-[#2383E2]`}>
             <h3 className="font-semibold">{c.proName}</h3>
             <p className="mt-1 text-2xl font-bold">
-              ${perMonth}
+              ${YEARLY_PER_MONTH}
               <span className="text-sm font-normal text-[#91908C]">{c.proUnit(PRO_PRICE.yearly)}</span>
             </p>
             <p className="mt-2 text-sm leading-relaxed text-[#5F5E5A] dark:text-[#B8B7B2]">

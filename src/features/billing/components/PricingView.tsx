@@ -11,7 +11,7 @@ import { usePaddle } from "../hooks/usePaddle";
 import ManageSubscriptionButton from "./ManageSubscriptionButton";
 import { useLang, useT } from "@/features/i18n/LangProvider";
 import { langHref, legalPath } from "@/lib/i18n";
-import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_SAVING } from "@/lib/pricing";
+import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_PER_MONTH, YEARLY_SAVING } from "@/lib/pricing";
 import { apiUrl } from "@/lib/apiUrl";
 
 /** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
@@ -104,11 +104,13 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
               {isPro ? t.currentPlan : t.recommended}
             </span>
           </div>
+          {/* 두 요금을 같은 단위(월)로 세운다 — 연 $48 과 월 $7 은 비교가 안 된다.
+              실제 청구 금액과 주기는 바로 아래 줄에 적어 오해가 없게 한다 */}
           <p className="mt-2 text-2xl font-bold" data-testid="pro_price">
-            ${yearly ? PRO_PRICE.yearly : PRO_PRICE.monthly}
-            <span className="text-sm font-normal text-[#91908C]">{yearly ? t.perYear : t.perMonth}</span>
+            ${yearly ? YEARLY_PER_MONTH : PRO_PRICE.monthly}
+            <span className="text-sm font-normal text-[#91908C]">{t.perMonth}</span>
             <span className="block text-xs font-normal text-[#91908C]">
-              {yearly ? t.yearlyNote((PRO_PRICE.yearly / 12).toFixed(0)) : t.monthlyNote}
+              {yearly ? t.billedYearly(String(PRO_PRICE.yearly)) : t.billedMonthly}
               {t.taxIncluded}
             </span>
             {yearly && (
