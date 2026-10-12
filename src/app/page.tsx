@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
-import { DICT, LANG_LABEL, langHref, legalPath } from "@/lib/i18n";
+import { DICT, LANG_LABEL, LANGS, langHref, legalPath } from "@/lib/i18n";
 import { currentLang } from "@/lib/lang.server";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -92,6 +92,25 @@ export default async function Home({
 
         {/* 중앙 대형 노드 */}
         <div className="relative flex flex-col items-center gap-5 rounded-[10px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] px-14 py-12 shadow-[5px_5px_0_#2E2C27]">
+          {/* 언어 — 설정 패널과 같은 토글 모양. 로그인 전에는 설정 패널이 없으므로 첫 화면에 둔다.
+              서버 컴포넌트라 쿠키 대신 짝 주소로 가는 링크다 */}
+          <span className="absolute right-3 top-3 flex overflow-hidden rounded-md border border-[#E9E9E7] text-xs">
+            {LANGS.map((l) => (
+              <a
+                key={l}
+                href={langHref(l, "/")}
+                data-testid={`home_lang_${l}_button`}
+                aria-current={lang === l ? "true" : undefined}
+                className={`px-2.5 py-1 ${
+                  lang === l
+                    ? "bg-[#2383E2] font-semibold text-white"
+                    : "text-[#37352F] hover:bg-[#FDFDFC]"
+                }`}
+              >
+                {LANG_LABEL[l]}
+              </a>
+            ))}
+          </span>
           {/* 설명을 제목 안에 둔다 — 브랜드명만 있는 h1 은 검색 의도와 안 맞는다. 보이는 모습은 그대로 */}
           <h1 className="flex flex-col items-center gap-2 text-2xl font-bold tracking-tight text-[#37352F]">
             Notion-mind
