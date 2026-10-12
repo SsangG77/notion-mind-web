@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSigma } from "@react-sigma/core";
+import { downloadBlob, exportFileName, exportGraphPng } from "../lib/exportImage";
 import PaywallModal from "./PaywallModal";
 import { BLOCK } from "@/components/blockStyle";
 import NotionDisclaimer from "@/components/NotionDisclaimer";
@@ -72,6 +74,22 @@ export default function SettingsPanel({
   const setLang = useSetLang();
   const router = useRouter();
   const [paywall, setPaywall] = useState(false);
+  const sigma = useSigma();
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(false);
+  const onExport = async () => {
+    if (plan !== "pro") return setPaywall(true);
+    setExporting(true);
+    setExportError(false);
+    try {
+      const dark = document.documentElement.classList.contains("dark");
+      downloadBlob(await exportGraphPng(sigma, dark), exportFileName(workspace));
+    } catch {
+      setExportError(true);
+    } finally {
+      setExporting(false);
+    }
+  };
   const pathname = usePathname();
   const params = useSearchParams();
   // 개발 모드는 주소에 남는다 — 링크를 타고 나가면 표시가 떨어져 저절로 일반 모드로 돌아간다
@@ -202,6 +220,22 @@ export default function SettingsPanel({
               {t.removeAds} <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
             </span>
             <ProSwitch testid="ad_free_switch" on={plan === "pro"} onAttempt={() => setPaywall(true)} />
+          </div>
+          <div className={ROW}>
+            <span>
+              {t.exportImage} <span className="ml-1 text-[10px] text-[#91908C]">Pro</span>
+              {exportError && (
+                <span className="mt-0.5 block text-[10px] text-[#EB5757]">{t.exportFailed}</span>
+              )}
+            </span>
+            <button
+              data-testid="export_png_button"
+              disabled={exporting}
+              onClick={onExport}
+              className="rounded-md border border-[#E9E9E7] px-2.5 py-1 text-xs hover:bg-[#F4F3EF] disabled:opacity-50 dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
+            >
+              {exporting ? t.exporting : t.exportPng}
+            </button>
           </div>
           <div className={ROW}>
             <span>

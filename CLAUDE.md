@@ -71,7 +71,8 @@ src/
 - ⚠️ 해지 자체는 막을 수 없음 — Paddle 이 모든 구독 메일에 해지 링크를 넣고(규정), 구매자는 paddle.net 에서 직접 해지·환불 요청 가능. 약관 제10조와 EU 철회권상으로도 승인제 불가. 이탈 대응은 만류 화면·연간 유도·사유 수집까지
 - Pro 영구 설정: Supabase `workspace_settings`(workspace_id PK, hidden jsonb string[], pinned jsonb {id:{x,y}}). `/api/settings` GET(Free 는 빈 값)/PUT(Pro 만, 20,000개 상한). 클라이언트 `useWorkspaceSettings(plan)` — 로드 후 `saved` 를 LayoutManager 에 넘겨 노드 추가 시 hidden/pinned+좌표 적용(로드 전엔 노드 추가 보류), 숨김/핀/핀 드래그/모두 표시 뒤 `persist(graph)` 가 그래프에서 읽어 800ms 디바운스 PUT. 필터는 UI 골격만 있어 저장 대상 없음
 - 자동 동기화(Pro): 설정 패널 스위치로 켜고 끄며 `workspace_settings.auto_sync` 에 저장. `useAutoSync` 가 5분마다 `reload()` 호출. ⚠️ rAF 금지(Safari 가 숨긴 창에서 멈춤) — setTimeout 체인이고, 숨겨진 탭에서는 건너뛴 뒤 돌아올 때 한 번 당겨 받는다(노션 rate limit 아끼기). `npm run lint` 가 이 규칙들을 `scripts/check-autosync.mjs` 로 검사
-- 아직 없음: 이미지 내보내기, 필터 실기능
+- 이미지 내보내기(Pro): 설정 패널 "PNG 저장". `lib/exportImage.ts` 가 컨테이너의 캔버스를 전부 합성한다(WebGL 노드와 엣지 + 2D 라벨 + relation 점선 레이어). ⚠️ sigma 는 `preserveDrawingBuffer: false` 를 하드코딩하므로 **`afterRender` 안에서 읽어야** 한다 — 밖에서 읽으면 노드가 통째로 빠진 빈 그림이 나온다. 투명 PNG 가 안 되게 배경을 깔고, 렌더가 안 오면 5초 뒤 실패 처리. `scripts/check-export.mjs` 가 이 전제를 lint 에 고정
+- 아직 없음: 필터 실기능
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지

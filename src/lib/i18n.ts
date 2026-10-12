@@ -103,6 +103,10 @@ const ko = {
   syncNow: "↻ 동기화",
   removeAds: "광고 제거",
   autoSync: "자동 동기화",
+  exportImage: "이미지 내보내기",
+  exportPng: "PNG 저장",
+  exporting: "저장 중…",
+  exportFailed: "저장하지 못했습니다",
   language: "언어",
   devMode: "개발 모드",
   devModeHint: "구독과 무관하게 화면을 바꿔 봄",
@@ -153,7 +157,6 @@ const ko = {
   refundNote: "결제 후 14일 이내 전액 환불, ",
   freeFeatures: [
     "노드 1,000개 (최근 수정순)",
-    "워크스페이스 1개",
     "그래프 전 기능 (관계형 포함)",
     "수동 동기화",
     "핀·숨김은 세션 한정",
@@ -161,11 +164,10 @@ const ko = {
   ],
   proFeatures: [
     "노드 무제한",
-    "핀·숨김·필터 영구 저장",
+    "핀, 숨김 영구 저장",
     "자동 동기화",
     "이미지 내보내기",
     "광고 제거",
-    "워크스페이스 3개+",
   ],
 
   // 해지 만류
@@ -296,6 +298,10 @@ const en: Shape = {
   syncNow: "↻ Sync",
   removeAds: "No ads",
   autoSync: "Automatic sync",
+  exportImage: "Image export",
+  exportPng: "Save PNG",
+  exporting: "Saving…",
+  exportFailed: "Could not save the image",
   language: "Language",
   devMode: "Dev mode",
   devModeHint: "Switch screens without a real subscription",
@@ -344,7 +350,6 @@ const en: Shape = {
   refundNote: "Full refund within 14 days, ",
   freeFeatures: [
     "1,000 nodes (most recently edited)",
-    "One workspace",
     "Every graph feature, relations included",
     "Manual sync",
     "Hidden nodes and pins last the session",
@@ -352,11 +357,10 @@ const en: Shape = {
   ],
   proFeatures: [
     "Unlimited nodes",
-    "Hidden nodes, pins and filters saved for good",
+    "Hidden nodes and pins saved for good",
     "Automatic sync",
     "Image export",
     "No ads",
-    "Three or more workspaces",
   ],
 
   cancelTitle: "Manage subscription",
