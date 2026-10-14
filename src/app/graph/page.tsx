@@ -5,6 +5,7 @@ import AdBanner from "@/components/AdBanner";
 import { currentPlan } from "@/lib/plan.server";
 import { langHref } from "@/lib/i18n";
 import { currentLang } from "@/lib/lang.server";
+import { sessionState } from "@/lib/session.server";
 
 export default async function GraphPage({
   searchParams,
@@ -12,7 +13,9 @@ export default async function GraphPage({
   searchParams: Promise<{ dev?: string | string[] }>;
 }) {
   const jar = await cookies();
-  if (!jar.get("nm_token")?.value) redirect(langHref(await currentLang(), "/"));
+  const session = await sessionState();
+  if (session === "anonymous") redirect(langHref(await currentLang(), "/"));
+  if (session === "no_connection") redirect("/api/auth/login");
   const workspace = jar.get("nm_workspace")?.value;
   const { plan, unlocked } = await currentPlan((await searchParams).dev);
 

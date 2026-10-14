@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "@/lib/crypto";
 import { searchPage } from "@/lib/notion";
+import { callNotion } from "@/lib/notionSession";
 import { planFor } from "@/lib/plan.server";
 import { FREE_NODE_LIMIT } from "@/features/graph/lib/assembleGraph";
 import { pickLang } from "@/lib/i18n";
@@ -9,10 +9,6 @@ import { recordVisit } from "@/lib/analytics";
 
 // 커서 단위 배치 응답 — 클라이언트가 반복 호출하며 그래프를 점진 조립
 export async function GET(req: NextRequest) {
-  const tokenCookie = req.cookies.get("nm_token")?.value;
-  if (!tokenCookie) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
   try {
     const cursor = req.nextUrl.searchParams.get("cursor") ?? undefined;
     // 첫 배치 = 그래프를 한 번 연 것 → 일별 활성 이용자 기록. 실패해도 그래프는 계속
@@ -29,12 +25,10 @@ export async function GET(req: NextRequest) {
     }
     // 제목 없는 페이지의 대체 문구가 응답에 섞이므로 화면 언어를 함께 넘긴다
     const lang = pickLang(req.nextUrl.searchParams.get(LANG_PARAM));
-    const batch = await searchPage(decrypt(tokenCookie), lang, cursor);
-    return NextResponse.json(batch);
+    const r = await callNotion(req, (token) => searchPage(token, lang, cursor));
+    if (!r.ok) return NextResponse.json({ error: r.reason }, { status: 401 });
+    return NextResponse.json(r.data);
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "unknown" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: e instanceof Error ? e.message : "unknown" }, { status: 502 });
   }
 }

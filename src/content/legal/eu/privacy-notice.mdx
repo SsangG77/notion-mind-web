@@ -9,8 +9,8 @@ To verify: no EU Representative (Art. 27) appointed yet; Supabase region (Seoul 
 
 This Privacy Notice explains how Sangjin Cha, sole proprietor trading as Notion-mind ("we", "us", "our") collects, uses, and protects your personal data when you use Notion-mind (the "Service").
 
-Effective Date 2026-09-25
-Last Updated 2026-09-25
+Effective Date 2026-10-13
+Last Updated 2026-10-13
 
 ## 1. Controller and Contact
 
@@ -23,11 +23,11 @@ We have not appointed a Data Protection Officer, as we are not required to under
 ## 2. Personal Data We Collect
 
 ### Account and identification data
-Items: Notion user ID, Notion workspace ID, workspace name
-Source: Notion OAuth, when you sign in
+Items: Google account identifier (sub) and email address; Notion workspace ID and workspace name
+Source: Google Sign-In when you sign in; Notion OAuth when you connect a workspace
 
 ### Authentication data
-Items: Notion access token (encrypted, stored in a browser cookie)
+Items: Notion access token and refresh token, **encrypted (AES-256-GCM) and stored on our servers** so you do not have to reconnect on every device
 Source: Notion OAuth
 
 ### Notion workspace content
@@ -78,6 +78,7 @@ We share personal data with the following recipients or categories of recipients
 | Supabase Inc. (servers in Seoul, Republic of Korea) | Storing subscription status and user settings | Processor |
 | Paddle.com Market Ltd (UK) | Payment processing, subscription management, invoicing | Independent controller (Merchant of Record) |
 | Google LLC (USA) | Advertising (Google AdSense) | Processor / independent controller for personalised ads |
+| Google LLC (USA) | Sign-in authentication (Google account) | Independent controller for the authentication itself |
 
 We do not sell personal data. We may disclose personal data where required by law or to protect our legal rights.
 
@@ -93,7 +94,8 @@ Where Standard Contractual Clauses (SCCs) apply, copies are available upon reque
 
 ## 6. Retention
 
-- **Account and authentication data**: deleted from your browser immediately on logout, or 30 days after issue if you do not log out. Criteria: session lifetime.
+- **Google account identifier and email**: until you delete your account. Criteria: contract duration.
+- **Notion access and refresh tokens**: deleted immediately when you disconnect Notion or delete your account. Signing out ends the session only; signing back in restores the connection. Criteria: contract duration.
 - **Subscription status and user settings**: 30 days after the subscription ends or the workspace is disconnected. Criteria: contract end.
 - **Billing and transaction records**: 5 years. Criteria: Korean e-commerce and tax law retention periods.
 - **Access logs**: up to 1 year. Criteria: security and legal requirements.

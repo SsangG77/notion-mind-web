@@ -1,0 +1,67 @@
+import { supabaseAdmin } from "./supabase";
+import { decrypt, encrypt } from "./crypto";
+import type { TokenResponse } from "./notion";
+
+/**
+ * 자체 계정(구글 로그인)과 거기 매달린 노션 연결.
+ *
+ * 노션 토큰을 서버에 둬야 기기를 옮겨도 노션 화면을 다시 안 거친다.
+ * 평문으로 두면 DB 가 뚫렸을 때 남의 워크스페이스가 통째로 열리므로 AES-GCM 으로 봉인해서 넣는다
+ * (키는 TOKEN_ENCRYPTION_KEY, 쿠키 봉인과 같은 키).
+ */
+export interface NotionConnection {
+  workspaceId: string;
+  workspaceName: string | null;
+  accessToken: string;
+  refreshToken: string | null;
+}
+
+export async function upsertUser(id: string, email: string): Promise<void> {
+  const { error } = await supabaseAdmin()
+    .from("app_users")
+    .upsert({ id, email, last_seen_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) throw new Error(`app_users upsert failed: ${error.message}`);
+}
+
+export async function saveConnection(userId: string, token: TokenResponse): Promise<void> {
+  const { error } = await supabaseAdmin().from("notion_connections").upsert(
+    {
+      user_id: userId,
+      workspace_id: token.workspace_id,
+      workspace_name: token.workspace_name ?? null,
+      access_token: encrypt(token.access_token),
+      refresh_token: token.refresh_token ? encrypt(token.refresh_token) : null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) throw new Error(`notion_connections upsert failed: ${error.message}`);
+}
+
+export async function getConnection(userId: string): Promise<NotionConnection | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("notion_connections")
+    .select("workspace_id, workspace_name, access_token, refresh_token")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(`notion_connections read failed: ${error.message}`);
+  if (!data) return null;
+  const row = data as {
+    workspace_id: string;
+    workspace_name: string | null;
+    access_token: string;
+    refresh_token: string | null;
+  };
+  return {
+    workspaceId: row.workspace_id,
+    workspaceName: row.workspace_name,
+    accessToken: decrypt(row.access_token),
+    refreshToken: row.refresh_token ? decrypt(row.refresh_token) : null,
+  };
+}
+
+/** 노션 연결만 끊는다 — 계정은 남는다(다시 연결하면 그대로 쓴다) */
+export async function deleteConnection(userId: string): Promise<void> {
+  const { error } = await supabaseAdmin().from("notion_connections").delete().eq("user_id", userId);
+  if (error) throw new Error(`notion_connections delete failed: ${error.message}`);
+}

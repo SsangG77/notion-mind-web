@@ -102,6 +102,13 @@ export default function SettingsPanel({
     router.replace(q ? `${pathname}?${q}` : pathname);
     router.refresh();
   };
+  const [disconnecting, setDisconnecting] = useState(false);
+  const onDisconnect = async () => {
+    if (!confirm(t.disconnectConfirm)) return;
+    setDisconnecting(true);
+    await fetch("/api/auth/disconnect", { method: "POST" }).catch(() => {});
+    window.location.assign("/");
+  };
   const lockDev = async () => {
     await fetch("/api/dev", {
       method: "POST",
@@ -198,6 +205,23 @@ export default function SettingsPanel({
             >
               {t.change}
             </a>
+          </div>
+          {/* 연결 해제 — 처리방침이 "설정 패널에서 해제하면 서버의 토큰을 즉시 삭제" 라고 약속하는 지점 */}
+          <div className={ROW}>
+            <span>
+              {t.disconnectNotion}
+              <span className="mt-0.5 block text-[10px] text-[#91908C]">
+                {t.disconnectNotionHint}
+              </span>
+            </span>
+            <button
+              data-testid="disconnect_notion_button"
+              disabled={disconnecting}
+              onClick={onDisconnect}
+              className="shrink-0 rounded-md border border-[#E9E9E7] px-2.5 py-1 text-xs hover:bg-[#F4F3EF] disabled:opacity-50 dark:border-[#2F2F2F] dark:hover:bg-[#35342F]"
+            >
+              {t.disconnect}
+            </button>
           </div>
           <div className={ROW}>
             <span>

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint && node scripts/check-ui-strings.mjs && node scripts/check-autosync.mjs && node scripts/check-export.mjs && tsx scripts/check-orphan-filter.ts",
+    "lint": "eslint && node scripts/check-ui-strings.mjs && node scripts/check-autosync.mjs && node scripts/check-export.mjs && tsx scripts/check-orphan-filter.ts && node scripts/check-env.mjs",
     "check:ui-strings": "node scripts/check-ui-strings.mjs",
     "check:seo": "node scripts/check-seo.mjs"
   },

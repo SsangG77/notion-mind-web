@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clearUid } from "@/lib/session";
 
-// 로그아웃 — 세션 쿠키 제거 후 로그인 화면으로
+// 로그아웃 — 계정 세션만 지운다. 노션 연결은 서버에 남아 다시 로그인하면 그대로 이어진다
 export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(new URL("/", req.url));
-  res.cookies.delete("nm_token");
+  clearUid(res);
   res.cookies.delete("nm_workspace");
-  res.cookies.delete("nm_ws");
   return res;
 }

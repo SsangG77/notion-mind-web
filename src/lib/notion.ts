@@ -53,6 +53,32 @@ export async function exchangeCode(code: string): Promise<TokenResponse> {
   return res.json();
 }
 
+/**
+ * 토큰 갱신 — 노션이 토큰을 교체했을 때 재로그인 없이 이어 간다.
+ * 노션 문서는 승인 응답의 "토큰 쌍"을 저장하라고 하며, 재인증 때 새 쌍이 올 수 있다고 적고 있다.
+ * https://developers.notion.com/reference/refresh-a-token
+ */
+export async function refreshToken(refresh: string): Promise<TokenResponse> {
+  const basic = Buffer.from(
+    `${env("NOTION_CLIENT_ID")}:${env("NOTION_CLIENT_SECRET")}`,
+  ).toString("base64");
+  const res = await fetch(`${NOTION_API}/oauth/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${basic}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ grant_type: "refresh_token", refresh_token: refresh }),
+  });
+  if (!res.ok) {
+    throw new Error(`token refresh failed: ${res.status} ${await res.text()}`);
+  }
+  return res.json();
+}
+
+/** 노션이 인증 거부로 답했는지 — 갱신을 시도할지 판단하는 기준 */
+export class NotionUnauthorized extends Error {}
+
 // ---------- 그래프 수집 ----------
 
 import type { GraphBatch, GraphItem } from "@/types/graph";
@@ -135,7 +161,9 @@ export async function searchPage(
     }),
   });
   if (!res.ok) {
-    throw new Error(`search failed: ${res.status} ${await res.text()}`);
+    const body = await res.text();
+    if (res.status === 401) throw new NotionUnauthorized(body);
+    throw new Error(`search failed: ${res.status} ${body}`);
   }
   const data = (await res.json()) as {
     results: SearchItem[];
@@ -188,7 +216,9 @@ export async function countAccessibleItems(
       body: JSON.stringify({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }),
     });
     if (!res.ok) {
-      throw new Error(`search failed: ${res.status} ${await res.text()}`);
+      const body = await res.text();
+      if (res.status === 401) throw new NotionUnauthorized(body);
+      throw new Error(`search failed: ${res.status} ${body}`);
     }
     const data = (await res.json()) as {
       results: Array<{ object: string }>;
@@ -291,7 +321,9 @@ export async function fetchNodeDetail(
 ): Promise<NodeDetail> {
   const metaRes = await api(accessToken, kind === "page" ? `/pages/${id}` : `/data_sources/${id}`);
   if (!metaRes.ok) {
-    throw new Error(`detail failed: ${metaRes.status} ${await metaRes.text()}`);
+    const body = await metaRes.text();
+    if (metaRes.status === 401) throw new NotionUnauthorized(body);
+    throw new Error(`detail failed: ${metaRes.status} ${body}`);
   }
   const meta = (await metaRes.json()) as {
     url?: string;
