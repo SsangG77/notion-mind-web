@@ -1,8 +1,20 @@
 // 공개 주소마다 검색 노출에 필요한 태그가 다 있는지 검사한다.
 // 완료 판정은 사람이 만든 목록이 아니라 이 명령의 0건으로 한다.
 // 사용법: node scripts/check-seo.mjs [기준주소]  (기본 http://localhost:3000)
+import { readFileSync } from "node:fs";
+
 const BASE = process.argv[2] ?? "http://localhost:3000";
-const PATHS = ["/", "/guide", "/faq", "/pricing", "/terms", "/privacy", "/refund"];
+// lib/seo.ts 의 PUBLIC_PATHS 와 같아야 한다 — 거기서 읽어 와 둘이 어긋나지 않게 한다
+const PATHS = (
+  readFileSync("src/lib/seo.ts", "utf8").match(/PUBLIC_PATHS = \[([^\]]*)\]/)?.[1] ?? ""
+)
+  .split(",")
+  .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+  .filter(Boolean);
+if (!PATHS.length) {
+  console.error("✗ lib/seo.ts 에서 PUBLIC_PATHS 를 읽지 못했다");
+  process.exit(1);
+}
 const LANGS = ["en", "ko"];
 const urlFor = (lang, p) => (lang === "en" ? p : p === "/" ? "/ko" : `/ko${p}`);
 
