@@ -22,7 +22,11 @@ interface State {
 const maxBatches = (limit: number) => Math.ceil(limit / 100) + 1;
 
 /** 커서 배치를 반복 수신하며 그래프를 점진 조립. reload()로 재동기화. 상한은 요금제에 따름 */
-export function useGraphData(plan: Plan): State & { reload: () => void } {
+export function useGraphData(
+  plan: Plan,
+  /** 미리 담긴 항목 — 주면 서버를 부르지 않는다(로그인 없는 예시 화면용) */
+  preset?: GraphItem[],
+): State & { reload: () => void } {
   const lang = useLang();
   const limit = plan === "pro" ? PRO_NODE_LIMIT : FREE_NODE_LIMIT;
   const MAX_BATCHES = maxBatches(limit);
@@ -37,6 +41,20 @@ export function useGraphData(plan: Plan): State & { reload: () => void } {
   const genRef = useRef(0);
 
   const load = useCallback(async (gen: number) => {
+    if (preset) {
+      // 예시 데이터는 받아올 것이 없지만 바로 꽂으면 안 된다 — sigma 가 노드 프로그램을 등록하기 전에
+      // 노드가 들어가 "could not find a suitable program for node type" 로 캔버스가 안 그려진다.
+      // 서버에서 받아올 때와 같은 타이밍이 되도록 한 틱 뒤로 미룬다.
+      await new Promise((r) => setTimeout(r, 400));
+      setState({
+        data: assembleGraph(preset, false, limit),
+        error: null,
+        loading: false,
+        gen,
+        lastSync: Date.now(),
+      });
+      return;
+    }
     const id = ++runId.current;
     setState((s) => ({ ...s, data: null, error: null, loading: true, gen }));
     const items: GraphItem[] = [];
@@ -74,7 +92,7 @@ export function useGraphData(plan: Plan): State & { reload: () => void } {
         }));
       }
     }
-  }, [limit, MAX_BATCHES, lang]);
+  }, [limit, MAX_BATCHES, lang, preset]);
 
   useEffect(() => {
     const ids = runId; // 언마운트 시 진행 중 로드 무효화

@@ -23,7 +23,9 @@ import TopBar from "./TopBar";
 import ZoomControls from "./ZoomControls";
 import ThemeSync from "./ThemeSync";
 import ViewportMemory from "./ViewportMemory";
+import FitToGraph from "./FitToGraph";
 import type { Plan } from "@/lib/billing";
+import type { GraphItem } from "@/types/graph";
 import { useT } from "@/features/i18n/LangProvider";
 
 const SIGMA_SETTINGS = {
@@ -46,15 +48,18 @@ export default function GraphView({
   workspace,
   plan,
   unlocked,
+  demoItems,
 }: {
   workspace?: string;
   plan: Plan;
   /** 개발 모드가 열려 있을 때만 설정 패널에 요금제 토글을 보여준다 */
   unlocked: boolean;
+  /** 로그인 없는 예시 화면 — 주면 서버 대신 이 데이터를 그린다 */
+  demoItems?: GraphItem[];
 }) {
   const t = useT();
   const lang = useLang();
-  const { data, error, loading, gen, lastSync, reload } = useGraphData(plan);
+  const { data, error, loading, gen, lastSync, reload } = useGraphData(plan, demoItems);
   const { dark, toggle } = useTheme();
   const { saved, persist, autoSync, setAutoSync } = useWorkspaceSettings(plan);
   useAutoSync(plan, autoSync, reload);
@@ -119,7 +124,11 @@ export default function GraphView({
           plan={plan}
         />
         <ZoomControls />
-        <ViewportMemory ready={!loading && data != null} />
+        {demoItems ? (
+          <FitToGraph ready={!loading && data != null} />
+        ) : (
+          <ViewportMemory ready={!loading && data != null} />
+        )}
       </SigmaContainer>
 
       {/* 첫 배치 전 로딩 */}

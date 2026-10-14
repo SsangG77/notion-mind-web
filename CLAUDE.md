@@ -113,6 +113,13 @@ src/
 - 집계 `getAdminStats(days)`: 누적 워크스페이스, 기간 내 신규/활성, Pro 수와 월/연 구독 수(`PRICE_IDS` 로 구분), 월 환산 매출(월 요금 + 연 요금÷12), 누적 가입자 추이(범위 이전 가입자를 바닥으로 일별 가입을 더함), 일별 가입/활성 추이(빈 날 0 채움), 구독 상태 분포, 해지 사유, 최근 가입 20개. 기간은 `?days=7|30|90`
 - 차트는 라이브러리 없이 `features/admin/components`(`TimeSeriesChart` 단일 계열 선+면, 호버 툴팁, 마지막 값만 라벨 / `StatTile` / `BarList`). 계열이 하나라 범례 없음, 글자는 텍스트 색, 마크만 액센트색
 
+## 예시 화면 `/demo` (2026-10-14)
+- 로그인 없이 실제 그래프를 만지는 공개 화면. AdSense 가 "가치가 별로 없는 콘텐츠"로 거절한 뒤 추가 — 제품이 전부 로그인 뒤에 있어 심사자가 볼 것이 없었다(구글 미승인 사유에 "pages behind a login or restricted access" 가 명시돼 있음)
+- 데이터는 `features/demo/data.ts` 에 `GraphItem` 형태로 직접 적는다. 노션 API 를 안 타고 조립과 배치는 실제 그래프와 같은 코드를 쓴다. 노드 30개, 관계형 엣지 30개, 고아 노드 2개(필터 시연용)
+- `GraphView` 에 `demoItems` 를 주면 `useGraphData` 가 서버 대신 그걸 쓴다. ⚠️ **동기로 꽂으면 안 된다** — sigma 가 노드 프로그램을 등록하기 전에 노드가 들어가 "could not find a suitable program for node type" 로 캔버스가 아예 안 그려지고 렌더러가 죽는다. 400ms 뒤로 미뤄 실제 네트워크와 같은 타이밍을 만든다
+- 뷰포트를 기억할 것이 없으므로 `FitToGraph` 로 전체가 들어오게 한 번 맞춘다(자기 워크스페이스는 `ViewportMemory`). 좌표계가 1단위=1px 에 autoRescale 이 꺼져 있어 안 맞추면 100% 로 열려 노드가 화면 밖에 흩어진다
+- 아래 소개 글은 `features/demo/copy.ts`(언어별). 위 그래프는 WebGL 이라 검색 결과와 공유 카드에 안 잡히므로 같은 장면을 `public/shots/graph-overview.png` 로도 둔다
+
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
 - Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(홈, /guide, /faq, /pricing, /graph 하단 가로 배너 + 노드 상세 패널 하단 배너 — 공개 페이지에도 붙여야 AdSense 가 심사할 수 있다 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기

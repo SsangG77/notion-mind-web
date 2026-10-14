@@ -5,7 +5,7 @@ export const SITE_URL = "https://notion-mind.com";
 export const SITE_NAME = "Notion-mind";
 
 /** 색인 대상 공개 경로 — 접두사 없는 형태로 적는다. sitemap 과 메타데이터가 같은 목록을 쓴다 */
-export const PUBLIC_PATHS = ["/", "/guide", "/faq", "/pricing", "/terms", "/privacy", "/refund"] as const;
+export const PUBLIC_PATHS = ["/", "/demo", "/guide", "/faq", "/pricing", "/terms", "/privacy", "/refund"] as const;
 export type PublicPath = (typeof PUBLIC_PATHS)[number];
 
 interface Meta {
@@ -20,6 +20,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       title: "Graph view for your Notion workspace",
       description:
         "See every Notion page and database as one connected graph — database membership, subpages and relation properties on a single screen, the way Obsidian graphs notes.",
+    },
+    "/demo": {
+      title: "Live example",
+      description:
+        "Open an example Notion workspace as a graph without signing in. Projects, meetings, clients and releases drawn from their relation properties, with hover focus, pinning and the unconnected filter.",
     },
     "/guide": {
       title: "Guide",
@@ -45,6 +50,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       title: "노션 워크스페이스를 그래프로 보기",
       description:
         "노션의 페이지와 데이터베이스를 하나의 연결된 그래프로 봅니다. 소속 관계, 하위 페이지, 관계형 속성을 한 화면에 — 옵시디언이 노트를 그리는 방식 그대로.",
+    },
+    "/demo": {
+      title: "예시로 바로 보기",
+      description:
+        "로그인 없이 예시 노션 워크스페이스를 그래프로 열어 봅니다. 프로젝트, 회의, 고객, 릴리스가 관계형 속성으로 이어진 모습과 호버 포커스, 핀 고정, 연결 없는 노드 필터를 그대로 만져 볼 수 있습니다.",
     },
     "/guide": {
       title: "사용 가이드",

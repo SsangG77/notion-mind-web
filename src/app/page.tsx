@@ -157,6 +157,9 @@ export default async function Home({
       {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
       <footer className="flex flex-col items-center gap-2 px-6 pb-8 text-center">
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
+          <a href={langHref(lang, "/demo")} className="hover:underline">
+            {t.demo}
+          </a>
           <a href={langHref(lang, "/guide")} className="hover:underline">
             {t.guide}
           </a>
