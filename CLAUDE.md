@@ -5,7 +5,7 @@
 ## 스택
 - Next.js (TypeScript · App Router · Tailwind · src/)
 - 그래프: Sigma.js v3 + graphology + graphology-layout-forceatlas2 (web worker) + @react-sigma/core
-- 백엔드: Next.js API Routes + Supabase (Postgres, 프로젝트 `notion-mind` 서울 리전 jqebviioxtnjfpmhmsqz). 노션 토큰은 서버에 저장 안 함(암호화 쿠키만). Supabase 는 `subscriptions` 테이블 하나 — RLS 켜고 정책 없음, 서버가 secret 키(`SUPABASE_SERVICE_ROLE_KEY`, 새 형식 sb_secret_)로만 접근
+- 백엔드: Next.js API Routes + Supabase (Postgres, 프로젝트 `notion-mind` 서울 리전 jqebviioxtnjfpmhmsqz). 노션 토큰은 서버에 저장 안 함(암호화 쿠키만). Supabase 테이블은 `subscriptions`, `workspace_settings`, `cancellation_feedback`, `workspaces`(가입과 마지막 접속), `workspace_visits`(일별 방문) — 전부 RLS 켜고 정책 없음, 서버가 secret 키(`SUPABASE_SERVICE_ROLE_KEY`, 새 형식 sb_secret_)로만 접근
 - 결제: Paddle Billing (판매대행 MoR — 한국 사업자는 Stripe 직접 가입 불가, 정산 USD/Payoneer, KRW 불가). 샌드박스 계정 별도(sandbox-vendors.paddle.com, 키 `PADDLE_SANDBOX_*` 로 `.env` 에 병기). 코드는 `NEXT_PUBLIC_PADDLE_ENV` 하나로 환경 결정 — Vercel Production 값을 sandbox 로 두면 사이트 전체가 테스트 모드(테스트 카드 4242). 라이브 심사(02) 통과됨(2026-09-29). 광고: Google AdSense
 - 배포: Vercel (프로젝트 `ssangg77s-projects/notion-mind-web`, CLI `npx vercel deploy --prod`). 정식 주소 https://notion-mind.com (Cloudflare Registrar, A 레코드 76.76.21.21, DNS only). www·notion-mind-web.vercel.app 은 정식 주소로 308 리디렉션. 시크릿은 Vercel 환경변수(Production·Preview)로만 — `.vercelignore` 가 `.env` 업로드 차단. GitHub 자동 배포는 미연결(Vercel GitHub 앱 권한 필요)
 
@@ -100,10 +100,16 @@ src/
 - 적용 조건은 **둘 다** 있어야 함: ① 쿠키 `nm_dev`(비밀번호를 안다는 증명) ② 주소의 `?dev=pro` 또는 `?dev=free`(이 요청에 적용하라는 표시). 쿠키만으로는 아무것도 안 바뀜 — 링크를 타고 나가 표시가 떨어지면 그 즉시 일반 모드
 - 설정 패널의 토글은 쿠키가 아니라 **주소를 고쳐 쓴다**(`router.replace`). "끄기"는 쿠키까지 지움
 - 화면이 개발 모드로 그려졌으면 서버 호출도 같은 판정을 받아야 하므로, 클라이언트는 `lib/devParam.ts` 의 `withDev()` 로 API 주소에 표시를 이어 붙인다(`/api/graph`, `/api/settings`, `/api/billing/status`). 새로 추가하는 요금제 의존 API 도 이걸 거쳐야 함
-- 비밀번호는 `DEV_UNLOCK_SECRET` 환경변수에만 있음. 미설정이면 `/dev` 는 404 이고 기능 전체가 꺼짐. 클라이언트 번들에 안 들어감(빌드 산출물로 확인)
+- 비밀번호는 `DEV_UNLOCK_SECRET` 환경변수에만 있음. 미설정이면 `/dev` 는 404 이고 기능 전체가 꺼짐. 클라이언트 번들에 안 들어감(빌드 산출물로 확인). 비밀번호 확인, 쿠키 봉인, 열기/잠그기 라우트 처리는 `lib/gate.ts` 의 `createGate`/`handleGateRequest` 공용(관리자 대시보드도 같은 게이트). 잠금 화면 `components/UnlockForm`(endpoint, next 를 prop 으로 받음)
 - 쿠키는 httpOnly, AES-GCM 봉인(토큰과 같은 키), 만료를 봉인 안에 넣어 서버가 직접 검사 — 위조·만료 쿠키는 무시하고 Free 로 떨어짐. 유효기간 7일
 - 요금제 판정은 `lib/plan.server.ts` 한 곳: 서버 컴포넌트는 `currentPlan(searchParams.dev)`, 라우트 핸들러는 `planFor(req)`(쿠키와 쿼리를 함께 봄). ⚠️ 새 코드에서 `getPlan()` 을 직접 부르면 개발 모드가 무시된다
 - `/dev` 는 robots.txt 로 차단, 어디에서도 링크하지 않음
+
+## 운영 대시보드 `/admin`
+- 비밀번호는 개발 모드와 같은 `DEV_UNLOCK_SECRET`(쿠키는 별개 `nm_admin` 24시간 — 개발 모드를 열어도 대시보드는 따로 열어야 함). 미설정이면 404. robots 차단 + noindex. 관리자 1인용이라 한국어 고정 — `scripts/check-ui-strings.mjs` 의 EXEMPT_DIRS 에 `src/app/admin/`, `src/features/admin/` 등록
+- 지표 기록은 `lib/analytics.ts` 두 함수: `touchWorkspace`(OAuth 콜백 — `workspaces` 에 첫 접속=가입, 마지막 접속, 워크스페이스명 upsert), `recordVisit`(`/api/graph` 첫 배치 — `workspace_visits` 에 (워크스페이스, UTC 날짜) 한 줄). 둘 다 실패를 삼킴 — 지표가 로그인이나 그래프를 막지 않게. 기록은 2026-10-13 배포 시점부터 쌓임(그 전 이용자는 다음 로그인 때 가입으로 잡힘)
+- 집계 `getAdminStats(days)`: 누적 워크스페이스, 기간 내 신규/활성, Pro 수와 월/연 구독 수(`PRICE_IDS` 로 구분), 월 환산 매출(월 요금 + 연 요금÷12), 누적 가입자 추이(범위 이전 가입자를 바닥으로 일별 가입을 더함), 일별 가입/활성 추이(빈 날 0 채움), 구독 상태 분포, 해지 사유, 최근 가입 20개. 기간은 `?days=7|30|90`
+- 차트는 라이브러리 없이 `features/admin/components`(`TimeSeriesChart` 단일 계열 선+면, 호버 툴팁, 마지막 값만 라벨 / `StatTile` / `BarList`). 계열이 하나라 범례 없음, 글자는 텍스트 색, 마크만 액센트색
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
@@ -113,13 +119,13 @@ src/
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
 
 ## 검색 노출 (2026-10-08)
-- 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 7개 × 두 언어 = 14개. `/graph` 와 `/dev` 는 robots.txt 차단 + noindex
+- 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 7개 × 두 언어 = 14개. `/graph`, `/dev`, `/admin` 은 robots.txt 차단 + noindex
 - 페이지 메타데이터는 `pageMeta(lang, path)` 한 곳에서 나온다 — 제목, 설명, 자기 참조 canonical, hreflang(en/ko/x-default), OG, 트위터 카드. 새 공개 페이지를 만들면 `PUBLIC_PATHS` 와 `META` 에 추가하고 `generateMetadata` 에서 `pageMeta` 를 부른다
 - 검색 결과 노출 문구는 `lib/seo.ts` 의 `META` 에 둔다(화면 사전 `i18n.ts` 와 분리 — 길이 제약과 쓰임이 다름). 문구 가드 예외 파일
 - `app/sitemap.ts` 가 14개 주소를 `lastmod` 와 언어 대체 주소까지 생성. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
 - 구조화 데이터는 Organization(layout)과 BreadcrumbList(문서, 법률 페이지)만. FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
 - OG 이미지는 `app/opengraph-image.tsx` 가 생성(이미지 파일 없음). 글꼴 파일을 안 받으려고 영문만 씀
-- `public/robots.txt` 는 `/api`, `/graph`, `/dev`(양 언어)를 막고 맨 아래 `Sitemap:` 줄로 sitemap 위치를 알린다 — 구글은 이 줄의 주소가 전체 주소일 것을 요구
+- `public/robots.txt` 는 `/api`, `/graph`, `/dev`, `/admin`(양 언어)을 막고 맨 아래 `Sitemap:` 줄로 sitemap 위치를 알린다 — 구글은 이 줄의 주소가 전체 주소일 것을 요구
 - `npm run check:seo [주소]` — 14개 주소에 title, description, canonical, hreflang, og 가 다 있는지, sitemap 개수가 맞는지 검사. **완료 판정은 이 명령의 0건으로 한다.** 서버가 떠 있어야 해서 `lint` 에는 안 묶임
 
 ## 명령

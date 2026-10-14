@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeCode } from "@/lib/notion";
 import { encrypt } from "@/lib/crypto";
+import { touchWorkspace } from "@/lib/analytics";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -16,6 +17,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const token = await exchangeCode(code);
+    // 가입(첫 접속)과 마지막 접속 기록 — 실패해도 로그인은 계속
+    await touchWorkspace(token.workspace_id, token.workspace_name).catch((e) =>
+      console.error("touchWorkspace failed:", e),
+    );
     const res = NextResponse.redirect(new URL("/", url.origin));
     res.cookies.delete("nm_oauth_state");
     // 워크스페이스 ID = 요금제(구독) 키. 서버만 읽음

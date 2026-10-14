@@ -15,7 +15,11 @@ const EXEMPT_FILES = new Set([
   "src/features/landing/content.ts", // 홈 소개 문구 사전
   "src/lib/seo.ts", // 검색 결과 노출 문구 — 언어별로 갈라져 있음
 ]);
-const EXEMPT_DIRS = ["src/content/"]; // 문서 원문(.mdx) — 언어별 파일로 갈라져 있음
+const EXEMPT_DIRS = [
+  "src/content/", // 문서 원문(.mdx) — 언어별 파일로 갈라져 있음
+  "src/app/admin/", // 운영 대시보드 — 관리자 1인용, 한국어 고정(언어 전환 대상 아님)
+  "src/features/admin/", // 위 대시보드의 구성 요소
+];
 
 const files = globSync("src/**/*.{ts,tsx}", { cwd: process.cwd() }).sort();
 const findings = [];
