@@ -62,7 +62,9 @@ src/
 - 공개 텍스트 페이지(AdSense "게시자 콘텐츠 없음" 거절 대응, 2026-09-28): 홈 = 로그인 카드(첫 화면) + 아래 `features/landing/LandingContent`(소개, 작동 방식, 기능, 활용, 요금, FAQ 서버 렌더 약 600단어), `/guide` `/faq` MDX(`content/docs`, `DocLayout`). 긴 글 공통 틀은 `components/ArticleShell`(약관 `LegalLayout` 도 이걸 씀). `public/robots.txt` 는 /api, /graph 차단
 
 ## 결제·요금제 판정
-- 유저 키 = 노션 `workspace_id` (OAuth 응답, httpOnly 쿠키 `nm_ws`). 팀 워크스페이스면 구성원 전체가 Pro 공유 — 초기엔 의도된 단순화
+- **유저 키 = 자체 계정 id**(구글 `sub`, 봉인 쿠키 `nm_uid`). `subscriptions` 의 기본키이고 `getPlan(userId)` 이 이걸로 본다. 워크스페이스를 바꿔도 구독이 따라오고, 남이 같은 워크스페이스를 연결해도 Pro 가 새지 않는다
+- 노션 `workspace_id`(쿠키 `nm_ws`)는 **데이터 쪽 키**로만 남는다 — `workspace_settings`(핀, 숨김), `workspaces`/`workspace_visits`(통계). 구독에는 참고용 컬럼으로만 들어간다
+- Paddle 체크아웃은 `customData.user_id` 를 싣고 웹훅이 그걸로 UPSERT 한다. `workspace_id` 도 같이 싣지만 판정에는 안 쓴다
 - 웹훅 `/api/billing/webhook`: `paddle.webhooks.unmarshal(rawBody, secret, signature)` 서명 검증(원문 body 필수), `subscription.created/updated/canceled` 만 UPSERT. 2xx 만 전달 완료 — 실패는 전부 500 으로 재시도 유도. 등록된 알림 대상 ntfset_01m3gqjgnysws25w3hcajr5tjv
 - Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
 - 카탈로그·웹훅·토큰 스크립트: `scripts/seed-paddle-catalog.ts`, `add-paddle-price.ts <month|year> <달러>`(새 가격 만들고 `PRICE_IDS` 자동 교체), `register-paddle-webhook.ts`, `create-paddle-client-token.ts`. 기본 sandbox, `PADDLE_ENV=production` 이면 라이브(라이브 쓰기는 사용자가 `!` 로 직접 실행). 샌드박스 가격: 월 $7 pri_01m3pr2skwg5q66vxb3rr930wk / 연 $48 pri_01m3pr2da5abpgjejabx0azfk5, 웹훅 ntfset_01m3pr2vrrj026xa0zdr2we764

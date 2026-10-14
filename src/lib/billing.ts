@@ -4,7 +4,10 @@ import { supabaseAdmin } from "./supabase";
 export type Plan = "free" | "pro";
 
 export interface SubscriptionRow {
-  workspace_id: string;
+  /** 자체 계정 id — 요금제의 기준. 워크스페이스를 바꿔도 구독이 따라온다 */
+  user_id: string;
+  /** 어느 워크스페이스에서 결제했는지 (참고용) */
+  workspace_id: string | null;
   customer_id: string;
   subscription_id: string;
   status: string;
@@ -19,21 +22,21 @@ export function planFromStatus(status: string | null | undefined): Plan {
   return status && PRO_STATUSES.has(status) ? "pro" : "free";
 }
 
-export async function getSubscription(workspaceId: string): Promise<SubscriptionRow | null> {
+export async function getSubscription(userId: string): Promise<SubscriptionRow | null> {
   const { data, error } = await supabaseAdmin()
     .from("subscriptions")
-    .select("workspace_id, customer_id, subscription_id, status, price_id, current_period_end")
-    .eq("workspace_id", workspaceId)
+    .select("user_id, workspace_id, customer_id, subscription_id, status, price_id, current_period_end")
+    .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(`subscriptions read failed: ${error.message}`);
   return (data as SubscriptionRow | null) ?? null;
 }
 
-/** 워크스페이스 요금제. Supabase 미설정(로컬 등)이면 free 로 폴백 — 결제 장애가 그래프를 막으면 안 됨 */
-export async function getPlan(workspaceId: string | undefined): Promise<Plan> {
-  if (!workspaceId) return "free";
+/** 계정 요금제. Supabase 미설정(로컬 등)이면 free 로 폴백 — 결제 장애가 그래프를 막으면 안 됨 */
+export async function getPlan(userId: string | undefined): Promise<Plan> {
+  if (!userId) return "free";
   try {
-    return planFromStatus((await getSubscription(workspaceId))?.status);
+    return planFromStatus((await getSubscription(userId))?.status);
   } catch (e) {
     console.error("getPlan fallback to free:", e);
     return "free";
@@ -43,7 +46,7 @@ export async function getPlan(workspaceId: string | undefined): Promise<Plan> {
 export async function upsertSubscription(row: SubscriptionRow) {
   const { error } = await supabaseAdmin()
     .from("subscriptions")
-    .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "workspace_id" });
+    .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
   if (error) throw new Error(`subscriptions upsert failed: ${error.message}`);
 }
 
@@ -89,9 +92,9 @@ export async function putWorkspaceSettings(workspaceId: string, s: WorkspaceSett
 // ---------- 해지 사유 ----------
 
 /** 해지 만류 화면에서 받은 응답. 선택 사항이며 해지를 막지 않는다 */
-export async function saveCancellationFeedback(workspaceId: string, reason: string | null, detail: string | null) {
+export async function saveCancellationFeedback(userId: string, reason: string | null, detail: string | null) {
   const { error } = await supabaseAdmin()
     .from("cancellation_feedback")
-    .insert({ workspace_id: workspaceId, reason, detail });
+    .insert({ user_id: userId, reason, detail });
   if (error) throw new Error(`cancellation_feedback insert failed: ${error.message}`);
 }

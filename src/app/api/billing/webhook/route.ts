@@ -32,15 +32,17 @@ async function handle(event: EventEntity) {
     return;
   }
   const sub = event.data;
-  // 체크아웃에서 customData.workspace_id 로 넘긴 값 — 이게 우리 유저 키
-  const workspaceId = (sub.customData as { workspace_id?: string } | null)?.workspace_id;
-  if (!workspaceId) {
-    console.error("subscription without workspace_id custom_data:", sub.id);
+  // 체크아웃에서 customData 로 넘긴 값 — user_id 가 우리 유저 키다
+  const custom = sub.customData as { user_id?: string; workspace_id?: string } | null;
+  const userId = custom?.user_id;
+  if (!userId) {
+    console.error("subscription without user_id custom_data:", sub.id);
     return; // 우리 유저와 못 잇는 이벤트 — 재시도해도 같으니 200 으로 끝냄
   }
   // UPSERT = 같은 이벤트가 여러 번 와도 결과 동일(멱등). 순서 뒤집혀도 마지막 상태로 수렴
   await upsertSubscription({
-    workspace_id: workspaceId,
+    user_id: userId,
+    workspace_id: custom?.workspace_id ?? null,
     customer_id: sub.customerId,
     subscription_id: sub.id,
     status: sub.status,

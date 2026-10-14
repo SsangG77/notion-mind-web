@@ -15,7 +15,16 @@ import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_PER_MONTH, YEARLY_SAVING } from "@/l
 import { apiUrl } from "@/lib/apiUrl";
 
 /** 요금제 화면 — Free/Pro 카드 + 월/연 토글 + Paddle 오버레이 체크아웃 */
-export default function PricingView({ plan, workspaceId }: { plan: Plan; workspaceId?: string }) {
+export default function PricingView({
+  plan,
+  userId,
+  workspaceId,
+}: {
+  plan: Plan;
+  /** 결제를 거는 기준 — 계정 id. 없으면 로그인부터 */
+  userId?: string;
+  workspaceId?: string;
+}) {
   const t = useT();
   const lang = useLang();
   const [yearly, setYearly] = useState(true);
@@ -133,11 +142,11 @@ export default function PricingView({ plan, workspaceId }: { plan: Plan; workspa
             >
               {t.manageSubscription}
             </ManageSubscriptionButton>
-          ) : workspaceId ? (
+          ) : userId ? (
             <button
               data-testid="pricing_subscribe_button"
               disabled={!ready || waiting}
-              onClick={() => openCheckout(priceId, workspaceId, () => setWaiting(true))}
+              onClick={() => openCheckout(priceId, userId, workspaceId, () => setWaiting(true))}
               className={`${BLOCK_PRESS} mt-6 w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#2383E2] py-2.5 text-sm font-semibold text-white shadow-[3px_3px_0_#2E2C27] hover:bg-[#1b74cb] disabled:cursor-wait disabled:opacity-70 dark:border-black dark:shadow-[3px_3px_0_#000]`}
             >
               {waiting ? t.checkoutConfirming : ready ? t.subscribePro : t.checkoutLoading}

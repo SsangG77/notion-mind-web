@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import PricingView from "@/features/billing/components/PricingView";
 import AdBanner from "@/components/AdBanner";
 import { currentPlan } from "@/lib/plan.server";
+import { currentUserId } from "@/lib/session.server";
 import { currentLang } from "@/lib/lang.server";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -19,12 +20,13 @@ export default async function PricingPage({
 }) {
   const jar = await cookies();
   const workspaceId = jar.get("nm_ws")?.value;
+  const userId = (await currentUserId()) ?? undefined;
   const { plan } = await currentPlan((await searchParams).dev);
   return (
     <div className="flex min-h-screen flex-col bg-white nm-dotgrid text-[#37352F] dark:bg-[#191919] dark:text-[#EDEDEC]">
       <main className="flex-1">
         <Suspense>
-          <PricingView plan={plan} workspaceId={workspaceId} />
+          <PricingView plan={plan} userId={userId} workspaceId={workspaceId} />
         </Suspense>
       </main>
       {plan === "free" && <AdBanner />}

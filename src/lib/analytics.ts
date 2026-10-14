@@ -90,20 +90,22 @@ export async function getAdminStats(days: number): Promise<AdminStats> {
   sinceDate.setUTCDate(sinceDate.getUTCDate() - (days - 1));
   const since = sinceDate.toISOString().slice(0, 10);
 
-  const [ws, newWs, visits, subs, feedback] = await Promise.all([
+  const [ws, newWs, visits, subs, conns, feedback] = await Promise.all([
     sb.from("workspaces").select("workspace_id, workspace_name, first_seen_at, last_seen_at").order("first_seen_at", { ascending: false }),
     sb.from("workspaces").select("first_seen_at").gte("first_seen_at", `${since}T00:00:00Z`),
     sb.from("workspace_visits").select("workspace_id, day").gte("day", since),
-    sb.from("subscriptions").select("workspace_id, status, price_id"),
+    sb.from("subscriptions").select("user_id, status, price_id"),
+    sb.from("notion_connections").select("user_id, workspace_id"),
     sb.from("cancellation_feedback").select("reason"),
   ]);
-  for (const r of [ws, newWs, visits, subs, feedback]) {
+  for (const r of [ws, newWs, visits, subs, conns, feedback]) {
     if (r.error) throw new Error(`admin stats read failed: ${r.error.message}`);
   }
 
   type Ws = { workspace_id: string; workspace_name: string | null; first_seen_at: string; last_seen_at: string };
   type Visit = { workspace_id: string; day: string };
-  type Sub = { workspace_id: string; status: string; price_id: string | null };
+  type Sub = { user_id: string; status: string; price_id: string | null };
+  type Conn = { user_id: string; workspace_id: string };
   const wsRows = (ws.data ?? []) as Ws[];
   const visitRows = (visits.data ?? []) as Visit[];
   const subRows = (subs.data ?? []) as Sub[];
@@ -111,7 +113,9 @@ export async function getAdminStats(days: number): Promise<AdminStats> {
   const proSubs = subRows.filter((s) => planFromStatus(s.status) === "pro");
   const monthly = proSubs.filter((s) => s.price_id === PRICE_IDS.monthly).length;
   const yearly = proSubs.filter((s) => s.price_id === PRICE_IDS.yearly).length;
-  const proIds = new Set(proSubs.map((s) => s.workspace_id));
+  // 구독은 계정에 걸려 있다 — 화면은 워크스페이스 단위라 연결 테이블로 이어 준다
+  const wsByUser = new Map(((conns.data ?? []) as Conn[]).map((c) => [c.user_id, c.workspace_id]));
+  const proIds = new Set(proSubs.map((s) => wsByUser.get(s.user_id)).filter(Boolean) as string[]);
 
   const signups = fillDays(since, days, countBy((newWs.data ?? []) as { first_seen_at: string }[], (r) => r.first_seen_at.slice(0, 10)));
   let running = wsRows.filter((w) => w.first_seen_at.slice(0, 10) < since).length;
