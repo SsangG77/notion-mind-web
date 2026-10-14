@@ -59,7 +59,7 @@ src/
 - 운영자 정보: 개인사업자 차상진(286-23-02144, 부산 동래구) — 이메일만 공개. 환불 = 결제(갱신 포함) 후 14일 전액. 아동 기준 16세 통일. 통신판매업 신고번호·EU Representative·CPO 전화번호 미기재(확인 필요, MDX 주석 참조)
 - 쿠키 배너 `components/legal/CookieBanner` 앱 전역 1개(layout.tsx), EU 옵트인. 동의값 localStorage `nm_cookie_consent`(accepted/rejected) — 광고 스크립트는 accepted일 때만 로드할 것. `openCookieSettings()`로 재열기
 - 회원가입 폼 없음(노션 OAuth) → 로그인 버튼 아래 동의 문구로 갈음. 홈 푸터에 가이드·FAQ·요금제·약관·처리방침·환불·English·문의 메일 링크(결제사·광고 심사가 홈에서 찾음)
-- 공개 텍스트 페이지(AdSense "게시자 콘텐츠 없음" 거절 대응, 2026-09-28): 홈 = 로그인 카드(첫 화면) + 아래 `features/landing/LandingContent`(소개, 작동 방식, 기능, 활용, 요금, FAQ 서버 렌더 약 600단어), `/guide` `/faq` MDX(`content/docs`, `DocLayout`). 긴 글 공통 틀은 `components/ArticleShell`(약관 `LegalLayout` 도 이걸 씀). `public/robots.txt` 는 /api, /graph 차단
+- 공개 텍스트 페이지(AdSense "게시자 콘텐츠 없음" 거절 대응, 2026-09-28): 홈 = 로그인 카드(첫 화면) + 아래 `features/landing/LandingContent`(소개, 작동 방식, 기능, 활용, 요금, FAQ 서버 렌더 약 600단어), `/guide` `/faq` MDX(`content/docs`, `DocLayout`). 긴 글 공통 틀은 `components/ArticleShell`(약관 `LegalLayout` 도 이걸 씀). `public/robots.txt` 는 /api, /dev, /admin 만 차단. **/graph 는 막지 않는다** — 광고가 실제로 붙는 화면을 크롤러가 못 보면 AdSense 심사에 불리하고, 로그인 게이트가 이미 내용을 가린다(구글도 robots 가 아니라 인증이나 noindex 로 막으라고 권장)
 
 ## 결제·요금제 판정
 - **유저 키 = 자체 계정 id**(구글 `sub`, 봉인 쿠키 `nm_uid`). `subscriptions` 의 기본키이고 `getPlan(userId)` 이 이걸로 본다. 워크스페이스를 바꿔도 구독이 따라오고, 남이 같은 워크스페이스를 연결해도 Pro 가 새지 않는다
@@ -115,7 +115,7 @@ src/
 
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(메인 그래프 하단 가로 배너 + 노드 상세 패널 하단 배너 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고(홈, /guide, /faq, /pricing, /graph 하단 가로 배너 + 노드 상세 패널 하단 배너 — 공개 페이지에도 붙여야 AdSense 가 심사할 수 있다 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더

@@ -7,10 +7,13 @@ export default function DocLayout({
   lang,
   page,
   children,
+  ad,
 }: {
   lang: Lang;
   page: "guide" | "faq";
   children: React.ReactNode;
+  /** Free 에게 보여줄 하단 광고 — 로그인 전 방문자도 포함 */
+  ad?: React.ReactNode;
 }) {
   const t = DICT[lang];
   return (
@@ -25,6 +28,7 @@ export default function DocLayout({
       trailing={{ href: "/api/auth/login", label: t.startWithNotion }}
     >
       {children}
+      {ad}
     </ArticleShell>
   );
 }

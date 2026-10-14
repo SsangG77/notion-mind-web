@@ -11,6 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMeta(await currentLang(), "/");
 }
 import LandingContent from "@/features/landing/components/LandingContent";
+import AdBanner from "@/components/AdBanner";
+import { currentPlan } from "@/lib/plan.server";
 import LangToggle from "@/features/i18n/LangToggle";
 
 // 화면 1. 홈 — 첫 화면은 로그인 카드(디자인 탭 확정: 중앙 대형 DB형 입체 노드 + 블러 배경 노드 + 도트 그리드),
@@ -55,6 +57,7 @@ export default async function Home({
   const { error } = await searchParams;
   const jar = await cookies();
   const lang = await currentLang();
+  const { plan } = await currentPlan();
   const session = await sessionState();
   if (session === "ready") redirect(langHref(lang, "/graph"));
   // 로그인은 했는데 노션을 아직 안 연결한 사람은 노션 연결로 바로 보낸다
@@ -178,6 +181,7 @@ export default async function Home({
         </nav>
         <NotionDisclaimer />
       </footer>
+      {plan === "free" && <AdBanner />}
     </main>
   );
 }
