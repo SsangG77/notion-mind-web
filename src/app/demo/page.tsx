@@ -19,6 +19,8 @@ export default async function DemoPage() {
         <DemoGraphClient workspace={DICT[lang].demoWorkspace} />
       </div>
       <DemoIntro lang={lang} />
+      {/* 요금제와 무관하게 항상 — 예시 화면은 제품이 아니라 보여주기용 공개 페이지이고,
+          광고가 실제로 어떻게 보이는지가 AdSense 심사에서 확인돼야 한다 */}
       <AdBanner />
     </div>
   );

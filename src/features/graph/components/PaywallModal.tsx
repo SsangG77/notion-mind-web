@@ -48,13 +48,6 @@ export default function PaywallModal({ onClose }: { onClose: () => void }) {
             {t.later}
           </button>
         </div>
-        {/* Free 전용 광고 슬롯 — 네트워크 미정, 플레이스홀더 */}
-        <div
-          data-testid="ad_banner_paywall"
-          className="flex h-[52px] items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
-        >
-          <span className="text-xs tracking-wide text-[#91908C]">{t.adSlot}</span>
-        </div>
       </div>
     </div>
   );

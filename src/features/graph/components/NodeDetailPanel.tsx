@@ -1,6 +1,7 @@
 "use client";
 
 import type { Plan } from "@/lib/billing";
+import AdBanner from "@/components/AdBanner";
 import { useEffect, useRef, useState } from "react";
 import { useSigma } from "@react-sigma/core";
 import type { NodeType } from "@/types/graph";
@@ -231,15 +232,7 @@ export default function NodeDetailPanel({
           {t.openInNotion}
         </a>
       </div>
-      {/* Free 전용 패널 하단 배너 — 네트워크 미정, 플레이스홀더 */}
-      {plan === "free" && (
-        <div
-          data-testid="ad_banner_detail"
-          className="flex h-[52px] shrink-0 items-center justify-center border-t border-[#E9E9E7] bg-[#F7F6F3] dark:border-[#2F2F2F] dark:bg-[#202020]"
-        >
-          <span className="text-xs tracking-wide text-[#91908C]">{t.adSlot}</span>
-        </div>
-      )}
+      {plan === "free" && <AdBanner variant="panel" />}
     </div>
   );
 }
