@@ -15,13 +15,15 @@ export default async function DemoPage() {
   const lang = await currentLang();
   return (
     <div className="flex min-h-screen flex-col bg-white nm-dotgrid dark:bg-[#191919]">
-      <div className="h-[72vh] min-h-[420px] shrink-0">
+      {/* 그래프를 조금 줄여 광고가 첫 화면 안에 들어오게 한다 — 맨 아래에 두면 스크롤해야 보인다 */}
+      <div className="h-[64vh] min-h-[380px] shrink-0">
         <DemoGraphClient workspace={DICT[lang].demoWorkspace} />
       </div>
-      <DemoIntro lang={lang} />
       {/* 요금제와 무관하게 항상 — 예시 화면은 제품이 아니라 보여주기용 공개 페이지이고,
-          광고가 실제로 어떻게 보이는지가 AdSense 심사에서 확인돼야 한다 */}
+          광고가 실제로 어떻게 보이는지가 AdSense 심사에서 확인돼야 한다.
+          그래프와 글 사이가 자연스러운 구분선이라 여기에 둔다 */}
       <AdBanner />
+      <DemoIntro lang={lang} />
     </div>
   );
 }

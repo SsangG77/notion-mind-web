@@ -42,7 +42,7 @@ export default function TopBar({
   return (
     <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
       {/* 좌측: 앱 이름(누르면 설정) + 검색 + 필터 */}
-      <div className="pointer-events-auto flex items-start gap-2">
+      <div className="pointer-events-auto flex min-w-0 flex-1 items-start gap-2">
         <button
           data-testid="settings_button"
           title={t.settings}

@@ -57,7 +57,8 @@ export default function SearchPanel() {
   };
 
   return (
-    <div className="relative w-72">
+    // 좁은 화면에서는 줄어들어야 한다 — 고정 폭이면 휴대폰에서 가로 스크롤이 생긴다
+    <div className="relative w-full max-w-72 min-w-0">
       <div className={`${BLOCK} flex h-9 items-center overflow-hidden`}>
         <input
           data-testid="graph_search_input"
