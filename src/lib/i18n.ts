@@ -89,6 +89,7 @@ const ko = {
   propDescription: "설명",
   propSchema: "속성",
   adSlot: "AD — 광고 영역 (Free)",
+  adLabel: "Advertisement",
 
   // 설정 패널
   plan: "요금제",
@@ -296,6 +297,7 @@ const en: Shape = {
   propDescription: "Description",
   propSchema: "Properties",
   adSlot: "AD — ad slot (Free)",
+  adLabel: "Advertisement",
 
   plan: "Plan",
   manageSubscription: "Manage subscription",
