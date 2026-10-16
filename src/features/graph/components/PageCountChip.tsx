@@ -31,7 +31,7 @@ export default function PageCountChip({
     <Link
       data-testid="page_count_chip"
       href={langHref(lang, "/pricing")}
-      className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-3 z-10 flex h-9 w-[276px] items-center gap-2.5 px-3`}
+      className={`${BLOCK} ${BLOCK_PRESS} absolute right-3 top-[56px] z-10 flex h-9 w-[276px] max-w-[calc(100%_-_24px)] sm:top-3 items-center gap-2.5 px-3`}
       title={t.viewPlans}
     >
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-[5px] leading-none">

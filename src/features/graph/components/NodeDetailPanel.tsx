@@ -96,15 +96,22 @@ export default function NodeDetailPanel({
   // 그래프 구조에서 바로 얻는 정보 (API 응답 전에도 표시)
   const attrs = graph.hasNode(selection.id) ? graph.getNodeAttributes(selection.id) : null;
   const fallbackTitle = (attrs?.label as string) ?? "";
+  // 주소가 없는 노드(예시 화면)는 "노션에서 열기"를 숨긴다 — 죽은 링크를 만들지 않게
+  const notionUrl = detail?.url ?? (attrs?.url as string | undefined) ?? null;
 
   const untitled = t.untitled; // forEachEdge 콜백의 target 인자 이름이 t 라 미리 꺼내 둔다
   const parents: Chip[] = [];
   const relations: Chip[] = [];
   const children: Chip[] = [];
+  // 관계형은 양쪽에서 서로를 가리키는 경우가 흔해 같은 노드가 두 번 나온다 — 목록별로 한 번만
+  const seen = new Set<string>();
   if (graph.hasNode(selection.id)) {
     graph.forEachEdge(selection.id, (_e, ea, s, t) => {
       const otherId = s === selection.id ? t : s;
       if (!graph.hasNode(otherId)) return;
+      const bucket = ea.kind === "relation" ? "r" : t === selection.id ? "p" : "c";
+      if (seen.has(bucket + otherId)) return;
+      seen.add(bucket + otherId);
       const chip: Chip = {
         id: otherId,
         label: (graph.getNodeAttribute(otherId, "label") as string) ?? untitled,
@@ -127,7 +134,7 @@ export default function NodeDetailPanel({
       data-testid="node_detail_panel"
       className={`${BLOCK} ${
         closing ? "nm-slide-out-right" : "nm-slide-in-right"
-      } pointer-events-auto fixed bottom-[72px] right-3 top-[60px] z-20 flex w-[380px] flex-col overflow-hidden`}
+      } pointer-events-auto fixed bottom-[calc(12px_+_var(--nm-adbar,60px))] right-3 top-[60px] z-20 flex w-[380px] flex-col overflow-hidden`}
     >
       {/* 헤더 — 타입 + 제목 */}
       <div className="shrink-0 border-b border-[#E9E9E7] px-4 py-3 dark:border-[#2F2F2F]">
@@ -221,17 +228,19 @@ export default function NodeDetailPanel({
       </div>
 
       {/* 하단 고정 — 노션에서 열기 + Free 광고 */}
-      <div className="shrink-0 border-t border-[#E9E9E7] p-3 dark:border-[#2F2F2F]">
-        <a
-          data-testid="open_in_notion_button"
-          href={detail?.url ?? (attrs?.url as string) ?? "#"}
-          target="_blank"
-          rel="noreferrer"
-          className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000] dark:hover:bg-[#3D3C36]`}
-        >
-          {t.openInNotion}
-        </a>
-      </div>
+      {notionUrl && (
+        <div className="shrink-0 border-t border-[#E9E9E7] p-3 dark:border-[#2F2F2F]">
+          <a
+            data-testid="open_in_notion_button"
+            href={notionUrl}
+            target="_blank"
+            rel="noreferrer"
+            className={`${BLOCK_PRESS} block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000] dark:hover:bg-[#3D3C36]`}
+          >
+            {t.openInNotion}
+          </a>
+        </div>
+      )}
       {plan === "free" && <AdBanner variant="panel" />}
     </div>
   );

@@ -38,7 +38,7 @@ export default function HiddenNodesPanel({
   return (
     <div
       data-testid="hidden_nodes_panel"
-      className={`${BLOCK} ${open ? "nm-slide-in" : "nm-slide-out"} pointer-events-auto fixed bottom-[116px] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
+      className={`${BLOCK} ${open ? "nm-slide-in" : "nm-slide-out"} pointer-events-auto fixed bottom-[calc(56px_+_var(--nm-adbar,60px))] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
       onAnimationEnd={(e) => {
         if (e.animationName === "nm-slide-out") onClosed();
       }}

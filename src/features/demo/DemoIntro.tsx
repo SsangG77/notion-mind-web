@@ -20,9 +20,9 @@ export default function DemoIntro({ lang }: { lang: Lang }) {
         <img
           src="/shots/graph-overview.png"
           alt={c.shotAlt}
-          width={1280}
-          height={540}
-          className="w-full rounded-[10px] border-[1.5px] border-[#2E2C27] shadow-[5px_5px_0_#2E2C27] dark:border-black dark:shadow-[5px_5px_0_#000]"
+          width={992}
+          height={520}
+          className="w-full rounded-[10px] border border-[#E9E9E7] dark:border-[#2F2F2F]"
         />
         <figcaption className="mt-2 text-xs text-[#91908C]">{c.shotCaption}</figcaption>
       </figure>

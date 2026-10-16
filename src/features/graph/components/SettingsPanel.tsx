@@ -142,7 +142,7 @@ export default function SettingsPanel({
         data-testid="settings_panel"
         className={`${BLOCK} ${
           closing ? "nm-slide-out" : "nm-slide-in"
-        } pointer-events-auto fixed bottom-[116px] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
+        } pointer-events-auto fixed bottom-[calc(56px_+_var(--nm-adbar,60px))] left-3 top-[60px] z-20 flex w-[332px] flex-col overflow-hidden`}
       >
         <div className={`${ROW} shrink-0`}>
           <span className="min-w-0">
