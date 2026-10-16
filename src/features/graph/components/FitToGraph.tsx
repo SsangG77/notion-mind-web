@@ -11,8 +11,20 @@ import { useSigma } from "@react-sigma/core";
  * 예시 화면은 매번 처음이라 들어오자마자 아무것도 안 보이게 된다.
  *
  * 물리가 정착한 뒤에 재야 의미가 있으므로 settleMs 만큼 기다렸다가 한 번만 맞춘다.
+ *
+ * 전체를 다 넣으면 노드가 너무 작아져(예시 워크스페이스 기준 10%) 제목이 안 보이고 사각형만 남는다.
+ * minPercent 아래로는 안 내려가게 막아, 가장자리가 좀 잘리더라도 무엇을 보고 있는지 읽히게 한다.
  */
-export default function FitToGraph({ ready, settleMs = 1200 }: { ready: boolean; settleMs?: number }) {
+export default function FitToGraph({
+  ready,
+  settleMs = 1200,
+  minPercent = 15,
+}: {
+  ready: boolean;
+  settleMs?: number;
+  /** 열릴 때 보장할 최소 배율(%) — 배율 = 100 / 카메라 비율 */
+  minPercent?: number;
+}) {
   const sigma = useSigma();
   const done = useRef(false);
 
@@ -44,7 +56,7 @@ export default function FitToGraph({ ready, settleMs = 1200 }: { ready: boolean;
       sigma.getCamera().setState({
         x: 0.5,
         y: 0.5,
-        ratio: Math.min(Math.max(ratio, 0.05), 100),
+        ratio: Math.min(Math.max(ratio, 0.05), 100 / minPercent),
         angle: 0,
       });
       // 카메라 중심은 화면 좌표계라 그래프 중심으로 다시 옮긴다
@@ -58,7 +70,7 @@ export default function FitToGraph({ ready, settleMs = 1200 }: { ready: boolean;
       });
     }, settleMs);
     return () => clearTimeout(timer);
-  }, [ready, sigma, settleMs]);
+  }, [ready, sigma, settleMs, minPercent]);
 
   return null;
 }
