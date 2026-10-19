@@ -7,6 +7,9 @@ import { decrypt, encrypt } from "./crypto";
  *
  * - 비밀번호는 환경변수에만 둔다. 미설정이면 게이트 자체가 꺼진다(경로가 404).
  * - 통과 증명은 AES-GCM 으로 봉인한 쿠키(토큰과 같은 키). 만료를 안에 넣어 서버가 직접 검사한다.
+ * - ⚠️ 봉인 안에 **용도(쿠키 이름)** 도 넣고 검증 때 대조한다. 만료만 담으면 두 게이트의 봉인이
+ *   서로 통과해(`nm_dev` 값을 `nm_admin` 자리에 넣으면 대시보드가 열림) 각자의 유효기간과
+ *   잠금이 자기 화면만 지배하지 못한다.
  * - 비교는 상수 시간 — 길이 차이로도 새지 않게.
  */
 export interface Gate {
@@ -37,12 +40,13 @@ export function createGate(opts: { env: string; cookie: string; ttlMs: number })
       if (a.length !== b.length) return false;
       return timingSafeEqual(a, b);
     },
-    seal: () => encrypt(JSON.stringify({ exp: Date.now() + opts.ttlMs })),
+    seal: () => encrypt(JSON.stringify({ p: opts.cookie, exp: Date.now() + opts.ttlMs })),
     isUnlocked(cookieValue) {
       if (!cookieValue || !secretOf()) return false;
       try {
-        const { exp } = JSON.parse(decrypt(cookieValue)) as { exp: number };
-        return exp > Date.now();
+        const { p, exp } = JSON.parse(decrypt(cookieValue)) as { p?: unknown; exp?: unknown };
+        if (p !== opts.cookie) return false; // 다른 게이트의 봉인은 받지 않는다
+        return typeof exp === "number" && exp > Date.now();
       } catch {
         return false;
       }

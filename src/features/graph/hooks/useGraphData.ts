@@ -61,8 +61,9 @@ export function useGraphData(
     let cursor: string | null = null;
     try {
       for (let i = 0; i < MAX_BATCHES; i++) {
+        // 배치 번호는 보내지 않는다 — 서버가 커서 안에 봉인해 직접 센다
         const url = apiUrl(
-          cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}&i=${i}` : "/api/graph",
+          cursor ? `/api/graph?cursor=${encodeURIComponent(cursor)}` : "/api/graph",
           lang,
         );
         const res = await fetch(url);

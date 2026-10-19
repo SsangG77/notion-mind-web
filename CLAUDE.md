@@ -64,12 +64,13 @@ src/
 
 ## 결제·요금제 판정
 - **유저 키 = 자체 계정 id**(구글 `sub`, 봉인 쿠키 `nm_uid`). `subscriptions` 의 기본키이고 `getPlan(userId)` 이 이걸로 본다. 워크스페이스를 바꿔도 구독이 따라오고, 남이 같은 워크스페이스를 연결해도 Pro 가 새지 않는다
-- 노션 `workspace_id`(쿠키 `nm_ws`)는 **데이터 쪽 키**로만 남는다 — `workspace_settings`(핀, 숨김), `workspaces`/`workspace_visits`(통계). 구독에는 참고용 컬럼으로만 들어간다
+- 노션 `workspace_id` 는 **데이터 쪽 키**로만 남는다 — `workspace_settings`(핀, 숨김), `workspaces`/`workspace_visits`(통계). 구독에는 참고용 컬럼으로만 들어간다
+- ⚠️ 그 워크스페이스 값을 **쿠키(`nm_ws`)에서 읽어 테넌트 키로 쓰면 안 된다.** 봉인이 없는 평문이라 호출자가 남의 워크스페이스를 적어 넣을 수 있고, Supabase 는 service 키로 접근하므로 DB 층에서도 안 막힌다. `/api/settings` 는 `getConnection(readUid(...))` 가 돌려준 값만 쓴다(보안 감사 run-1 확정 결함). `nm_ws` 는 화면 표시용 힌트로만 남아 있고 로그아웃 때 같이 지운다
 - Paddle 체크아웃은 `customData.user_id` 를 싣고 웹훅이 그걸로 UPSERT 한다. `workspace_id` 도 같이 싣지만 판정에는 안 쓴다
 - 웹훅 `/api/billing/webhook`: `paddle.webhooks.unmarshal(rawBody, secret, signature)` 서명 검증(원문 body 필수), `subscription.created/updated/canceled` 만 UPSERT. 2xx 만 전달 완료 — 실패는 전부 500 으로 재시도 유도. 등록된 알림 대상 ntfset_01m3gqjgnysws25w3hcajr5tjv
 - Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
 - 카탈로그·웹훅·토큰 스크립트: `scripts/seed-paddle-catalog.ts`, `add-paddle-price.ts <month|year> <달러>`(새 가격 만들고 `PRICE_IDS` 자동 교체), `register-paddle-webhook.ts`, `create-paddle-client-token.ts`. 기본 sandbox, `PADDLE_ENV=production` 이면 라이브(라이브 쓰기는 사용자가 `!` 로 직접 실행). 샌드박스 가격: 월 $7 pri_01m3pr2skwg5q66vxb3rr930wk / 연 $48 pri_01m3pr2da5abpgjejabx0azfk5, 웹훅 ntfset_01m3pr2vrrj026xa0zdr2we764
-- 노드 상한: Free 1,000 / Pro 20,000 (`assembleGraph` limit, `useGraphData(plan)`). 클라이언트는 상한+1 배치까지 요청(초과 감지), 서버 `/api/graph` 는 배치 번호 `i` 가 Free 상한을 넘으면 요금제 확인 후 빈 응답 — 클라이언트 조작만으로는 더 못 받음
+- 노드 상한: Free 1,000 / Pro 20,000 (`assembleGraph` limit, `useGraphData(plan)`). 클라이언트는 상한+1 배치까지 요청(초과 감지), 서버 `/api/graph` 는 **진행 횟수를 직접 센다** — 노션 커서와 배치 번호를 `crypto.ts` 로 함께 봉인해 `nextCursor` 로 내주고 되돌려 받을 때 푼다. 위조나 손상된 커서는 400. ⚠️ 배치 번호를 쿼리에서 받으면 안 된다 — 값을 빼면 0 으로 평가돼 상한 검사가 통째로 건너뛰어진다(보안 감사 run-1 확정 결함)
 - 구독 관리: `ManageSubscriptionButton`(설정 패널 Pro 행, 요금제 화면 Pro 카드) → 만류 모달(잃는 것 안내) → 해지 사유(선택, 건너뛰기 가능) → `/api/billing/portal` 이 Paddle 고객 포털 세션을 만들어 새 탭으로. 사유는 `/api/billing/feedback` → Supabase `cancellation_feedback`
 - ⚠️ 해지 자체는 막을 수 없음 — Paddle 이 모든 구독 메일에 해지 링크를 넣고(규정), 구매자는 paddle.net 에서 직접 해지·환불 요청 가능. 약관 제10조와 EU 철회권상으로도 승인제 불가. 이탈 대응은 만류 화면·연간 유도·사유 수집까지
 - Pro 영구 설정: Supabase `workspace_settings`(workspace_id PK, hidden jsonb string[], pinned jsonb {id:{x,y}}). `/api/settings` GET(Free 는 빈 값)/PUT(Pro 만, 20,000개 상한). 클라이언트 `useWorkspaceSettings(plan)` — 로드 후 `saved` 를 LayoutManager 에 넘겨 노드 추가 시 hidden/pinned+좌표 적용(로드 전엔 노드 추가 보류), 숨김/핀/핀 드래그/모두 표시 뒤 `persist(graph)` 가 그래프에서 읽어 800ms 디바운스 PUT. 필터는 UI 골격만 있어 저장 대상 없음
@@ -104,7 +105,7 @@ src/
 - 설정 패널의 토글은 쿠키가 아니라 **주소를 고쳐 쓴다**(`router.replace`). "끄기"는 쿠키까지 지움
 - 화면이 개발 모드로 그려졌으면 서버 호출도 같은 판정을 받아야 하므로, 클라이언트는 `lib/devParam.ts` 의 `withDev()` 로 API 주소에 표시를 이어 붙인다(`/api/graph`, `/api/settings`, `/api/billing/status`). 새로 추가하는 요금제 의존 API 도 이걸 거쳐야 함
 - 비밀번호는 `DEV_UNLOCK_SECRET` 환경변수에만 있음. 미설정이면 `/dev` 는 404 이고 기능 전체가 꺼짐. 클라이언트 번들에 안 들어감(빌드 산출물로 확인). 비밀번호 확인, 쿠키 봉인, 열기/잠그기 라우트 처리는 `lib/gate.ts` 의 `createGate`/`handleGateRequest` 공용(관리자 대시보드도 같은 게이트). 잠금 화면 `components/UnlockForm`(endpoint, next 를 prop 으로 받음)
-- 쿠키는 httpOnly, AES-GCM 봉인(토큰과 같은 키), 만료를 봉인 안에 넣어 서버가 직접 검사 — 위조·만료 쿠키는 무시하고 Free 로 떨어짐. 유효기간 7일
+- 쿠키는 httpOnly, AES-GCM 봉인(토큰과 같은 키), 만료와 **용도(쿠키 이름)** 를 봉인 안에 넣어 서버가 직접 검사 — 위조, 만료, 다른 게이트의 봉인은 무시하고 Free 로 떨어짐. 유효기간 7일. ⚠️ 만료만 담으면 `nm_dev` 봉인이 `nm_admin` 자리에서 통과해 대시보드가 열린다(보안 감사 run-1 확정 결함)
 - 요금제 판정은 `lib/plan.server.ts` 한 곳: 서버 컴포넌트는 `currentPlan(searchParams.dev)`, 라우트 핸들러는 `planFor(req)`(쿠키와 쿼리를 함께 봄). ⚠️ 새 코드에서 `getPlan()` 을 직접 부르면 개발 모드가 무시된다
 - `/dev` 는 robots.txt 로 차단, 어디에서도 링크하지 않음
 
@@ -142,6 +143,7 @@ src/
 
 ## 명령
 - `npm run dev` / `npm run build` / `npm run lint` (리포 루트 = 웹 앱)
+- `npm run check:tenancy` — 보안 감사에서 확정된 결함 3건(설정 API 의 쿠키 테넌트 키, 그래프 상한의 클라이언트 배치 번호, 용도 없는 게이트 봉인)이 되돌아오지 않는지 검사(`lint` 가 같이 돌림). 예외는 그 줄에 `tenancy-allow: 사유` 주석
 - `npm run check:ui-strings` — 화면 문구가 코드에 하드코딩됐는지 검사(`lint` 가 같이 돌림). **번역 작업의 완료 판정은 사람이 만든 목록이 아니라 이 명령의 0건으로 한다.** 의도된 예외는 그 줄에 `i18n-allow: 사유` 주석
 
 ## 주의
