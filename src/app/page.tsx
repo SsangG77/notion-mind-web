@@ -11,6 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMeta(await currentLang(), "/");
 }
 import LandingContent from "@/features/landing/components/LandingContent";
+import DemoGraphClient from "@/features/demo/DemoGraphClient";
 import AdBanner from "@/components/AdBanner";
 import { currentPlan } from "@/lib/plan.server";
 import LangToggle from "@/features/i18n/LangToggle";
@@ -143,11 +144,25 @@ export default async function Home({
         </div>
 
         <a
-          href="#intro"
+          href="#demo"
           className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] text-[#91908C] hover:underline"
         >
           {t.seeWhatItDoes}
         </a>
+      </section>
+
+      {/* 로그인하지 않아도 만져 보는 예시 그래프 — 예전 /demo 페이지가 하던 일을 여기서 한다.
+          제품이 로그인 뒤에만 있으면 심사자와 크롤러가 볼 것이 없고, 그게 애드센스 1차 거절 사유였다.
+          ⚠️ 글 폭 박스 안에 가둔다 — 화면을 가로지르면 휠이 어디서 확대이고 어디서 스크롤인지 경계가 안 보인다.
+          transform-gpu 는 모양이 아니라 그 안의 position:fixed 패널을 박스에 묶기 위한 것 */}
+      <section id="demo" className="mx-auto w-full max-w-[1040px] px-4 pt-10 sm:px-6">
+        <h2 className="text-xl font-bold tracking-tight text-[#37352F] dark:text-[#EDEDEC]">
+          {t.demoHeading}
+        </h2>
+        <p className="mb-4 mt-2 text-sm text-[#5F5E5A] dark:text-[#B8B7B2]">{t.demoLead}</p>
+        <div className="relative h-[520px] max-h-[62vh] min-h-[320px] transform-gpu [--nm-adbar:0px] overflow-hidden rounded-[12px] border border-[#E9E9E7] dark:border-[#2F2F2F]">
+          <DemoGraphClient workspace={t.demoWorkspace} />
+        </div>
       </section>
 
       <div id="intro">
@@ -157,7 +172,7 @@ export default async function Home({
       {/* 푸터 — 결제사·광고 심사가 홈에서 약관·환불정책·연락처를 찾음 */}
       <footer className="flex flex-col items-center gap-2 px-6 pb-8 text-center">
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-[#91908C]">
-          <a href={langHref(lang, "/demo")} className="hover:underline">
+          <a href="#demo" className="hover:underline">
             {t.demo}
           </a>
           <a href={langHref(lang, "/guide")} className="hover:underline">

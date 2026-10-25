@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import PricingView from "@/features/billing/components/PricingView";
+import PricingDetails from "@/features/billing/components/PricingDetails";
 import AdBanner from "@/components/AdBanner";
 import { currentPlan } from "@/lib/plan.server";
 import { currentUserId } from "@/lib/session.server";
@@ -28,6 +29,7 @@ export default async function PricingPage({
         <Suspense>
           <PricingView plan={plan} userId={userId} workspaceId={workspaceId} />
         </Suspense>
+        <PricingDetails lang={await currentLang()} />
       </main>
       {plan === "free" && <AdBanner />}
     </div>

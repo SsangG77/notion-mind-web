@@ -34,6 +34,15 @@ for (const file of walk(SRC)) {
   }
 }
 
+// 승인 전에는 광고 자리를 아예 그리지 않는다 — 빈 "광고 자리" 상자는 구글이 금지하는
+// "아직 미완성 상태인 화면"으로 읽힌다(publisherpolicies/answer/11112688).
+// 심사에 필요한 건 코드 스니펫·ads.txt·메타 태그 중 하나뿐이고, 승인 전에는 광고가 게재되지 않는다
+// (adsense/answer/7584263).
+const owner = readFileSync(OWNER, "utf8");
+if (!/if \(!AD_SLOTS\[variant\]\) return null/.test(owner)) {
+  problems.push(`${OWNER} 에 slot 미발급 시 null 반환 가드가 없다 — 승인 전 빈 광고 상자가 노출된다`);
+}
+
 if (problems.length) {
   console.error(`✗ 광고 자리 ${problems.length}건 이상\n`);
   for (const p of problems) console.error("  " + p);

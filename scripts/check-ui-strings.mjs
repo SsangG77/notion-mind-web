@@ -15,6 +15,7 @@ const EXEMPT_FILES = new Set([
   "src/features/landing/content.ts", // 홈 소개 문구 사전
   "src/lib/seo.ts", // 검색 결과 노출 문구 — 언어별로 갈라져 있음
   "src/features/demo/copy.ts", // 예시 화면 소개 글 — 언어별로 갈라져 있음
+  "src/features/billing/pricingCopy.ts", // 요금제 설명 글 — 언어별로 갈라져 있음
 ]);
 const EXEMPT_DIRS = [
   "src/content/", // 문서 원문(.mdx) — 언어별 파일로 갈라져 있음

@@ -21,7 +21,7 @@ export default function DocLayout({
       lang={lang}
       langToggle={<LangToggle lang={lang} path={`/${page}`} />}
       nav={[
-        { href: langHref(lang, "/demo"), label: t.demo },
+        { href: `${langHref(lang, "/")}#demo`, label: t.demo },
         { href: langHref(lang, "/guide"), label: t.guide, active: page === "guide" },
         { href: langHref(lang, "/faq"), label: t.faq, active: page === "faq" },
         { href: langHref(lang, "/pricing"), label: t.pricingTitle },

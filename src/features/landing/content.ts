@@ -6,8 +6,6 @@ export interface LandingCopy {
   introBody: string[];
   stepsTitle: string;
   steps: Array<{ n: string; title: string; body: string }>;
-  featuresTitle: string;
-  features: Array<{ title: string; body: string }>;
   useCasesTitle: string;
   useCases: Array<{ title: string; body: string }>;
   pricingTitle: string;
@@ -45,33 +43,6 @@ const ko: LandingCopy = {
       n: "3",
       title: "구조를 탐색",
       body: "마우스를 올려 이웃만 남기고, 노드를 끌어 배치를 바꾸고, 클릭해서 속성과 본문을 확인합니다. 잡동사니는 숨기고 중요한 노드는 핀으로 고정합니다.",
-    },
-  ],
-  featuresTitle: "기능",
-  features: [
-    {
-      title: "소속과 관계를 한 화면에",
-      body: "데이터베이스 소속은 실선, 페이지 안의 하위 페이지는 회색 실선, 관계형 속성은 점선으로 구분해 그립니다. 사이드바 트리에서는 보이지 않는 가로 연결이 드러납니다.",
-    },
-    {
-      title: "물리 배치",
-      body: "연결이 많은 데이터베이스 주위로 자식 페이지가 동심원처럼 모이고, 고립된 페이지는 바깥으로 밀려납니다. 노드를 끌면 이웃이 스프링처럼 따라옵니다.",
-    },
-    {
-      title: "호버 포커스",
-      body: "노드 위에 마우스를 올리면 직접 연결된 이웃만 선명하게 남고 나머지는 흐려집니다. 한 페이지가 어디에 얽혀 있는지 바로 보입니다.",
-    },
-    {
-      title: "노드 상세 패널",
-      body: "클릭하면 소속, 데이터베이스 속성, 마지막 수정 시각, 관계형 연결, 본문 미리보기를 오른쪽 패널에서 봅니다. 연결된 항목을 누르면 그 노드로 이동합니다.",
-    },
-    {
-      title: "숨기기와 핀 고정",
-      body: "우클릭으로 관심 없는 노드를 치우고, 원하는 자리에 노드를 박아 둡니다. Pro에서는 이 설정이 서버에 저장되어 다른 기기에서도 그대로입니다.",
-    },
-    {
-      title: "다크 모드와 위치 기억",
-      body: "시스템 설정을 따르는 다크 모드, 마지막으로 보던 화면 위치와 배율을 기억해 다음 접속 때 같은 자리에서 시작합니다.",
     },
   ],
   useCasesTitle: "이럴 때 씁니다",
@@ -155,33 +126,6 @@ const en: LandingCopy = {
       n: "3",
       title: "Explore the structure",
       body: "Hover to keep only the neighbours, drag nodes to rearrange, click to read properties and a body preview. Hide the clutter and pin what matters.",
-    },
-  ],
-  featuresTitle: "Features",
-  features: [
-    {
-      title: "Hierarchy and relations together",
-      body: "Database membership is a solid black line, a subpage inside a page is a solid grey line, and a relation property is a dotted line. The sideways links the sidebar never shows become visible.",
-    },
-    {
-      title: "Physical layout",
-      body: "Child pages gather in rings around the databases they belong to, and unconnected pages drift outward. Drag a node and its neighbours follow on springs.",
-    },
-    {
-      title: "Hover focus",
-      body: "Hovering a node keeps it and its direct neighbours sharp while everything else fades. You see at once where a page is entangled.",
-    },
-    {
-      title: "Node detail panel",
-      body: "A click opens a side panel with the parent, database properties, last edited time, relations and a body preview. Clicking any linked item flies the camera to that node.",
-    },
-    {
-      title: "Hide and pin",
-      body: "Right-click to clear away nodes you do not care about, or nail a node to a spot. On Pro these choices are stored server-side and follow you to other devices.",
-    },
-    {
-      title: "Dark mode and remembered view",
-      body: "Dark mode follows your system setting, and the last camera position and zoom are remembered so you start where you left off.",
     },
   ],
   useCasesTitle: "Good for",

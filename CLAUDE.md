@@ -115,18 +115,19 @@ src/
 - 집계 `getAdminStats(days)`: 누적 워크스페이스, 기간 내 신규/활성, Pro 수와 월/연 구독 수(`PRICE_IDS` 로 구분), 월 환산 매출(월 요금 + 연 요금÷12), 누적 가입자 추이(범위 이전 가입자를 바닥으로 일별 가입을 더함), 일별 가입/활성 추이(빈 날 0 채움), 구독 상태 분포, 해지 사유, 최근 가입 20개. 기간은 `?days=7|30|90`
 - 차트는 라이브러리 없이 `features/admin/components`(`TimeSeriesChart` 단일 계열 선+면, 호버 툴팁, 마지막 값만 라벨 / `StatTile` / `BarList`). 계열이 하나라 범례 없음, 글자는 텍스트 색, 마크만 액센트색
 
-## 예시 화면 `/demo` (2026-10-14)
-- 로그인 없이 실제 그래프를 만지는 공개 화면. AdSense 가 "가치가 별로 없는 콘텐츠"로 거절한 뒤 추가 — 제품이 전부 로그인 뒤에 있어 심사자가 볼 것이 없었다(구글 미승인 사유에 "pages behind a login or restricted access" 가 명시돼 있음)
+## 예시 그래프 (홈 안, 2026-10-25)
+
+- 로그인 없이 실제 그래프를 만지는 공개 영역. 홈 첫 화면(로그인 카드) 바로 아래 `#demo` 구역에 들어 있다. AdSense 가 "가치가 별로 없는 콘텐츠"로 거절한 뒤 추가 — 제품이 전부 로그인 뒤에 있어 심사자가 볼 것이 없었다
+- 처음에는 별도 주소 `/demo` 였으나 홈 하단 소개와 같은 내용을 두 페이지가 나눠 갖고 있어 2026-10-25 에 홈으로 합쳤다(구글은 원본 가치를 더하지 않은 중복을 가치 없는 콘텐츠로 본다). 옛 주소는 `next.config.ts` 에서 `/#demo` 로 301 — 사이트맵과 레딧 글에 쓴 주소라 끊지 않는다
 - 데이터는 `features/demo/data.ts` 에 `GraphItem` 형태로 직접 적는다. 노션 API 를 안 타고 조립과 배치는 실제 그래프와 같은 코드를 쓴다. 노드 30개, 관계형 엣지 30개, 고아 노드 2개(필터 시연용)
 - `GraphView` 에 `demoItems` 를 주면 `useGraphData` 가 서버 대신 그걸 쓴다. ⚠️ **동기로 꽂으면 안 된다** — sigma 가 노드 프로그램을 등록하기 전에 노드가 들어가 "could not find a suitable program for node type" 로 캔버스가 아예 안 그려지고 렌더러가 죽는다. 400ms 뒤로 미뤄 실제 네트워크와 같은 타이밍을 만든다
-- 그래프는 화면을 가로지르지 않고 **글 폭(최대 1040px)의 박스 안**에 들어간다 — 전폭이면 휠이 어디서 확대이고 어디서 페이지 스크롤인지 경계가 안 보인다. 박스 안이면 그래프 조작, 밖이면 늘 페이지 스크롤. ⚠️ 박스에 `transform-gpu` 를 주는 이유는 모양이 아니라 **변형된 요소가 `position: fixed` 의 기준이 되기 때문** — 설정, 숨김, 상세 패널(/graph 와 공용 코드라 `fixed`)이 박스를 벗어나지 않게 한다
-- 상세 패널 내용은 `features/demo/data.ts` 의 `demoDetail(id)` 가 만든다. `/api/node/[id]` 가 예시 id 면 세션 검사 **전에** 그걸 돌려준다 — 로그인이 없어 노션 API 를 못 탄다. 워크스페이스 안의 글이라 화면 언어를 따르지 않고 영어 한 벌이다. 마지막 수정 시각은 고정 날짜가 아니라 오늘 기준으로 흩뿌린다
-- 뷰포트를 기억할 것이 없으므로 `FitToGraph` 로 전체가 들어오게 한 번 맞춘다(자기 워크스페이스는 `ViewportMemory`). 좌표계가 1단위=1px 에 autoRescale 이 꺼져 있어 안 맞추면 100% 로 열려 노드가 화면 밖에 흩어진다
-- 아래 소개 글은 `features/demo/copy.ts`(언어별). 위 그래프는 WebGL 이라 검색 결과와 공유 카드에 안 잡히므로 같은 장면을 `public/shots/graph-overview.png` 로도 둔다
-
+- 그래프는 글 폭(최대 1040px) 박스 안에 들어간다 — 전폭이면 휠이 어디서 확대이고 어디서 페이지 스크롤인지 경계가 안 보인다. ⚠️ 박스의 `transform-gpu` 는 모양이 아니라 **변형된 요소가 `position: fixed` 의 기준이 되기 때문** — 설정, 숨김, 상세 패널(/graph 와 공용 코드라 `fixed`)이 박스를 벗어나지 않게 한다
+- 상세 패널 내용은 `features/demo/data.ts` 의 `demoDetail(id)` 가 만든다. `/api/node/[id]` 가 예시 id 면 세션 검사 **전에** 그걸 돌려준다 — 로그인이 없어 노션 API 를 못 탄다. 워크스페이스 안의 글이라 화면 언어를 따르지 않고 영어 한 벌이다
+- 뷰포트를 기억할 것이 없으므로 `FitToGraph` 로 맞춘다(자기 워크스페이스는 `ViewportMemory`). 전체를 다 넣으면 노드가 글자 없는 사각형이 되므로 최소 15% 아래로는 안 내려간다
+- 아래 소개 글은 `features/landing/components/LandingContent` 가 `landing/content.ts`(문제 제기, 작동 방식, 활용, 요금, FAQ)와 `demo/copy.ts`(지금 보이는 그래프 해설)를 **한 번씩만** 쓰도록 엮는다. ⚠️ 기능을 카드로 다시 나열하지 않는다 — 예전 `features` 블록이 데모 해설과 같은 말을 반복하고 있었다
 ## 제품 규칙
 - 인증: 노션 OAuth 단일 (자체 계정 없음)
-- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고는 `components/AdBanner` **한 곳에만** 있다(`variant="page"` 화면 하단 / `"panel"` 노드 상세). 나오는 자리: 홈, /demo, /guide, /faq, /pricing, /graph, 노드 상세 패널. ⚠️ 승인 뒤 광고 단위는 이 파일 하나만 고치면 전부 바뀐다 — 자리마다 따로 심지 말 것(`scripts/check-ads.mjs` 가 막는다). /demo 는 띠가 아니라 `variant="article"`(소개 글 리드문 뒤, 본문 폭 카드)로 넣고 요금제와 무관하게 항상 표시(공개 전시용), 나머지는 Free 만. ⚠️ 글 안에 넣더라도 **글처럼 위장하지 않는다** — 구글: "may not implement Google ads in a manner that disguises the ads in any way", 라벨은 "Advertisement" 또는 "Sponsored Links" 만 허용(answer/1346295). 그래서 점선 테두리와 ADVERTISEMENT 라벨을 남긴다. **페이월 모달에는 넣지 않는다** — 구글이 interstitial 에 콘텐츠 광고를 금지하고, 광고 제거를 권하는 창이라 앞뒤가 안 맞는다 — `AdBanner` 플레이스홀더, 광고 단위 slot 은 AdSense 승인 후 발급). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
+- Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고는 `components/AdBanner` **한 곳에만** 있다(`variant="page"` 화면 하단 / `"panel"` 노드 상세). 나오는 자리: 홈, /guide, /faq, /pricing, /graph, 노드 상세 패널. ⚠️ 승인 뒤 광고 단위는 이 파일 하나만 고치면 전부 바뀐다 — 자리마다 따로 심지 말 것(`scripts/check-ads.mjs` 가 막는다). 홈 소개 글에는 `variant="article"`(본문 폭 카드)로, 나머지는 화면 하단 띠로 넣고 Free 에게만 보인다. ⚠️ 글 안에 넣더라도 **글처럼 위장하지 않는다** — 구글: "may not implement Google ads in a manner that disguises the ads in any way", 라벨은 "Advertisement" 또는 "Sponsored Links" 만 허용(answer/1346295). 그래서 점선 테두리와 ADVERTISEMENT 라벨을 남긴다. **페이월 모달에는 넣지 않는다** — 구글이 interstitial 에 콘텐츠 광고를 금지하고, 광고 제거를 권하는 창이라 앞뒤가 안 맞는다 — 광고 단위 slot 은 AdSense 승인 후 발급 — 그때까지 `components/adsense.ts` 의 `AD_SLOTS` 가 빈 값이고 `AdBanner` 는 **아무것도 렌더하지 않는다**. ⚠️ 승인 전에 "광고 자리" 빈 상자를 띄우지 말 것: 구글은 심사에 코드 스니펫, ads.txt, 메타 태그 중 하나만 요구하고 승인 전에는 광고가 게재되지 않으며(answer/7584263), 빈 상자는 정책이 금지하는 "아직 미완성 상태인 화면"으로 읽힌다(publisherpolicies/answer/11112688). `scripts/check-ads.mjs` 가 이 가드를 고정). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더

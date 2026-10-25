@@ -182,6 +182,23 @@ export default function SettingsPanel({
               <span className="text-[#91908C]">›</span>
             </span>
           </Link>
+          {/* 도움말 — 앱 안에서 막혔을 때 나갈 길. 그래프 화면에는 공개 페이지로 가는 링크가 요금제뿐이었다 */}
+          <Link
+            data-testid="guide_row"
+            href={langHref(lang, "/guide")}
+            className={`${ROW} hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
+          >
+            <span>{t.guide}</span>
+            <span className="text-[#91908C]">›</span>
+          </Link>
+          <Link
+            data-testid="faq_row"
+            href={langHref(lang, "/faq")}
+            className={`${ROW} hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}
+          >
+            <span>{t.faq}</span>
+            <span className="text-[#91908C]">›</span>
+          </Link>
           {plan === "pro" && (
             <ManageSubscriptionButton className={`${ROW} w-full text-left hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}>
               <span>
