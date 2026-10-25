@@ -40,11 +40,15 @@ export function createGate(opts: { env: string; cookie: string; ttlMs: number })
       if (a.length !== b.length) return false;
       return timingSafeEqual(a, b);
     },
-    seal: () => encrypt(JSON.stringify({ p: opts.cookie, exp: Date.now() + opts.ttlMs })),
+    seal: () =>
+      encrypt(JSON.stringify({ p: opts.cookie, exp: Date.now() + opts.ttlMs }), `gate:${opts.cookie}`),
     isUnlocked(cookieValue) {
       if (!cookieValue || !secretOf()) return false;
       try {
-        const { p, exp } = JSON.parse(decrypt(cookieValue)) as { p?: unknown; exp?: unknown };
+        const { p, exp } = JSON.parse(decrypt(cookieValue, `gate:${opts.cookie}`)) as {
+          p?: unknown;
+          exp?: unknown;
+        };
         if (p !== opts.cookie) return false; // 다른 게이트의 봉인은 받지 않는다
         return typeof exp === "number" && exp > Date.now();
       } catch {

@@ -29,8 +29,8 @@ export async function saveConnection(userId: string, token: TokenResponse): Prom
       user_id: userId,
       workspace_id: token.workspace_id,
       workspace_name: token.workspace_name ?? null,
-      access_token: encrypt(token.access_token),
-      refresh_token: token.refresh_token ? encrypt(token.refresh_token) : null,
+      access_token: encrypt(token.access_token, "notion-token"),
+      refresh_token: token.refresh_token ? encrypt(token.refresh_token, "notion-token") : null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },
@@ -55,8 +55,11 @@ export async function getConnection(userId: string): Promise<NotionConnection | 
   return {
     workspaceId: row.workspace_id,
     workspaceName: row.workspace_name,
-    accessToken: decrypt(row.access_token),
-    refreshToken: row.refresh_token ? decrypt(row.refresh_token) : null,
+    // legacy: 옛 형식으로 저장된 토큰도 읽는다 — 다음 저장 때 새 형식으로 바뀐다
+    accessToken: decrypt(row.access_token, "notion-token", { legacy: true }),
+    refreshToken: row.refresh_token
+      ? decrypt(row.refresh_token, "notion-token", { legacy: true })
+      : null,
   };
 }
 

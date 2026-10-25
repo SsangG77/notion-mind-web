@@ -20,6 +20,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (!r.ok) return NextResponse.json({ error: r.reason }, { status: 401 });
     return NextResponse.json(r.data);
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "unknown" }, { status: 502 });
+    // 예외 메시지에는 노션 응답 본문이 섞여 나온다 — 밖으로는 고정 문자열만
+    console.error("/api/node failed:", e);
+    return NextResponse.json({ error: "upstream_failed" }, { status: 502 });
   }
 }

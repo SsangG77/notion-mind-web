@@ -17,7 +17,7 @@ const base = {
 } as const;
 
 export function writeUid(res: NextResponse, userId: string) {
-  res.cookies.set(UID_COOKIE, encrypt(userId), base);
+  res.cookies.set(UID_COOKIE, encrypt(userId, "session"), base);
 }
 
 export function clearUid(res: NextResponse) {
@@ -28,7 +28,8 @@ export function clearUid(res: NextResponse) {
 export function readUid(cookieValue: string | undefined): string | null {
   if (!cookieValue) return null;
   try {
-    return decrypt(cookieValue);
+    // legacy: 용도 표시가 없던 옛 쿠키도 받는다 — 거부하면 로그인된 사람이 전부 튕긴다
+    return decrypt(cookieValue, "session", { legacy: true });
   } catch {
     return null;
   }

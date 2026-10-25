@@ -15,13 +15,13 @@ import { decrypt, encrypt } from "@/lib/crypto";
  * 봉인은 세션 쿠키와 같은 `crypto.ts` 를 쓴다 — 새 의존성 없음.
  */
 function sealCursor(notionCursor: string, batchIndex: number): string {
-  return encrypt(JSON.stringify({ c: notionCursor, i: batchIndex }));
+  return encrypt(JSON.stringify({ c: notionCursor, i: batchIndex }), "graph-cursor");
 }
 
 function openCursor(sealed: string | null): { cursor?: string; batchIndex: number } | null {
   if (!sealed) return { batchIndex: 0 }; // 첫 배치
   try {
-    const { c, i } = JSON.parse(decrypt(sealed)) as { c: unknown; i: unknown };
+    const { c, i } = JSON.parse(decrypt(sealed, "graph-cursor")) as { c: unknown; i: unknown };
     if (typeof c !== "string" || typeof i !== "number" || !Number.isFinite(i) || i < 0) return null;
     return { cursor: c, batchIndex: i };
   } catch {
@@ -54,6 +54,8 @@ export async function GET(req: NextRequest) {
       nextCursor: r.data.nextCursor ? sealCursor(r.data.nextCursor, batchIndex + 1) : null,
     });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "unknown" }, { status: 502 });
+    // 예외 메시지에는 노션 응답 본문이 섞여 나온다 — 밖으로는 고정 문자열만
+    console.error("/api/graph failed:", e);
+    return NextResponse.json({ error: "upstream_failed" }, { status: 502 });
   }
 }

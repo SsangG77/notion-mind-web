@@ -45,7 +45,11 @@ export default function LayoutManager({
       // 초기 위치: 부모 근처(있으면), 아니면 황금각 나선 — 시뮬레이션이 정리
       let x: number;
       let y: number;
-      const pin = saved.pinned[n.id];
+      // 저장된 좌표는 서버에서 돌아온 값이라 숫자라는 보장이 없다 — 하나라도 유한수가
+      // 아니면 핀을 무시한다. NaN 이 들어가면 d3 시뮬레이션이 그래프 전체를 못 그린다
+      const stored = saved.pinned[n.id];
+      const pin =
+        stored && Number.isFinite(stored.x) && Number.isFinite(stored.y) ? stored : null;
       if (pin) {
         x = pin.x;
         y = pin.y;
