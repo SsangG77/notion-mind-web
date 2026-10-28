@@ -45,6 +45,12 @@ const checks = [
     require: /subscriptions guard: refusing to replace an active subscription/,
   },
   {
+    file: "src/lib/accounts.ts",
+    name: "토큰 갱신은 삭제된 연결을 되살리지 않는다",
+    // 갱신을 upsert 로 두면 해제 도중 끝난 갱신이 행을 다시 삽입한다(감사 run-1 단서).
+    require: /mode === "refresh"[\s\S]*\.update\(row\)\.eq\("user_id", userId\)/,
+  },
+  {
     file: "src/features/graph/components/LayoutManager.tsx",
     name: "저장된 핀 좌표를 유한수인지 보고 쓴다",
     // 숫자가 아니면 시뮬레이션이 NaN 으로 번져 그래프가 통째로 안 그려진다.

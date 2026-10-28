@@ -38,7 +38,8 @@ export async function callNotion<T>(
     const token: TokenResponse = await refreshToken(conn.refreshToken);
     const data = await run(token.access_token);
     // 갱신된 쌍을 저장 — 다음 요청부터 바로 쓰이고, 실패해도 이번 응답은 돌려준다
-    await saveConnection(userId, token).catch((err) =>
+    // refresh 모드 — 해제가 먼저 끝났으면 행이 없고, 그러면 아무것도 되살리지 않는다
+    await saveConnection(userId, token, "refresh").catch((err) =>
       console.error("saveConnection after refresh failed:", err),
     );
     return { ok: true, data, workspaceId: conn.workspaceId };
