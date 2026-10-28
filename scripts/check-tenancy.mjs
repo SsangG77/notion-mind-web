@@ -32,6 +32,19 @@ const checks = [
     require: /setAAD\(Buffer\.from\(seal[\s\S]*setAAD\(Buffer\.from\(seal/,
   },
   {
+    file: "src/app/api/graph/route.ts",
+    name: "방문 지표는 인증 뒤에, 연결에서 온 워크스페이스로 기록한다",
+    // 인증 전에 쿠키 값으로 기록하면 세션 없는 요청 하나로 아무 id 나 영구 행이 들어간다(확정 결함, low).
+    forbid: /recordVisit\(\s*workspaceId\s*\)/,
+    require: /recordVisit\(r\.workspaceId\)/,
+  },
+  {
+    file: "src/lib/billing.ts",
+    name: "활성 구독을 다른 Paddle 고객이 덮어쓰지 못한다",
+    // 키가 체크아웃이 보낸 값이라, 가드가 없으면 남의 계정 구독 행을 대체할 수 있다(확정 결함, medium).
+    require: /subscriptions guard: refusing to replace an active subscription/,
+  },
+  {
     file: "src/features/graph/components/LayoutManager.tsx",
     name: "저장된 핀 좌표를 유한수인지 보고 쓴다",
     // 숫자가 아니면 시뮬레이션이 NaN 으로 번져 그래프가 통째로 안 그려진다.

@@ -66,7 +66,7 @@ src/
 - **유저 키 = 자체 계정 id**(구글 `sub`, 봉인 쿠키 `nm_uid`). `subscriptions` 의 기본키이고 `getPlan(userId)` 이 이걸로 본다. 워크스페이스를 바꿔도 구독이 따라오고, 남이 같은 워크스페이스를 연결해도 Pro 가 새지 않는다
 - 노션 `workspace_id` 는 **데이터 쪽 키**로만 남는다 — `workspace_settings`(핀, 숨김), `workspaces`/`workspace_visits`(통계). 구독에는 참고용 컬럼으로만 들어간다
 - ⚠️ 그 워크스페이스 값을 **쿠키(`nm_ws`)에서 읽어 테넌트 키로 쓰면 안 된다.** 봉인이 없는 평문이라 호출자가 남의 워크스페이스를 적어 넣을 수 있고, Supabase 는 service 키로 접근하므로 DB 층에서도 안 막힌다. `/api/settings` 는 `getConnection(readUid(...))` 가 돌려준 값만 쓴다(보안 감사 run-1 확정 결함). `nm_ws` 는 화면 표시용 힌트로만 남아 있고 로그아웃 때 같이 지운다
-- Paddle 체크아웃은 `customData.user_id` 를 싣고 웹훅이 그걸로 UPSERT 한다. `workspace_id` 도 같이 싣지만 판정에는 안 쓴다
+- Paddle 체크아웃은 `customData.user_id` 를 싣고 웹훅이 그걸로 UPSERT 한다. `workspace_id` 도 같이 싣지만 판정에는 안 쓴다. ⚠️ 그 키는 **결제한 브라우저가 고른 값**이다 — `upsertSubscription` 이 **이미 활성인 구독을 다른 `customer_id` 가 덮어쓰는 경우를 거부**한다(보안 감사 run-1 확정 결함: 남의 계정 id 로 결제하면 그 계정 구독을 대체할 수 있었음). 같은 고객의 갱신과 해지, 구독이 없거나 끝난 계정의 새 결제는 통과 — 본인 재구독을 막으면 안 되기 때문
 - 웹훅 `/api/billing/webhook`: `paddle.webhooks.unmarshal(rawBody, secret, signature)` 서명 검증(원문 body 필수), `subscription.created/updated/canceled` 만 UPSERT. 2xx 만 전달 완료 — 실패는 전부 500 으로 재시도 유도. 등록된 알림 대상 ntfset_01m3gqjgnysws25w3hcajr5tjv
 - Pro 판정 `lib/billing.ts` `planFromStatus`: active/trialing/past_due = pro, 나머지 free. Supabase 오류 시 free 폴백(결제 장애가 그래프를 막지 않게). 서버 컴포넌트(graph, pricing)에서 `getPlan` 으로 읽어 `plan` prop 으로 내려보냄 → 광고 2곳 숨김, 페이지 수 게이지 제거, 설정 배지 Pro, Pro 스위치 켜짐
 - 카탈로그·웹훅·토큰 스크립트: `scripts/seed-paddle-catalog.ts`, `add-paddle-price.ts <month|year> <달러>`(새 가격 만들고 `PRICE_IDS` 자동 교체), `register-paddle-webhook.ts`, `create-paddle-client-token.ts`. 기본 sandbox, `PADDLE_ENV=production` 이면 라이브(라이브 쓰기는 사용자가 `!` 로 직접 실행). 샌드박스 가격: 월 $7 pri_01m3pr2skwg5q66vxb3rr930wk / 연 $48 pri_01m3pr2da5abpgjejabx0azfk5, 웹훅 ntfset_01m3pr2vrrj026xa0zdr2we764
@@ -111,7 +111,7 @@ src/
 
 ## 운영 대시보드 `/admin`
 - 비밀번호는 개발 모드와 같은 `DEV_UNLOCK_SECRET`(쿠키는 별개 `nm_admin` 24시간 — 개발 모드를 열어도 대시보드는 따로 열어야 함). 미설정이면 404. robots 차단 + noindex. 관리자 1인용이라 한국어 고정 — `scripts/check-ui-strings.mjs` 의 EXEMPT_DIRS 에 `src/app/admin/`, `src/features/admin/` 등록
-- 지표 기록은 `lib/analytics.ts` 두 함수: `touchWorkspace`(OAuth 콜백 — `workspaces` 에 첫 접속=가입, 마지막 접속, 워크스페이스명 upsert), `recordVisit`(`/api/graph` 첫 배치 — `workspace_visits` 에 (워크스페이스, UTC 날짜) 한 줄). 둘 다 실패를 삼킴 — 지표가 로그인이나 그래프를 막지 않게. 기록은 2026-10-13 배포 시점부터 쌓임(그 전 이용자는 다음 로그인 때 가입으로 잡힘)
+- 지표 기록은 `lib/analytics.ts` 두 함수: `touchWorkspace`(OAuth 콜백 — `workspaces` 에 첫 접속=가입, 마지막 접속, 워크스페이스명 upsert), `recordVisit`(`/api/graph` 첫 배치 — `workspace_visits` 에 (워크스페이스, UTC 날짜) 한 줄). ⚠️ **인증 뒤에, `callNotion` 이 돌려준 `workspaceId` 로** 기록한다 — 앞에서 `nm_ws` 쿠키로 기록하면 세션 없는 요청 하나로 아무 id 나 영구 행이 들어간다(감사 run-1 확정 결함). 둘 다 실패를 삼킴 — 지표가 로그인이나 그래프를 막지 않게. 기록은 2026-10-13 배포 시점부터 쌓임(그 전 이용자는 다음 로그인 때 가입으로 잡힘)
 - 집계 `getAdminStats(days)`: 누적 워크스페이스, 기간 내 신규/활성, Pro 수와 월/연 구독 수(`PRICE_IDS` 로 구분), 월 환산 매출(월 요금 + 연 요금÷12), 누적 가입자 추이(범위 이전 가입자를 바닥으로 일별 가입을 더함), 일별 가입/활성 추이(빈 날 0 채움), 구독 상태 분포, 해지 사유, 최근 가입 20개. 기간은 `?days=7|30|90`
 - 차트는 라이브러리 없이 `features/admin/components`(`TimeSeriesChart` 단일 계열 선+면, 호버 툴팁, 마지막 값만 라벨 / `StatTile` / `BarList`). 계열이 하나라 범례 없음, 글자는 텍스트 색, 마크만 액센트색
 

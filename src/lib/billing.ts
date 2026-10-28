@@ -43,7 +43,28 @@ export async function getPlan(userId: string | undefined): Promise<Plan> {
   }
 }
 
+/**
+ * 구독 행 쓰기. ⚠️ 키(`user_id`)는 체크아웃이 보낸 `customData` 에서 오므로 **결제한 사람이 고른 값**이다
+ * — 남의 계정 id 를 넣으면 그 계정의 행을 덮어쓸 수 있었다(보안 감사 run-1 확정 결함).
+ *
+ * 그래서 **이미 활성인 구독을 다른 Paddle 고객이 덮어쓰는 경우만 거부**한다. 같은 고객의 갱신과 해지,
+ * 구독이 없거나 이미 끝난 계정의 새 결제는 그대로 통과시킨다 — 본인 재구독을 막으면 안 되기 때문.
+ */
 export async function upsertSubscription(row: SubscriptionRow) {
+  const existing = await getSubscription(row.user_id).catch((e) => {
+    // 조회가 깨졌으면 덮어쓰지 않는다 — 웹훅은 500 으로 재시도된다
+    throw new Error(`subscriptions guard read failed: ${e instanceof Error ? e.message : e}`);
+  });
+  if (
+    existing &&
+    existing.customer_id !== row.customer_id &&
+    planFromStatus(existing.status) === "pro"
+  ) {
+    throw new Error(
+      `subscriptions guard: refusing to replace an active subscription for user ${row.user_id} ` +
+        `(existing customer ${existing.customer_id}, incoming ${row.customer_id})`,
+    );
+  }
   const { error } = await supabaseAdmin()
     .from("subscriptions")
     .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id" });

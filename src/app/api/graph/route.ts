@@ -35,11 +35,6 @@ export async function GET(req: NextRequest) {
     const opened = openCursor(req.nextUrl.searchParams.get("cursor"));
     if (!opened) return NextResponse.json({ error: "bad_cursor" }, { status: 400 });
     const { cursor, batchIndex } = opened;
-    // 첫 배치 = 그래프를 한 번 연 것 → 일별 활성 이용자 기록. 실패해도 그래프는 계속
-    const workspaceId = req.cookies.get("nm_ws")?.value;
-    if (!cursor && workspaceId) {
-      await recordVisit(workspaceId).catch((e) => console.error("recordVisit failed:", e));
-    }
     // 상한 다음 배치(초과 감지용 1페이지)까지는 허용, 그 뒤부터 차단
     if (batchIndex * 100 > FREE_NODE_LIMIT) {
       const plan = await planFor(req);
@@ -49,6 +44,12 @@ export async function GET(req: NextRequest) {
     const lang = pickLang(req.nextUrl.searchParams.get(LANG_PARAM));
     const r = await callNotion(req, (token) => searchPage(token, lang, cursor));
     if (!r.ok) return NextResponse.json({ error: r.reason }, { status: 401 });
+    // 첫 배치 = 그래프를 한 번 연 것 → 일별 활성 이용자 기록. 실패해도 그래프는 계속.
+    // ⚠️ 인증 **뒤에**, 그리고 쿠키가 아니라 연결에서 온 워크스페이스로 기록한다 — 앞에서 쿠키 값으로
+    // 기록하면 세션 없는 요청 하나로 아무 워크스페이스 id 나 영구 행이 들어간다(감사 run-1 확정 결함)
+    if (!cursor) {
+      await recordVisit(r.workspaceId).catch((e) => console.error("recordVisit failed:", e));
+    }
     return NextResponse.json({
       items: r.data.items,
       nextCursor: r.data.nextCursor ? sealCursor(r.data.nextCursor, batchIndex + 1) : null,

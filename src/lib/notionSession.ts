@@ -12,7 +12,9 @@ import type { TokenResponse } from "./notion";
  * 노션 문서가 "Store the token pair from each successful authorization response" 라고 명시한다.
  */
 export type NotionCallResult<T> =
-  | { ok: true; data: T }
+  /** workspaceId 는 **계정에 매달린 연결**에서 온 값이다 — 지표 기록처럼 테넌트 키가 필요한 쪽은 이걸 쓴다.
+   *  ⚠️ `nm_ws` 쿠키를 키로 쓰면 안 된다: 봉인이 없는 평문이라 호출자가 아무 값이나 넣을 수 있다 */
+  | { ok: true; data: T; workspaceId: string }
   | { ok: false; reason: "no_session" | "no_connection" | "expired" };
 
 export async function callNotion<T>(
@@ -26,7 +28,7 @@ export async function callNotion<T>(
   if (!conn) return { ok: false, reason: "no_connection" };
 
   try {
-    return { ok: true, data: await run(conn.accessToken) };
+    return { ok: true, data: await run(conn.accessToken), workspaceId: conn.workspaceId };
   } catch (e) {
     if (!(e instanceof NotionUnauthorized)) throw e;
   }
@@ -39,7 +41,7 @@ export async function callNotion<T>(
     await saveConnection(userId, token).catch((err) =>
       console.error("saveConnection after refresh failed:", err),
     );
-    return { ok: true, data };
+    return { ok: true, data, workspaceId: conn.workspaceId };
   } catch {
     return { ok: false, reason: "expired" };
   }
