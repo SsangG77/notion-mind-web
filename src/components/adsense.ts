@@ -19,3 +19,6 @@ export const AD_SLOTS = {
 } as const;
 
 export type AdVariant = keyof typeof AD_SLOTS;
+
+/** 그 자리에 실제 광고가 그려지는지 — 레이아웃이 자리를 비울지 결정할 때 쓴다 */
+export const hasAdSlot = (variant: AdVariant) => !!AD_SLOTS[variant];
