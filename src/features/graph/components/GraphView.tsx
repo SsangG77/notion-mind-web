@@ -123,7 +123,7 @@ export default function GraphView({
           truncated={data?.truncated ?? false}
           plan={plan}
         />
-        <ZoomControls />
+        <ZoomControls shifted={!!selection} />
         {demoItems ? (
           <FitToGraph ready={!loading && data != null} />
         ) : (

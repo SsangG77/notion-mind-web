@@ -11,7 +11,8 @@ const BTN =
 
 const TRACK_H = 96; // 슬라이더 트랙 높이(px)
 
-export default function ZoomControls() {
+/** 상세 패널은 우하단을 덮는다 — 열리면 패널 폭(380px)+여백만큼 왼쪽으로 비켜서서 겹치지 않게 한다 */
+export default function ZoomControls({ shifted = false }: { shifted?: boolean }) {
   const txt = useT(); // 슬라이더 위치 변수 t 와 겹치지 않게
   const sigma = useSigma();
   const camera = useCallback(() => sigma.getCamera(), [sigma]);
@@ -66,7 +67,11 @@ export default function ZoomControls() {
   const thumbTop = (1 - Math.min(1, Math.max(0, t))) * TRACK_H;
 
   return (
-    <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-2">
+    <div
+      className={`absolute bottom-3 right-3 z-10 flex flex-col items-end gap-2 transition-transform duration-200 ease-out motion-reduce:transition-none ${
+        shifted ? "-translate-x-[392px] max-sm:-translate-x-0 max-sm:opacity-0" : ""
+      }`}
+    >
       <span
         data-testid="zoom_percent"
         className={`${BLOCK} px-2 py-0.5 text-[11px] tabular-nums`}

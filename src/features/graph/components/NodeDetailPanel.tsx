@@ -165,12 +165,19 @@ export default function NodeDetailPanel({
           </Section>
         )}
 
-        {loading && (
-          <p className="px-4 py-3 text-xs text-[#91908C]">{t.detailLoading}</p>
-        )}
+        {loading && <p className="px-4 py-3 text-xs text-[#91908C]">{t.detailLoading}</p>}
         {error && (
           <p className="px-4 py-3 text-xs text-[#D44C47]">{t.detailError(error)}</p>
         )}
+
+        {/* 받아온 내용은 0fr → 1fr 로 높이가 자라며 들어온다.
+            grid-template-rows 전환이라 높이를 미리 재지 않아도 되고, 안쪽은 overflow-hidden 이라
+            자라는 동안 잘려 보인다. 값이 통째로 튀어 들어오던 것을 없애는 목적 */}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none"
+          style={{ gridTemplateRows: detail ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
 
         {detail && detail.properties.length > 0 && (
           <Section title={t.detailProperties}>
@@ -225,6 +232,8 @@ export default function NodeDetailPanel({
             </div>
           </Section>
         )}
+          </div>
+        </div>
       </div>
 
       {/* 하단 고정 — 노션에서 열기 + Free 광고 */}
