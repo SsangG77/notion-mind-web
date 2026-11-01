@@ -181,6 +181,9 @@ export default async function Home({
           <a href={langHref(lang, "/faq")} className="hover:underline">
             {t.faq}
           </a>
+          <a href={langHref(lang, "/blog")} className="hover:underline">
+            {t.blogNav}
+          </a>
           <a href={langHref(lang, "/pricing")} className="hover:underline">
             {t.pricingTitle}
           </a>

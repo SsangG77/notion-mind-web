@@ -13,6 +13,19 @@ const checks = [
     require: /getConnection\(/,
   },
   {
+    file: "src/app/api/billing/redeem/route.ts",
+    name: "체험 코드 사용은 nm_ws 쿠키를 워크스페이스 키로 쓰지 않는다",
+    // 평문 쿠키를 믿으면 워크스페이스를 바꿔 적어 1회 제한을 비껴갈 수 있다.
+    forbid: /cookies\.get\(\s*["']nm_ws["']\s*\)/,
+    require: /getConnection\(/,
+  },
+  {
+    file: "src/lib/promo.ts",
+    name: "체험 코드는 구독 테이블을 건드리지 않는다",
+    // 넣으면 매출 집계가 오염되고, 결제 웹훅이 체험 행을 덮어쓴다.
+    forbid: /from\("subscriptions"\)/,
+  },
+  {
     file: "src/app/api/graph/route.ts",
     name: "그래프 API 는 배치 번호를 쿼리에서 받지 않는다",
     // 클라이언트 값을 믿으면 Free 상한 검사가 통째로 건너뛰어진다(확정 결함, low).

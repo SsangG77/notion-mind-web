@@ -9,8 +9,9 @@ import { PRICE_IDS } from "@/lib/paddle";
 import type { Plan } from "@/lib/billing";
 import { usePaddle } from "../hooks/usePaddle";
 import ManageSubscriptionButton from "./ManageSubscriptionButton";
+import RedeemCode from "./RedeemCode";
 import { useLang, useT } from "@/features/i18n/LangProvider";
-import { langHref, legalPath } from "@/lib/i18n";
+import { formatDay, langHref, legalPath } from "@/lib/i18n";
 import { PRO_PRICE, YEARLY_DISCOUNT, YEARLY_PER_MONTH, YEARLY_SAVING } from "@/lib/pricing";
 import { apiUrl } from "@/lib/apiUrl";
 
@@ -19,11 +20,14 @@ export default function PricingView({
   plan,
   userId,
   workspaceId,
+  promoUntil,
 }: {
   plan: Plan;
   /** 결제를 거는 기준 — 계정 id. 없으면 로그인부터 */
   userId?: string;
   workspaceId?: string;
+  /** 이벤트 코드로 Pro 인 경우 그 만료 시각 — 관리할 구독이 없으므로 버튼 대신 기간을 보여준다 */
+  promoUntil?: string | null;
 }) {
   const t = useT();
   const lang = useLang();
@@ -103,6 +107,7 @@ export default function PricingView({
               </li>
             ))}
           </ul>
+          {!isPro && <RedeemCode />}
         </div>
 
         {/* Pro */}
@@ -136,7 +141,12 @@ export default function PricingView({
               </li>
             ))}
           </ul>
-          {isPro ? (
+          {isPro && promoUntil ? (
+            <p data-testid="promo_until" className="mt-6 text-center text-xs font-semibold">
+              {t.promoPro(formatDay(promoUntil, lang))}
+              <span className="mt-0.5 block text-[10px] font-normal text-[#91908C]">{t.promoProHint}</span>
+            </p>
+          ) : isPro ? (
             <ManageSubscriptionButton
               className={`${BLOCK_PRESS} mt-6 block w-full rounded-[8px] border-[1.5px] border-[#2E2C27] bg-[#F4F3EF] py-2.5 text-center text-sm font-semibold shadow-[3px_3px_0_#2E2C27] hover:bg-[#EDECE7] dark:border-black dark:bg-[#35342F] dark:shadow-[3px_3px_0_#000]`}
             >

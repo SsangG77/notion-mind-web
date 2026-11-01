@@ -18,7 +18,7 @@ export default async function GraphPage({
   if (session === "anonymous") redirect(langHref(await currentLang(), "/"));
   if (session === "no_connection") redirect("/api/auth/login");
   const workspace = jar.get("nm_workspace")?.value;
-  const { plan, unlocked } = await currentPlan((await searchParams).dev);
+  const { plan, unlocked, promoUntil } = await currentPlan((await searchParams).dev);
 
   // 캔버스 앱 관례대로 전용 헤더 줄 없음 — 앱 이름은 좌상단 로고 박스(= 설정 버튼)가 맡음
   // 하단 광고 띠가 실제로 그려질 때만 패널이 그 높이를 비운다 — 승인 전에는 띠가 없으므로 0.
@@ -31,7 +31,7 @@ export default async function GraphPage({
       }`}
     >
       <main className="min-h-0 flex-1">
-        <GraphView workspace={workspace} plan={plan} unlocked={unlocked} />
+        <GraphView workspace={workspace} plan={plan} unlocked={unlocked} promoUntil={promoUntil} />
       </main>
       {adBar && <AdBanner />}
     </div>

@@ -67,6 +67,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <StatTile label="월 환산 매출" value={`$${s.totals.mrr}`} hint={`Pro ${s.totals.pro} (월 ${s.totals.monthly} / 연 ${s.totals.yearly})`} />
         </section>
 
+        <section className="grid grid-cols-2 gap-3" aria-label="이벤트 코드">
+          <StatTile label="이벤트 코드 사용" value={s.promo.redeemed} hint="누적, 워크스페이스당 1회" />
+          <StatTile label="지금 체험 Pro" value={s.promo.active} hint="기간이 남은 사람" />
+        </section>
+
         <section className={`${BLOCK} p-4`}>
           <TimeSeriesChart title="누적 가입자" points={s.cumulativeWorkspaces} summary="last" />
         </section>

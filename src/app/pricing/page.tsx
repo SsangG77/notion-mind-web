@@ -22,12 +22,12 @@ export default async function PricingPage({
   const jar = await cookies();
   const workspaceId = jar.get("nm_ws")?.value;
   const userId = (await currentUserId()) ?? undefined;
-  const { plan } = await currentPlan((await searchParams).dev);
+  const { plan, promoUntil } = await currentPlan((await searchParams).dev);
   return (
     <div className="flex min-h-screen flex-col bg-white nm-dotgrid text-[#37352F] dark:bg-[#191919] dark:text-[#EDEDEC]">
       <main className="flex-1">
         <Suspense>
-          <PricingView plan={plan} userId={userId} workspaceId={workspaceId} />
+          <PricingView plan={plan} userId={userId} workspaceId={workspaceId} promoUntil={promoUntil} />
         </Suspense>
         <PricingDetails lang={await currentLang()} />
       </main>

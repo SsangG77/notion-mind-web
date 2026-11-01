@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "./supabase";
+import { promoUntil } from "./promo";
 
 // 요금제 판정 — subscriptions 테이블 한 행이 곧 진실. 웹훅이 갱신, 여기서는 읽기만.
 export type Plan = "free" | "pro";
@@ -32,15 +33,31 @@ export async function getSubscription(userId: string): Promise<SubscriptionRow |
   return (data as SubscriptionRow | null) ?? null;
 }
 
-/** 계정 요금제. Supabase 미설정(로컬 등)이면 free 로 폴백 — 결제 장애가 그래프를 막으면 안 됨 */
-export async function getPlan(userId: string | undefined): Promise<Plan> {
-  if (!userId) return "free";
+export interface PlanInfo {
+  plan: Plan;
+  /** 이벤트 코드로 받은 Pro 의 만료 시각(ISO). 결제 구독이거나 Free 면 null */
+  promoUntil: string | null;
+}
+
+/**
+ * 계정 요금제. Pro 가 되는 길은 두 가지 — 결제 구독, 그리고 이벤트 체험 코드.
+ * Supabase 미설정(로컬 등)이면 free 로 폴백 — 결제 장애가 그래프를 막으면 안 됨.
+ */
+export async function getPlanInfo(userId: string | undefined): Promise<PlanInfo> {
+  if (!userId) return { plan: "free", promoUntil: null };
   try {
-    return planFromStatus((await getSubscription(userId))?.status);
+    // 둘을 같이 물어본다 — 차례로 물으면 Free 사용자의 모든 요청에 왕복이 하나씩 더 붙는다
+    const [sub, promo] = await Promise.all([getSubscription(userId), promoUntil(userId)]);
+    if (planFromStatus(sub?.status) === "pro") return { plan: "pro", promoUntil: null };
+    return promo ? { plan: "pro", promoUntil: promo } : { plan: "free", promoUntil: null };
   } catch (e) {
-    console.error("getPlan fallback to free:", e);
-    return "free";
+    console.error("getPlanInfo fallback to free:", e);
+    return { plan: "free", promoUntil: null };
   }
+}
+
+export async function getPlan(userId: string | undefined): Promise<Plan> {
+  return (await getPlanInfo(userId)).plan;
 }
 
 /**

@@ -16,6 +16,7 @@ export default function TopBar({
   workspace,
   plan,
   unlocked,
+  promoUntil,
   autoSync,
   onAutoSync,
 }: {
@@ -25,6 +26,7 @@ export default function TopBar({
   workspace?: string;
   plan: Plan;
   unlocked: boolean;
+  promoUntil?: string | null;
   autoSync: boolean;
   onAutoSync: (on: boolean) => void;
 }) {
@@ -76,6 +78,7 @@ export default function TopBar({
             workspace={workspace}
             plan={plan}
             unlocked={unlocked}
+            promoUntil={promoUntil}
             autoSync={autoSync}
             onAutoSync={onAutoSync}
           />

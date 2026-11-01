@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Event Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* 앱 디자인 토큰 (CLAUDE.md 디자인 시스템) */
+  :root { --bg:#FFFFFF; --dot:#E9E9E7; --surface:#F7F6F3; --node:#FDFDFC; --db:#F4F3EF; --raised:#2E2C27; --text:#37352F; --muted:#8A8883; --accent:#2383E2; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--surface); font-family: Inter, -apple-system, sans-serif; color: var(--text); }
+  .page { max-width: 1280px; margin: 0 auto; padding: 40px 16px 120px; }
+  .page > h1 { font-size: 30px; font-weight: 800; }
+  .page > p { color: var(--muted); margin-top: 8px; line-height: 1.55; }
+  section.platform { margin-top: 48px; }
+  section.platform > h2 { font-size: 22px; font-weight: 800; }
+  section.platform > p { color: var(--muted); margin-top: 6px; line-height: 1.55; }
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 18px; }
+  .frame { overflow: hidden; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .frame.ig { width: 389px; height: 486px; } .frame.ig .slide { transform: scale(.36); }
+  .frame.x { width: 600px; height: 338px; } .frame.x .slide { transform: scale(.5); }
+  .meta { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .copy { margin-top: 14px; background: var(--node); border: 1.5px solid var(--raised); border-radius: 10px; padding: 16px; }
+  .copy header { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 700; }
+  .copy header small { font-weight: 500; color: var(--muted); }
+  .copy header small.over { color: #D44C47; font-weight: 700; }
+  .copy pre { margin-top: 10px; white-space: pre-wrap; font: 15px/1.55 Inter, sans-serif; }
+  .copy .ko { margin-top: 12px; padding: 12px 14px; background: var(--surface); border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #5f5e5a; }
+  .copy .ko b { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .btn { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; background: var(--node); border: 1.5px solid var(--raised); box-shadow: 3px 3px 0 var(--raised); }
+
+  /* ---------- 슬라이드 (실제 크기) ---------- */
+  .slide { position: relative; overflow: hidden; transform-origin: 0 0; display: flex; flex-direction: column; color: var(--text);
+    background: var(--bg) radial-gradient(var(--dot) 2px, transparent 2px) 0 0 / 36px 36px; }
+  .slide.ig { width: 1080px; height: 1350px; padding: 96px 88px; }
+  .slide.x { width: 1200px; height: 675px; padding: 64px 72px; }
+  .kicker { font-size: 26px; font-weight: 700; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .kicker b { color: var(--accent); }
+  .h { font-size: 82px; line-height: 1.06; font-weight: 800; letter-spacing: -.02em; margin-top: 26px; }
+  .h em { font-style: normal; color: var(--accent); }
+  .stat { font-size: 34px; color: var(--muted); line-height: 1.4; margin-top: 22px; }
+  .stat b { color: var(--text); }
+  .x .kicker { font-size: 20px; } .x .h { font-size: 60px; margin-top: 16px; } .x .stat { font-size: 26px; margin-top: 16px; }
+  .foot { position: absolute; left: 88px; right: 88px; bottom: 64px; display: flex; justify-content: space-between; font-size: 24px; font-weight: 600; color: var(--muted); }
+  .foot b { color: var(--text); }
+  .box { background: var(--node); border: 1.5px solid var(--raised); box-shadow: 6px 6px 0 var(--raised); border-radius: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 14px; padding: 18px 28px; background: var(--accent); color: #fff; font-size: 40px; font-weight: 800;
+    border: 1.5px solid var(--raised); box-shadow: 6px 6px 0 var(--raised); border-radius: 12px; }
+  .x .badge { font-size: 28px; padding: 12px 20px; }
+  .steps { display: flex; flex-direction: column; gap: 28px; margin-top: 56px; }
+  .step { display: flex; gap: 28px; align-items: center; padding: 30px 34px; }
+  .step .n { flex: none; width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 36px; font-weight: 800; display: grid; place-items: center; }
+  .step .t { font-size: 38px; font-weight: 700; line-height: 1.25; }
+  .step .t small { display: block; font-size: 26px; font-weight: 500; color: var(--muted); margin-top: 6px; }
+  .rules { margin-top: 56px; display: flex; flex-direction: column; gap: 22px; }
+  .rule { padding: 26px 32px; font-size: 32px; line-height: 1.35; }
+  .rule b { color: var(--accent); }
+
+  /* 미니 그래프 — 서비스가 무엇인지 보여 줌. 좌표 = 노드 중심 */
+  .mg { position: relative; width: 904px; height: 520px; }
+  .mg > svg { position: absolute; inset: 0; }
+  .mg .n { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; display: flex; align-items: center; gap: 10px;
+    padding: 14px 22px; font-size: 26px; background: var(--node); border: 1.5px solid var(--raised); box-shadow: 5px 5px 0 var(--raised); border-radius: 10px; }
+  .mg .n.db { background: var(--db); font-size: 29px; font-weight: 700; padding: 16px 26px; }
+  .mg .n.hot { border-color: var(--accent); box-shadow: 5px 5px 0 var(--accent); }
+  .mg .rl { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; padding: 6px 14px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 22px; font-weight: 700; }
+  .mg-x { position: relative; width: 560px; height: 322px; }
+  .mg-x .mg { position: absolute; top: 0; left: 0; transform: scale(.62); transform-origin: 0 0; }
+  .dl { margin-top: 8px; font: inherit; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; background: var(--accent); color: #fff; border: 1.5px solid var(--raised); box-shadow: 3px 3px 0 var(--raised); }
+  .dl-all { margin-top: 14px; }
+</style>
+<!-- 렌더한 PNG 내장본(out/rendered.js). file:// 에서도 Safari 포함 바로 저장되게 data URL 로 내려준다 -->
+<script src="out/rendered.js" onerror="window.RENDERED = {}"></script>
+</head>
+<body>
+<div class="page">
+  <h1>노션 연동 인증샷 이벤트 키트</h1>
+  <p>참여자 전원 Pro 30일 무료 / 2026-10-30 ~ 11-30 / 각 SNS에 그래프 캡쳐를 올리고 계정 태그(레딧은 댓글). 이미지는 out/*.png, 문구는 복사 버튼(영어 원문만 복사).</p>
+
+  <!-- ================= Instagram ================= -->
+  <section class="platform">
+    <h2>Instagram 캐러셀 3장</h2>
+    <p>1080×1350. 인스타 규칙상 "인스타그램과 무관" 고지를 캡션과 3번 장에 넣었습니다.</p>
+    <div class="grid">
+      <div><div class="frame ig"><div class="slide ig" data-name="ig-1">
+        <div class="kicker"><b>Event</b> / until Nov 30</div>
+        <div class="h">Show us your Notion<br><em>as a map.</em></div>
+        <div style="margin-top:34px"><span class="badge">Get 30 days of Pro, free</span></div>
+        <div data-minigraph style="margin-top:auto; margin-bottom:110px"></div>
+        <div class="foot"><b>notion-mind.com</b><span>Swipe →</span></div>
+      </div></div><div class="meta">ig-1.png</div></div>
+
+      <div><div class="frame ig"><div class="slide ig" data-name="ig-2">
+        <div class="kicker"><b>How to join</b> / 3 steps</div>
+        <div class="h">Connect.<br>Screenshot. <em>Tag.</em></div>
+        <div class="steps">
+          <div class="step box"><div class="n">1</div><div class="t">Connect your Notion<small>Sign in at notion-mind.com</small></div></div>
+          <div class="step box"><div class="n">2</div><div class="t">Screenshot your map<small>Blur anything private first</small></div></div>
+          <div class="step box"><div class="n">3</div><div class="t">Post it and tag @notion_mind_<small>Add #notionmind</small></div></div>
+        </div>
+        <div class="stat" style="margin-top:44px">We'll DM you a code. Redeem it on the <b>pricing page.</b></div>
+        <div class="foot"><b>notion-mind.com</b><span>2 / 3</span></div>
+      </div></div><div class="meta">ig-2.png</div></div>
+
+      <div><div class="frame ig"><div class="slide ig" data-name="ig-3">
+        <div class="kicker"><b>Good to know</b></div>
+        <div class="h">Everyone who<br>joins <em>gets Pro.</em></div>
+        <div class="rules">
+          <div class="rule box">No draw. <b>Every</b> valid post gets 30 days of Pro.</div>
+          <div class="rule box"><b>No card needed.</b> Back to Free automatically after 30 days.</div>
+          <div class="rule box">One entry per Notion workspace.</div>
+          <div class="rule box">Post by <b>Nov 30, 2026</b> (KST).</div>
+          <div class="rule box">Not sponsored, endorsed or administered by Instagram, or affiliated with Notion.</div>
+        </div>
+        <div class="foot"><b>notion-mind.com</b><span>3 / 3</span></div>
+      </div></div><div class="meta">ig-3.png</div></div>
+    </div>
+
+    <div class="copy"><header>인스타 캡션 <button class="btn" data-copy>복사</button></header><pre>Show us your Notion as a map, get 30 days of Pro free.
+
+How to join, until Nov 30:
+1. Connect your Notion at notion-mind.com (link in bio)
+2. Screenshot your map. Blur anything private first.
+3. Post it, tag @notion_mind_ and add #notionmind
+
+No draw. Every valid post gets a code by DM. Enter it on the pricing page (notion-mind.com/pricing) for 30 days of Pro. No card needed, and it goes back to Free on its own. One entry per Notion workspace.
+
+This promotion is not sponsored, endorsed or administered by, or associated with, Instagram. Notion-mind is not affiliated with Notion.
+
+#notionmind #notion #notiontips #productivity #secondbrain #buildinpublic</pre><div class="ko"><b>한글 번역</b>노션을 지도로 보여 주세요. Pro 30일을 무료로 드립니다.
+
+참여 방법 (11월 30일까지):
+1. notion-mind.com에서 노션을 연결하세요 (프로필 링크)
+2. 지도를 캡쳐하세요. 공개하기 싫은 내용은 먼저 가려 주세요.
+3. 올리고 @notion_mind_ 태그와 #notionmind 해시태그를 달아 주세요
+
+추첨이 아닙니다. 조건에 맞게 올린 분은 모두 DM으로 코드를 받습니다. 요금제 화면(notion-mind.com/pricing)에서 입력하면 30일 동안 Pro가 됩니다. 카드 정보는 필요 없고, 기간이 끝나면 자동으로 Free로 돌아갑니다. 노션 워크스페이스당 1회 참여할 수 있습니다.
+
+이 프로모션은 인스타그램이 후원, 보증, 운영하지 않으며 인스타그램과 관련이 없습니다. Notion-mind는 노션과 제휴 관계가 없습니다.
+
+(해시태그)</div></div>
+
+    <div class="copy"><header>인스타 첫 댓글 <button class="btn" data-copy>복사</button></header><pre>What's the most tangled database in your workspace? Post the map, we want to see it.</pre><div class="ko"><b>한글 번역</b>워크스페이스에서 가장 얽혀 있는 데이터베이스는 뭔가요? 지도로 올려 주세요, 보고 싶어요.</div></div>
+  </section>
+
+  <!-- ================= X ================= -->
+  <section class="platform">
+    <h2>X 게시물 1개 + 카드 1장</h2>
+    <p>1200×675. X 규칙상 "여러 계정 참여 무효"를 답글로 바로 이어 답니다.</p>
+    <div class="grid">
+      <div><div class="frame x"><div class="slide x" data-name="x-1">
+        <div style="display:flex; gap:40px; height:100%; align-items:center">
+          <div style="width:500px">
+            <div class="kicker"><b>Event</b> / until Nov 30</div>
+            <div class="h">Show us your Notion <em>as a map.</em></div>
+            <div style="margin-top:22px"><span class="badge">30 days of Pro, free</span></div>
+            <div class="stat">Post a screenshot, tag <b>@notion_mind</b></div>
+          </div>
+          <div class="mg-x" data-minigraph></div>
+        </div>
+      </div></div><div class="meta">x-1.png</div></div>
+    </div>
+
+    <div class="copy" data-limit="280"><header>게시물 <small></small><button class="btn" data-copy>복사</button></header><pre>Show us your Notion as a map, get 30 days of Pro free.
+
+1. Connect your Notion at notion-mind.com
+2. Screenshot your graph
+3. Post it, tag @notion_mind, add #notionmind
+
+We DM you a code. No card, back to Free on its own. Until Nov 30.</pre><div class="ko"><b>한글 번역</b>노션을 지도로 보여 주세요. Pro 30일을 무료로 드립니다.
+
+1. notion-mind.com에서 노션 연결
+2. 그래프 캡쳐
+3. @notion_mind 태그와 #notionmind 해시태그를 달아 올리기
+
+DM으로 코드를 보내 드립니다. 카드 필요 없고, 기간이 끝나면 자동으로 Free. 11월 30일까지.</div></div>
+
+    <div class="copy" data-limit="280"><header>바로 다는 답글 (규칙) <small></small><button class="btn" data-copy>복사</button></header><pre>Rules: redeem your code on the pricing page (notion-mind.com/pricing). One entry per Notion workspace. Entries from multiple accounts are ineligible. Blur anything private before posting. Ends Nov 30, 2026 (KST). Not affiliated with Notion.</pre><div class="ko"><b>한글 번역</b>규칙: 코드는 요금제 화면(notion-mind.com/pricing)에서 입력. 노션 워크스페이스당 1회 참여. 여러 계정으로 참여하면 무효입니다. 올리기 전에 공개하기 싫은 내용은 가려 주세요. 2026년 11월 30일(한국 시간) 종료. 노션과 제휴 관계 없음.</div></div>
+  </section>
+
+  <!-- ================= Reddit ================= -->
+  <section class="platform">
+    <h2>Reddit 게시물 + 이미지 1장</h2>
+    <p>레딧은 태그가 없어서 이 게시물의 댓글로 인증받습니다. r/Notion 은 규칙 4번(자기홍보는 고정 Self-promo &amp; Showcase 스레드만)이라 일반 글로 올리면 삭제되니, r/Notion 에는 아래 짧은 댓글을 고정 스레드에 답니다. 다른 서브레딧은 올리기 전에 사이드바의 홍보, 경품 규칙을 확인하세요.</p>
+    <div class="grid">
+      <div><div class="frame x"><div class="slide x" data-name="rd-1">
+        <div style="display:flex; gap:40px; height:100%; align-items:center">
+          <div style="width:500px">
+            <div class="kicker"><b>Event</b> / until Nov 30</div>
+            <div class="h">Show us your Notion <em>as a map.</em></div>
+            <div style="margin-top:22px"><span class="badge">30 days of Pro, free</span></div>
+            <div class="stat">Comment a screenshot below</div>
+          </div>
+          <div class="mg-x" data-minigraph></div>
+        </div>
+      </div></div><div class="meta">rd-1.png</div></div>
+    </div>
+
+    <div class="copy"><header>제목 <button class="btn" data-copy>복사</button></header><pre>Show me your Notion relations as a map and I'll give you 30 days of Pro (no draw, everyone who posts)</pre><div class="ko"><b>한글 번역</b>노션 관계형을 지도로 보여 주시면 Pro 30일을 드립니다 (추첨 아님, 올린 분 전원)</div></div>
+
+    <div class="copy"><header>본문 <button class="btn" data-copy>복사</button></header><pre>I build Notion-mind, which draws your databases and relation properties as one graph (not affiliated with Notion).
+
+I'd like to see how other people's workspaces actually look when the relations are drawn out, so here's a trade:
+
+1. Connect your Notion at notion-mind.com (the free plan covers up to 1,000 pages)
+2. Screenshot your map. Blur anything private.
+3. Comment it here
+
+Everyone who comments a screenshot gets a code by DM. Enter it on the pricing page for 30 days of Pro. No card needed, it goes back to Free on its own. No draw. One per workspace, until Nov 30.
+
+Most tangled workspace gets my respect.</pre><div class="ko"><b>한글 번역</b>저는 데이터베이스와 관계형 속성을 하나의 그래프로 그려 주는 Notion-mind를 만들고 있습니다 (노션과 제휴 관계 없음).
+
+다른 분들의 워크스페이스가 관계형을 그려 놓으면 실제로 어떻게 생겼는지 보고 싶어서, 이렇게 제안합니다.
+
+1. notion-mind.com에서 노션을 연결하세요 (무료 요금제로 1,000페이지까지 됩니다)
+2. 지도를 캡쳐하세요. 공개하기 싫은 내용은 가려 주세요.
+3. 여기에 댓글로 올려 주세요
+
+캡쳐를 댓글로 올린 분은 모두 DM으로 코드를 받습니다. 요금제 화면에서 입력하면 30일 동안 Pro가 됩니다. 카드 정보는 필요 없고 기간이 끝나면 자동으로 Free로 돌아갑니다. 추첨 아닙니다. 워크스페이스당 1회, 11월 30일까지.
+
+가장 복잡한 워크스페이스에는 제 존경을 드립니다.</div></div>
+
+    <div class="copy"><header>r/Notion 고정 Self-promo &amp; Showcase 스레드 댓글 <button class="btn" data-copy>복사</button></header><pre>Running a small thing until Nov 30: connect your Notion at notion-mind.com, screenshot your relation map, reply here with it, and I'll DM you a code for 30 days of Pro (redeem on the pricing page, no card needed). Everyone who posts, no draw. Not affiliated with Notion.</pre><div class="ko"><b>한글 번역</b>11월 30일까지 작은 이벤트를 합니다. notion-mind.com에서 노션을 연결하고, 관계형 지도를 캡쳐해서 여기 답글로 올려 주시면 Pro 30일 코드를 DM으로 드립니다(요금제 화면에서 입력, 카드 불필요). 올린 분 전원, 추첨 아님. 노션과 제휴 관계 없음.</div></div>
+  </section>
+</div>
+
+<template id="minigraph"><div class="mg"><svg viewBox="0 0 904 520" width="904" height="520"><line x1="170" y1="270" x2="300" y2="100" stroke="#D6D5D1" stroke-width="2"/><line x1="170" y1="270" x2="80" y2="430" stroke="#D6D5D1" stroke-width="2"/><line x1="170" y1="270" x2="270" y2="450" stroke="#D6D5D1" stroke-width="2"/><line x1="780" y1="115" x2="760" y2="230" stroke="#D6D5D1" stroke-width="2"/><line x1="780" y1="115" x2="560" y2="40" stroke="#D6D5D1" stroke-width="2"/><line x1="700" y1="460" x2="560" y2="340" stroke="#D6D5D1" stroke-width="2"/><line x1="700" y1="460" x2="810" y2="340" stroke="#D6D5D1" stroke-width="2"/><line x1="300" y1="100" x2="760" y2="230" stroke="#2383E2" stroke-width="4.5" stroke-dasharray="12 9" stroke-linecap="round"/><line x1="300" y1="100" x2="560" y2="340" stroke="#2383E2" stroke-width="4.5" stroke-dasharray="12 9" stroke-linecap="round"/></svg><div class="n db" style="left:170px; top:270px">Projects</div><div class="n hot" style="left:300px; top:100px">App v2 Redesign</div><div class="n" style="left:80px; top:430px">Hiring</div><div class="n" style="left:270px; top:450px">Docs Revamp</div><div class="n db" style="left:780px; top:115px">Clients</div><div class="n" style="left:760px; top:230px">Acme Co</div><div class="n" style="left:560px; top:40px">Bright Labs</div><div class="n db" style="left:700px; top:460px">Meeting Notes</div><div class="n" style="left:560px; top:340px">Kickoff</div><div class="n" style="left:810px; top:340px">Weekly Sync</div><div class="rl" style="left:553px; top:172px">↔ Client</div><div class="rl" style="left:443px; top:232px">↔ Meetings</div></div></template>
+<script>
+  // 이미지마다 다운로드 버튼 + 전체 다운로드
+  const download = name => { const url = (window.RENDERED || {})[name]; if (!url) return alert(name + '.png 가 없습니다. 렌더를 다시 해 주세요.'); const a = document.createElement('a'); a.href = url; a.download = name + '.png'; a.click(); };
+  document.querySelectorAll('.slide[data-name]').forEach(slide => {
+    const meta = slide.closest('.frame').nextElementSibling;
+    const b = document.createElement('button'); b.className = 'dl'; b.textContent = slide.dataset.name + '.png 다운로드';
+    b.onclick = () => download(slide.dataset.name); meta.after(b);
+  });
+  const all = document.createElement('button'); all.className = 'dl dl-all'; all.textContent = '이미지 5장 전체 다운로드';
+  all.onclick = async () => { for (const s of document.querySelectorAll('.slide[data-name]')) { download(s.dataset.name); await new Promise(r => setTimeout(r, 400)); } };
+  document.querySelector('.page > p').after(all);
+  document.querySelectorAll('[data-minigraph]').forEach(el => el.prepend(document.getElementById('minigraph').content.cloneNode(true)));
+  document.querySelectorAll('.copy').forEach(box => {
+    const pre = box.querySelector('pre');
+    box.querySelector('[data-copy]').onclick = e => { navigator.clipboard.writeText(pre.innerText); e.target.textContent = '복사됨'; setTimeout(() => e.target.textContent = '복사', 1200); };
+    if (box.dataset.limit) {
+      const n = [...pre.innerText.replace(/\b[\w-]+\.(com|io|app)\S*/g, 'x'.repeat(23))].length;  // X 는 링크를 23자로 셈
+      const s = box.querySelector('small'); s.textContent = `${n} / 280`; s.classList.toggle('over', n > 280);
+    }
+  });
+</script>
+</body>
+</html>

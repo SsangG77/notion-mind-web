@@ -48,12 +48,15 @@ export default function GraphView({
   workspace,
   plan,
   unlocked,
+  promoUntil,
   demoItems,
 }: {
   workspace?: string;
   plan: Plan;
   /** 개발 모드가 열려 있을 때만 설정 패널에 요금제 토글을 보여준다 */
   unlocked: boolean;
+  /** 이벤트 코드로 Pro 인 경우 그 만료 시각 — 관리할 구독이 없으므로 기간만 보여준다 */
+  promoUntil?: string | null;
   /** 로그인 없는 예시 화면 — 주면 서버 대신 이 데이터를 그린다 */
   demoItems?: GraphItem[];
 }) {
@@ -114,6 +117,7 @@ export default function GraphView({
           workspace={workspace}
           plan={plan}
           unlocked={unlocked}
+          promoUntil={promoUntil}
           autoSync={autoSync}
           onAutoSync={setAutoSync}
         />

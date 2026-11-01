@@ -164,6 +164,21 @@ const ko = {
   checkoutConfirming: "결제 확인 중…",
   loginToSubscribe: "Notion으로 로그인 후 구독",
   refundNote: "결제 후 14일 이내 전액 환불, ",
+  // 인증샷 이벤트 체험 코드 (설정 패널과 요금제 화면)
+  redeemTitle: "이벤트 코드",
+  redeemHint: "코드를 받으셨다면 입력해 주세요",
+  redeemPlaceholder: "NM1030",
+  redeemButton: "적용",
+  redeemApplying: "확인 중…",
+  redeemOk: (until: string) => `Pro 적용됨, ${until}까지`,
+  redeemInvalid: "없는 코드입니다",
+  redeemClosed: "이벤트가 끝났습니다",
+  redeemAlreadyJoined: "이미 이벤트에 참여한 워크스페이스입니다",
+  redeemAlreadyPro: "이미 Pro를 구독하고 있습니다",
+  redeemNoLogin: "먼저 Notion을 연결해 주세요",
+  redeemError: "지금은 확인할 수 없습니다. 잠시 뒤 다시 시도해 주세요",
+  promoPro: (until: string) => `이벤트 Pro, ${until}까지`,
+  promoProHint: "기간이 끝나면 자동으로 Free로 돌아갑니다",
   freeFeatures: [
     "노드 1,000개 (최근 수정순)",
     "그래프 전 기능 (관계형 포함)",
@@ -222,9 +237,15 @@ const ko = {
   loginError: (e: string) => `연결에 실패했습니다: ${e}`,
   guide: "사용 가이드",
   faq: "자주 묻는 질문",
+  blogNav: "게시글",
   contact: "문의",
   otherLanguage: "English",
-  startWithNotion: "Notion으로 시작",
+
+  // 글 안의 유도 블록 — 처음 온 사람은 예시로, 다 읽은 사람은 바로 연결로 보낸다
+  ctaDemoLabel: "예시 그래프 만져 보기",
+  ctaDemoNote: "로그인 없이 바로. 노드를 끌어 보고 눌러 볼 수 있습니다.",
+  ctaLoginLabel: "내 노션 워크스페이스로 보기",
+  ctaLoginNote: "구글로 로그인한 뒤 노션 워크스페이스를 연결합니다. 무료로 페이지 1,000개까지.",
 
   // 쿠키 배너
   cookieBody:
@@ -371,6 +392,20 @@ const en: Shape = {
   checkoutConfirming: "Confirming payment…",
   loginToSubscribe: "Sign in with Notion to subscribe",
   refundNote: "Full refund within 14 days, ",
+  redeemTitle: "Event code",
+  redeemHint: "Got a code? Enter it here",
+  redeemPlaceholder: "NM1030",
+  redeemButton: "Apply",
+  redeemApplying: "Checking…",
+  redeemOk: (until: string) => `Pro is on until ${until}`,
+  redeemInvalid: "No such code",
+  redeemClosed: "The event has ended",
+  redeemAlreadyJoined: "This workspace already joined the event",
+  redeemAlreadyPro: "You are already subscribed to Pro",
+  redeemNoLogin: "Connect Notion first",
+  redeemError: "Could not check that right now. Try again in a moment",
+  promoPro: (until: string) => `Event Pro, until ${until}`,
+  promoProHint: "Goes back to Free on its own when it ends",
   freeFeatures: [
     "1,000 nodes (most recently edited)",
     "Every graph feature, relations included",
@@ -428,9 +463,14 @@ const en: Shape = {
   loginError: (e: string) => `Connection failed: ${e}`,
   guide: "Guide",
   faq: "FAQ",
+  blogNav: "Posts",
   contact: "Contact",
   otherLanguage: "한국어",
-  startWithNotion: "Start with Notion",
+
+  ctaDemoLabel: "Try the example graph",
+  ctaDemoNote: "No sign-in. Drag the nodes and open them.",
+  ctaLoginLabel: "See my own Notion workspace",
+  ctaLoginNote: "Sign in with Google, then connect your Notion workspace. Free for up to 1,000 pages.",
 
   cookieBody:
     "We use advertising cookies to show ads to Free users. Strictly necessary cookies, such as the sign-in session, are always used.",
@@ -460,4 +500,14 @@ export function langHref(lang: Lang, pathname: string): string {
       : pathname;
   if (lang === "en") return bare;
   return bare === "/" ? LANG_PREFIX : `${LANG_PREFIX}${bare}`;
+}
+
+/** 만료일 같은 날짜 한 줄 표시. 서버와 클라이언트가 같은 문자열을 내도록 UTC 로 고정한다 */
+export function formatDay(iso: string, lang: Lang): string {
+  return new Date(iso).toLocaleDateString(lang === "ko" ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
 }

@@ -2,6 +2,7 @@ import { supabaseAdmin } from "./supabase";
 import { planFromStatus } from "./billing";
 import { PRICE_IDS } from "./paddle";
 import { PRO_PRICE } from "./pricing";
+import { getPromoStats, type PromoStats } from "./promo";
 
 /**
  * 이용 지표 기록과 집계 — 관리자 대시보드(/admin) 전용.
@@ -60,6 +61,8 @@ export interface AdminStats {
   activeUsers: DayPoint[];
   subscriptionStatus: { status: string; count: number }[];
   cancellationReasons: { reason: string; count: number }[];
+  /** 이벤트 체험 코드 현황 */
+  promo: PromoStats;
   recentWorkspaces: { name: string; firstSeen: string; lastSeen: string; plan: "free" | "pro" }[];
 }
 
@@ -98,6 +101,7 @@ export async function getAdminStats(days: number): Promise<AdminStats> {
     sb.from("notion_connections").select("user_id, workspace_id"),
     sb.from("cancellation_feedback").select("reason"),
   ]);
+  const promo = await getPromoStats();
   for (const r of [ws, newWs, visits, subs, conns, feedback]) {
     if (r.error) throw new Error(`admin stats read failed: ${r.error.message}`);
   }
@@ -137,6 +141,7 @@ export async function getAdminStats(days: number): Promise<AdminStats> {
     cumulativeWorkspaces,
     activeUsers: fillDays(since, days, countBy(visitRows, (v) => v.day)),
     subscriptionStatus: [...countBy(subRows, (s) => s.status)].map(([status, count]) => ({ status, count })).sort((a, b) => b.count - a.count),
+    promo,
     cancellationReasons: [...countBy((feedback.data ?? []) as { reason: string | null }[], (r) => r.reason ?? "(no reason)")]
       .map(([reason, count]) => ({ reason, count }))
       .sort((a, b) => b.count - a.count),

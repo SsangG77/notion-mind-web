@@ -5,7 +5,17 @@ export const SITE_URL = "https://notion-mind.com";
 export const SITE_NAME = "Notion-mind";
 
 /** 색인 대상 공개 경로 — 접두사 없는 형태로 적는다. sitemap 과 메타데이터가 같은 목록을 쓴다 */
-export const PUBLIC_PATHS = ["/", "/guide", "/faq", "/pricing", "/terms", "/privacy", "/refund"] as const;
+export const PUBLIC_PATHS = [
+  "/",
+  "/guide",
+  "/faq",
+  "/pricing",
+  "/blog",
+  "/blog/notion-mind-map",
+  "/terms",
+  "/privacy",
+  "/refund",
+] as const;
 export type PublicPath = (typeof PUBLIC_PATHS)[number];
 
 interface Meta {
@@ -36,6 +46,16 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "Free covers 1,000 pages with ads. Pro removes the ads, stores hidden nodes and pins, and raises the limit — $7 a month or $48 a year, refundable for 14 days.",
     },
+    "/blog": {
+      title: "Posts",
+      description:
+        "Short answers about Notion's views, links between pages, and seeing a workspace as a graph.",
+    },
+    "/blog/notion-mind-map": {
+      title: "Does Notion have mind maps?",
+      description:
+        "Notion has no mind map or graph view — its database views are table, board, timeline, calendar, list, gallery and chart. The three options that remain, and when each one is the right answer.",
+    },
     "/terms": { title: "Terms of Service", description: "The terms that apply to using Notion-mind, including subscriptions, cancellation and the 14-day refund window." },
     "/privacy": { title: "Privacy Notice", description: "What Notion-mind reads from your workspace, what it stores, who processes it and the rights you have over it." },
     "/refund": { title: "Refund Policy", description: "Payments, including renewals, are fully refundable within 14 days, no reason required." },
@@ -59,11 +79,38 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "Free 는 1,000개 페이지까지 광고와 함께. Pro 는 광고를 없애고 숨김과 핀을 저장하며 상한을 올립니다 — 월 $7 또는 연 $48, 14일 전액 환불.",
     },
+    "/blog": {
+      title: "게시글",
+      description: "노션의 보기, 페이지 사이의 연결, 워크스페이스를 그래프로 보는 것에 대한 짧은 답.",
+    },
+    "/blog/notion-mind-map": {
+      title: "노션에 마인드맵 기능이 있나요?",
+      description:
+        "노션에는 마인드맵 뷰도 그래프 뷰도 없습니다. 지원하는 보기는 표, 보드, 타임라인, 캘린더, 목록, 갤러리, 차트 일곱 가지뿐. 남은 방법 세 가지와 어느 쪽이 맞는지.",
+    },
     "/terms": { title: "이용약관", description: "Notion-mind 이용에 적용되는 약관. 구독과 해지, 14일 환불 기간을 포함합니다." },
     "/privacy": { title: "개인정보 처리방침", description: "Notion-mind 가 워크스페이스에서 읽는 것, 저장하는 것, 처리를 맡기는 곳과 이용자의 권리." },
     "/refund": { title: "환불정책", description: "갱신 결제를 포함해 결제 후 14일 안에는 이유를 묻지 않고 전액 환불합니다." },
   },
 };
+
+/** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. 날짜는 공개일(화면 표시용) */
+export const BLOG_POSTS = [{ path: "/blog/notion-mind-map", date: "2026-11-01" }] as const satisfies
+  readonly { path: PublicPath; date: string }[];
+
+/** 글 공개일 — 화면에 쓰는 형식으로. 목록과 글 본문이 같은 값을 쓴다 */
+export function postDate(lang: Lang, path: PublicPath) {
+  const post = BLOG_POSTS.find((p) => p.path === path);
+  if (!post) return null;
+  return new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(post.date));
+}
+
+/** 목록 화면이 제목과 요약을 가져다 쓴다 — 검색 결과와 같은 문구를 쓰려고 한 곳에 둔다 */
+export const metaOf = (lang: Lang, path: PublicPath): Meta => META[lang][path];
 
 /**
  * 한 페이지의 메타데이터 — 제목, 설명, 자기 참조 canonical, 언어 대체 주소.
@@ -100,14 +147,23 @@ export const organizationJsonLd = {
   email: "sangjincha719@gmail.com",
 } as const;
 
-/** 문서 안쪽 페이지의 위치 — 검색 결과 경로 표시 */
+/**
+ * 문서 안쪽 페이지의 위치 — 검색 결과 경로 표시.
+ * 글(`/blog/...`)은 목록을 중간에 끼운다 — 주소 계층과 표시가 어긋나면 안 된다.
+ */
 export function breadcrumbJsonLd(lang: Lang, path: PublicPath) {
+  const trail: PublicPath[] = path.startsWith("/blog/") ? ["/blog", path] : [path];
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: SITE_NAME, item: `${SITE_URL}${langHref(lang, "/")}` },
-      { "@type": "ListItem", position: 2, name: META[lang][path].title, item: `${SITE_URL}${langHref(lang, path)}` },
+      ...trail.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: META[lang][p].title,
+        item: `${SITE_URL}${langHref(lang, p)}`,
+      })),
     ],
   };
 }

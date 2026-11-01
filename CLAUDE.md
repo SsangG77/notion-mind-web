@@ -79,6 +79,14 @@ src/
 - 필터: 좌상단 검색 블록의 필터 버튼 → "연결 없는 노드만". 관계형으로 아무 데도 안 엮인 노드만 남긴다. ⚠️ **차수가 아니라 relation 엣지 수로 센다** — DB 안의 페이지는 소속선(dbChild)이 항상 붙어서 차수로 세면 고아가 영영 안 나온다. 숨김은 기존 `hidden` 속성을 재사용하되 필터가 숨긴 것만 `filteredOut` 으로 표시해, 사용자가 직접 숨긴 노드와 섞이지 않게 하고 "숨긴 노드 N개" 집계에서도 뺀다. `scripts/check-orphan-filter.ts` 가 실제 graphology 그래프로 10건 검사
 - 고아 필터는 r/Notion 사용자 피드백에서 나온 것 — "the value is in the gaps, not the map"(2026-10-12). 그래프의 실사용처는 지도를 보는 게 아니라 안 엮인 것을 찾는 쪽이었다
 - 아직 없음: 필터의 나머지 갈래(노드 종류, 소속 DB 별)
+- 이벤트 체험 코드(Pro 1개월, 결제 없음): 코드는 **공용 한 개 `NM1030`** 이고 참여자마다 DM 으로 같은 값을 보낸다. 게시물에는 적지 않는다. 사람마다 다른 코드를 뽑던 구조는 운영이 번거로워 버렸다 — 대신 1회 제한을 코드가 아니라 **계정과 워크스페이스**에 걸었다. 입력할 때 대소문자, 공백, 하이픈은 무시한다(`lib/promo.ts` 의 `normalizeCode`)
+- 저장소는 두 테이블(스키마 `scripts/promo-codes.sql`): `promo_coupons`(코드, 기간 30일, 마감일) + `promo_redemptions`(누가 언제 썼고 언제까지인지). ⚠️ **`subscriptions` 에 넣지 않는다** — 넣으면 매출 집계가 오염되고 결제 웹훅이 체험 행을 덮어쓴다(`check-tenancy` 가 고정)
+- 1계정 1회 + 1워크스페이스 1회를 `promo_redemptions` 의 **기본키와 유니크 제약**이 막는다 — 앱 코드가 아니라 DB 라서 동시 요청으로 뚫는 길이 없다. 유니크 위반(23505)은 "이미 참여함"으로 번역한다. ⚠️ 기간이 끝나도 사용 기록은 남으므로 **재참여는 안 된다** — 열어주려면 그 행을 지워야 한다
+- 공용 코드는 받은 사람이 남에게 넘길 수 있으므로 쿠폰에 **마감일**(`closes_on`, event-connect 는 2026-11-30)을 둔다. 그 날까지는 되고 다음 날부터 안 된다 — 이벤트 뒤에 코드가 돌아다녀도 안 먹게 하는 유일한 지점이라 `isClosed` 로 꺼내 `check-promo-code.ts` 가 경계 5건을 검사한다
+- Pro 판정은 `lib/billing.ts` 의 `getPlanInfo` 하나로 모인다: 구독과 체험 기간을 **병렬로** 물어본다(차례로 물으면 Free 사용자의 모든 요청에 왕복이 하나씩 더 붙는다). 만료는 `expires_at` 이 지나면 조회에서 빠지는 방식 — 되돌리는 cron 이 없다
+- 코드 입력 자리는 **요금제 화면의 Free 카드** 한 곳(`features/billing/components/RedeemCode.tsx`). 체험 Pro 인 사람에게는 요금제 화면과 설정 패널 **두 곳 다** "구독 관리" 대신 만료일을 보여준다(`promoUntil`) — 관리할 구독이 없어서 포털로 보내면 되돌아오는 막다른 길이 된다
+- 코드 사용 라우트는 워크스페이스를 `getConnection` 이 돌려준 값으로만 쓴다. ⚠️ `nm_ws` 쿠키를 믿으면 다른 워크스페이스를 적어 넣어 1회 제한을 비껴갈 수 있다(`check-tenancy` 가 고정). 이미 결제 구독 중이면 코드가 날아가지 않게 막는다 — 이 한 곳만 `planFor` 가 아니라 실제 구독 상태를 본다(개발 모드로 켜 둔 Pro 때문에 입력이 막히면 안 된다)
+- 새 이벤트를 열려면 `promo_coupons` 에 코드와 마감일을 한 줄 넣는다. 발급 스크립트는 없다
 
 ## 상표·이름 (2026-09-23 결정)
 - 노션 상표 가이드라인은 앱 이름·도메인·SNS 핸들에 "Notion" 사용을 명시적으로 금지. 그래도 이름 `Notion-mind` 유지 결정(A안) — 대신 로그인·설정 패널·요금제에 비제휴·상표 귀속 면책 문구(`NotionDisclaimer`) 노출. "with permission" 문구는 허가 없으므로 사용 금지
@@ -112,6 +120,7 @@ src/
 ## 운영 대시보드 `/admin`
 - 비밀번호는 개발 모드와 같은 `DEV_UNLOCK_SECRET`(쿠키는 별개 `nm_admin` 24시간 — 개발 모드를 열어도 대시보드는 따로 열어야 함). 미설정이면 404. robots 차단 + noindex. 관리자 1인용이라 한국어 고정 — `scripts/check-ui-strings.mjs` 의 EXEMPT_DIRS 에 `src/app/admin/`, `src/features/admin/` 등록
 - 지표 기록은 `lib/analytics.ts` 두 함수: `touchWorkspace`(OAuth 콜백 — `workspaces` 에 첫 접속=가입, 마지막 접속, 워크스페이스명 upsert), `recordVisit`(`/api/graph` 첫 배치 — `workspace_visits` 에 (워크스페이스, UTC 날짜) 한 줄). ⚠️ **인증 뒤에, `callNotion` 이 돌려준 `workspaceId` 로** 기록한다 — 앞에서 `nm_ws` 쿠키로 기록하면 세션 없는 요청 하나로 아무 id 나 영구 행이 들어간다(감사 run-1 확정 결함). 둘 다 실패를 삼킴 — 지표가 로그인이나 그래프를 막지 않게. 기록은 2026-10-13 배포 시점부터 쌓임(그 전 이용자는 다음 로그인 때 가입으로 잡힘)
+- 체험 코드 현황 타일 2개: 누적 사용, 지금 기간이 남은 사람(`getPromoStats`)
 - 집계 `getAdminStats(days)`: 누적 워크스페이스, 기간 내 신규/활성, Pro 수와 월/연 구독 수(`PRICE_IDS` 로 구분), 월 환산 매출(월 요금 + 연 요금÷12), 누적 가입자 추이(범위 이전 가입자를 바닥으로 일별 가입을 더함), 일별 가입/활성 추이(빈 날 0 채움), 구독 상태 분포, 해지 사유, 최근 가입 20개. 기간은 `?days=7|30|90`
 - 차트는 라이브러리 없이 `features/admin/components`(`TimeSeriesChart` 단일 계열 선+면, 호버 툴팁, 마지막 값만 라벨 / `StatTile` / `BarList`). 계열이 하나라 범례 없음, 글자는 텍스트 색, 마크만 액센트색
 
@@ -126,25 +135,27 @@ src/
 - 뷰포트를 기억할 것이 없으므로 `FitToGraph` 로 맞춘다(자기 워크스페이스는 `ViewportMemory`). 전체를 다 넣으면 노드가 글자 없는 사각형이 되므로 최소 15% 아래로는 안 내려간다
 - 아래 소개 글은 `features/landing/components/LandingContent` 가 `landing/content.ts`(문제 제기, 작동 방식, 활용, 요금, FAQ)와 `demo/copy.ts`(지금 보이는 그래프 해설)를 **한 번씩만** 쓰도록 엮는다. ⚠️ 기능을 카드로 다시 나열하지 않는다 — 예전 `features` 블록이 데모 해설과 같은 말을 반복하고 있었다
 ## 제품 규칙
-- 인증: 노션 OAuth 단일 (자체 계정 없음)
+- 인증은 두 단계 — 구글 로그인(`/api/auth/google`, 계정 키 = 구글 `sub`)으로 자체 계정을 만들고, 그다음 노션 워크스페이스를 연결(`/api/auth/login`)한다. ⚠️ 공개 화면의 시작 버튼은 **구글 쪽**을 가리켜야 한다 — 노션 콜백은 세션을 요구하므로 로그인 전 방문자를 보내면 `no_session` 으로 튕긴다
 - Free: 노드 1,000개(초과 시 최근 수정순만 렌더) · 워크스페이스 1개 · 숨김/핀은 세션 한정 · 광고는 `components/AdBanner` **한 곳에만** 있다(`variant="page"` 화면 하단 / `"panel"` 노드 상세). 나오는 자리: 홈, /guide, /faq, /pricing, /graph, 노드 상세 패널. ⚠️ 승인 뒤 광고 단위는 이 파일 하나만 고치면 전부 바뀐다 — 자리마다 따로 심지 말 것(`scripts/check-ads.mjs` 가 막는다). 홈 소개 글에는 `variant="article"`(본문 폭 카드)로, 나머지는 화면 하단 띠로 넣고 Free 에게만 보인다. ⚠️ 글 안에 넣더라도 **글처럼 위장하지 않는다** — 구글: "may not implement Google ads in a manner that disguises the ads in any way", 라벨은 "Advertisement" 또는 "Sponsored Links" 만 허용(answer/1346295). 그래서 점선 테두리와 ADVERTISEMENT 라벨을 남긴다. **페이월 모달에는 넣지 않는다** — 구글이 interstitial 에 콘텐츠 광고를 금지하고, 광고 제거를 권하는 창이라 앞뒤가 안 맞는다 — 광고 단위 slot 은 AdSense 승인 후 발급 — 그때까지 `components/adsense.ts` 의 `AD_SLOTS` 가 빈 값이고 `AdBanner` 는 **아무것도 렌더하지 않는다**. ⚠️ 승인 전에 "광고 자리" 빈 상자를 띄우지 말 것: 구글은 심사에 코드 스니펫, ads.txt, 메타 태그 중 하나만 요구하고 승인 전에는 광고가 게재되지 않으며(answer/7584263), 빈 상자는 정책이 금지하는 "아직 미완성 상태인 화면"으로 읽힌다(publisherpolicies/answer/11112688). `scripts/check-ads.mjs` 가 이 가드를 고정). AdSense 게시자 `ca-pub-3545555975398754`(`components/adsense.ts`, AdMob 과 같은 계정): `public/ads.txt`, `<meta google-adsense-account>`(소유 확인), 스크립트는 `AdSenseLoader` 가 항상 로드(구글 인증 CMP 가 이 스크립트로 EEA/UK/CH 동의창을 띄움 — AdSense 에서 3선택 CMP 메시지 선택). 우리 배너는 맞춤 여부만 가른다 — 동의 시 맞춤, 거부나 미응답 시 `requestNonPersonalizedAds=1` 비맞춤. ⚠️ `pauseAdRequests` 로 요청을 막지 않는다(막으면 배너를 안 누른 방문자와 구글 점검 봇에게 광고 코드가 한 번도 안 돌아 심사가 안 넘어가고 수익이 0). EEA 사용자는 창 둘 볼 수 있음 — 트래픽 생기면 지역 분기
 - Pro: 무제한 · 핀/숨김/필터 영구 저장 · 자동 동기화 · 내보내기 · 광고 제거
 - 도구는 보여주기만 — 결함 판정·감사 기능 없음 (Won't)
 - 노션 API rate limit ~3req/s → 초기 동기화는 부분 렌더
 
 ## 검색 노출 (2026-10-08)
-- 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 7개 × 두 언어 = 14개. `/graph`, `/dev`, `/admin` 은 robots.txt 차단 + noindex
+- 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 9개 × 두 언어 = 18개. `/graph`, `/dev`, `/admin` 은 robots.txt 차단 + noindex
 - 페이지 메타데이터는 `pageMeta(lang, path)` 한 곳에서 나온다 — 제목, 설명, 자기 참조 canonical, hreflang(en/ko/x-default), OG, 트위터 카드. 새 공개 페이지를 만들면 `PUBLIC_PATHS` 와 `META` 에 추가하고 `generateMetadata` 에서 `pageMeta` 를 부른다
 - 검색 결과 노출 문구는 `lib/seo.ts` 의 `META` 에 둔다(화면 사전 `i18n.ts` 와 분리 — 길이 제약과 쓰임이 다름). 문구 가드 예외 파일
 - `app/sitemap.ts` 가 14개 주소를 `lastmod` 와 언어 대체 주소까지 생성. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
 - 구조화 데이터는 Organization(layout)과 BreadcrumbList(문서, 법률 페이지)만. FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
-- OG 이미지는 `app/opengraph-image.tsx` 가 생성(이미지 파일 없음). 글꼴 파일을 안 받으려고 영문만 씀
+- 공유 카드(OG) 이미지는 `lib/ogCard.tsx` 가 그리고, 주소마다 그 폴더의 `opengraph-image.tsx` 가 제목을 넣어 부른다(이미지 파일 없음). 홈과 글이 같은 그림이면 외부에 올릴 때 구별이 안 되므로 글은 따로 만든다. 글꼴 파일을 안 받으려고 영문만 씀 — 한국어 주소도 영문 카드다. 도트 배경은 생성기가 지원하지 않아 안 그려짐
+- 검색어 글(`/blog`): 목록 `app/blog/page.tsx`, 글 `app/blog/<이름>/page.tsx` + `content/docs/<이름>.{ko,en}.mdx`. 목록 순서와 공개일은 `lib/seo.ts` 의 `BLOG_POSTS` 한 곳. 글 본문의 `<Cta to="demo|login" />` 는 `components/CtaBlock` 이고, MDX 는 언어를 모르므로 페이지가 언어를 묶어 넘긴다. ⚠️ 본문 이미지는 마크다운 문법으로 쓴다 — MDX 는 직접 쓴 `<img>` 태그를 그대로 내보내서 `next/image` 교체가 안 걸린다. 글 화면은 메뉴를 두지 않는다(나가는 길은 유도 버튼 둘 + 목록으로 돌아가는 링크 하나)
 - `public/robots.txt` 는 `/api`, `/graph`, `/dev`, `/admin`(양 언어)을 막고 맨 아래 `Sitemap:` 줄로 sitemap 위치를 알린다 — 구글은 이 줄의 주소가 전체 주소일 것을 요구
 - `npm run check:seo [주소]` — 14개 주소에 title, description, canonical, hreflang, og 가 다 있는지, sitemap 개수가 맞는지 검사. **완료 판정은 이 명령의 0건으로 한다.** 서버가 떠 있어야 해서 `lint` 에는 안 묶임
 
 ## 명령
 - `npm run dev` / `npm run build` / `npm run lint` (리포 루트 = 웹 앱)
-- `npm run check:tenancy` — 보안 감사에서 확정된 결함 3건(설정 API 의 쿠키 테넌트 키, 그래프 상한의 클라이언트 배치 번호, 용도 없는 게이트 봉인)이 되돌아오지 않는지 검사(`lint` 가 같이 돌림). 예외는 그 줄에 `tenancy-allow: 사유` 주석
+- `npm run check:tenancy` — 보안 감사에서 확정된 결함(설정 API 의 쿠키 테넌트 키, 그래프 상한의 클라이언트 배치 번호, 용도 없는 게이트 봉인)과 체험 코드 전제(워크스페이스 키, 구독 테이블 불침범)가 되돌아오지 않는지 검사. 10건 + `src` 전수 스캔, `lint` 가 같이 돌림. 예외는 그 줄에 `tenancy-allow: 사유` 주석
+- `npx tsx scripts/check-promo-code.ts` — 체험 코드 입력 정리와 마감일 경계 검사. `lint` 가 같이 돌림
 - `npm run check:ui-strings` — 화면 문구가 코드에 하드코딩됐는지 검사(`lint` 가 같이 돌림). **번역 작업의 완료 판정은 사람이 만든 목록이 아니라 이 명령의 0건으로 한다.** 의도된 예외는 그 줄에 `i18n-allow: 사유` 주석
 
 ## 주의

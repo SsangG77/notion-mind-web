@@ -11,7 +11,7 @@ import NotionDisclaimer from "@/components/NotionDisclaimer";
 import ManageSubscriptionButton from "@/features/billing/components/ManageSubscriptionButton";
 import type { Plan } from "@/lib/billing";
 import { useLang, useSetLang, useT } from "@/features/i18n/LangProvider";
-import { LANG_LABEL, LANGS, langHref, legalPath } from "@/lib/i18n";
+import { formatDay, LANG_LABEL, LANGS, langHref, legalPath } from "@/lib/i18n";
 import { DEV_PARAM } from "@/lib/apiUrl";
 
 const ROW =
@@ -53,6 +53,7 @@ export default function SettingsPanel({
   workspace,
   plan,
   unlocked,
+  promoUntil,
   autoSync,
   onAutoSync,
 }: {
@@ -65,6 +66,8 @@ export default function SettingsPanel({
   plan: Plan;
 /** 비밀번호를 입력해 둔 사람에게만 요금제 토글이 보인다 */
   unlocked: boolean;
+  /** 이벤트 코드로 Pro 인 경우 그 만료 시각 — 결제 구독이 아니라 관리할 것이 없다 */
+  promoUntil?: string | null;
   /** 자동 동기화(Pro) 현재 상태와 토글 */
   autoSync: boolean;
   onAutoSync: (on: boolean) => void;
@@ -199,7 +202,14 @@ export default function SettingsPanel({
             <span>{t.faq}</span>
             <span className="text-[#91908C]">›</span>
           </Link>
-          {plan === "pro" && (
+          {plan === "pro" && promoUntil ? (
+            <div className={ROW} data-testid="promo_until_row">
+              <span>
+                {t.promoPro(formatDay(promoUntil, lang))}
+                <span className="mt-0.5 block text-[10px] text-[#91908C]">{t.promoProHint}</span>
+              </span>
+            </div>
+          ) : plan === "pro" ? (
             <ManageSubscriptionButton className={`${ROW} w-full text-left hover:bg-[#F4F3EF] dark:hover:bg-[#35342F]`}>
               <span>
                 {t.manageSubscription}
@@ -207,7 +217,7 @@ export default function SettingsPanel({
               </span>
               <span className="text-[#91908C]">›</span>
             </ManageSubscriptionButton>
-          )}
+          ) : null}
           <div className={ROW}>
             <span>
               {t.connectedPages}
