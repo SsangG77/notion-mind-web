@@ -13,6 +13,7 @@ export const PUBLIC_PATHS = [
   "/blog",
   "/blog/notion-mind-map",
   "/blog/notion-graph-view",
+  "/blog/notion-vs-obsidian-graph-view",
   "/terms",
   "/privacy",
   "/refund",
@@ -62,6 +63,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "Notion has no graph view like Obsidian's and no official plugin that adds one. What its database views actually show, and how to see the links between your pages instead.",
     },
+    "/blog/notion-vs-obsidian-graph-view": {
+      title: "Notion vs Obsidian: the graph view gap",
+      description:
+        "Only Obsidian has a graph view; Notion does not. What that screen actually shows, why the choice splits on it, and how to get the same picture of a Notion workspace without moving.",
+    },
     "/terms": { title: "Terms of Service", description: "The terms that apply to using Notion-mind, including subscriptions, cancellation and the 14-day refund window." },
     "/privacy": { title: "Privacy Notice", description: "What Notion-mind reads from your workspace, what it stores, who processes it and the rights you have over it." },
     "/refund": { title: "Refund Policy", description: "Payments, including renewals, are fully refundable within 14 days, no reason required." },
@@ -99,6 +105,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "노션에는 옵시디언 같은 그래프뷰도, 그 기능을 더해 주는 공식 플러그인도 없습니다. 노션의 보기가 실제로 보여 주는 것과, 페이지 사이의 연결을 한 화면에서 보는 방법.",
     },
+    "/blog/notion-vs-obsidian-graph-view": {
+      title: "노션 vs 옵시디언, 그래프뷰 차이",
+      description:
+        "그래프뷰는 옵시디언에만 있고 노션에는 없습니다. 그 화면이 실제로 보여 주는 것, 선택이 갈리는 지점, 노션을 옮기지 않고 같은 그림을 보는 방법.",
+    },
     "/terms": { title: "이용약관", description: "Notion-mind 이용에 적용되는 약관. 구독과 해지, 14일 환불 기간을 포함합니다." },
     "/privacy": { title: "개인정보 처리방침", description: "Notion-mind 가 워크스페이스에서 읽는 것, 저장하는 것, 처리를 맡기는 곳과 이용자의 권리." },
     "/refund": { title: "환불정책", description: "갱신 결제를 포함해 결제 후 14일 안에는 이유를 묻지 않고 전액 환불합니다." },
@@ -107,6 +118,7 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
 
 /** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. 날짜는 공개일(화면 표시용) */
 export const BLOG_POSTS = [
+  { path: "/blog/notion-vs-obsidian-graph-view", date: "2026-11-01" },
   { path: "/blog/notion-graph-view", date: "2026-11-01" },
   { path: "/blog/notion-mind-map", date: "2026-11-01" },
 ] as const satisfies
