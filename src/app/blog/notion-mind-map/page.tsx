@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import DocLayout from "@/components/DocLayout";
 import CtaBlock from "@/components/CtaBlock";
+import RelatedPosts from "@/components/RelatedPosts";
 import { currentLang } from "@/lib/lang.server";
 import { breadcrumbJsonLd, pageMeta, postDate } from "@/lib/seo";
 import { currentPlan } from "@/lib/plan.server";
@@ -50,6 +51,7 @@ export default async function Page() {
       />
       <DocLayout lang={lang} page="blog" path={PATH} ad={plan === "free" ? <AdBanner /> : null}>
         {lang === "en" ? <En components={components} /> : <Ko components={components} />}
+        <RelatedPosts lang={lang} current={PATH} />
       </DocLayout>
     </>
   );

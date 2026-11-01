@@ -1,0 +1,21 @@
+# Does Notion have a graph view?
+
+No. Notion has no graph view like Obsidian's, and there is no official plugin that adds one. A database can be shown as a table, board, timeline, calendar, list, gallery or chart, and every one of those shows a single database as rows. Nothing lays out how your pages connect to each other on one screen.
+
+So people reach for outside tools. Most of them are drawing tools, which means the picture lives apart from the links actually in Notion: add a page and the drawing is already out of date.
+
+Notion-mind does not draw. It reads the links your workspace already has:
+
+- which database each page belongs to
+- which page sits inside which page
+- where each relation property points
+
+Each becomes a line, and every page and database becomes a node. It is the same idea as Obsidian graphing the links between notes, except the links here are Notion's own membership and relation properties. The map is rebuilt from the workspace every time you open it, so there is nothing to maintain and nothing goes stale.
+
+Hover a node and everything it is not connected to dims, so one page's neighbourhood is readable at a glance. One filter leaves only the pages no relation touches — the notes you wrote once and never found again.
+
+![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
+
+See it on your own workspace.
+
+<Cta to="login" />

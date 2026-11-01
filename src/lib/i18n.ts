@@ -237,6 +237,7 @@ const ko = {
   guide: "사용 가이드",
   faq: "자주 묻는 질문",
   blogNav: "게시글",
+  relatedPosts: "다른 글",
   contact: "문의",
   otherLanguage: "English",
 
@@ -462,6 +463,7 @@ const en: Shape = {
   guide: "Guide",
   faq: "FAQ",
   blogNav: "Posts",
+  relatedPosts: "More posts",
   contact: "Contact",
   otherLanguage: "한국어",
 
