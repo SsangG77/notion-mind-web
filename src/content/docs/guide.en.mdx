@@ -20,7 +20,7 @@ Right after sign-in you see "Reading your workspace", and the graph grows live a
 The graph has three kinds of thing in it.
 
 - **Nodes (blocks)**: one page is one white block. Databases are a slightly darker grey block with a disc icon. Long titles wrap to two lines and clip; hovering expands the block to show the whole title.
-- **Solid lines**: membership. The line joining a database to a page inside it is black; the line joining a page to a subpage or database nested in it is grey.
+- **Solid lines**: membership. A light grey line joins a database to a page inside it, and a page to a subpage or database nested in it. The node shape tells you which end is the database.
 - **Dotted lines**: pages connected through a database relation property. These sideways links are the ones a tree view never shows.
 
 A physics simulation decides the layout. A database with many children gets them arranged in concentric rings around it, and pages with no connections drift outward. Nodes wobbling for the first few seconds before settling is normal.

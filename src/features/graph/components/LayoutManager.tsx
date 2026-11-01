@@ -83,8 +83,8 @@ export default function LayoutManager({
       if (graph.hasEdge(e.source, e.target)) continue;
       // relation은 WebGL에서 숨기고 별도 캔버스 레이어에 점선으로 그림
       graph.addEdge(e.source, e.target, {
-        color: e.kind === "dbChild" ? T.edgeDb : T.edgeHierarchy,
-        size: 1.3,
+        color: T.edgeHierarchy, // 소속선은 종류 구분 없이 한 모양 — 부모 노드 모양이 DB/페이지를 말해 줌
+        size: 2.2, // 소속선 두께 — GraphView 의 minEdgeThickness 와 같은 값 (2026-11-01)
         kind: e.kind,
         hidden: e.kind === "relation",
       });

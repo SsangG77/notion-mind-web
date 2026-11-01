@@ -364,15 +364,11 @@ export default function SettingsPanel({
             <p className="mb-2 text-xs font-semibold text-[#91908C]">{t.legend}</p>
             <div className="space-y-1.5 text-[12px] leading-5">
               <div className="flex items-center gap-2">
-                <span className="inline-block h-0 w-6 border-t-[1.5px] border-[#2E2C27] dark:border-[#8D8A83]" />
-                {t.legendDbChild}
-              </div>
-              <div className="flex items-center gap-2">
                 <span className="inline-block h-0 w-6 border-t-[1.5px] border-[#C9C7C1] dark:border-[#4A4844]" />
-                {t.legendPageChild}
+                {t.legendHierarchy}
               </div>
               <div className="flex items-center gap-2">
-                <span className="inline-block h-0 w-6 border-t-[1.5px] border-dashed border-[#C9C7C1] dark:border-[#4A4844]" />
+                <span className="inline-block h-0 w-6 border-t-[1.5px] border-dashed border-[#57564F] dark:border-[#A8A6A0]" />
                 {t.legendRelation}
               </div>
               <div className="flex items-center gap-2">

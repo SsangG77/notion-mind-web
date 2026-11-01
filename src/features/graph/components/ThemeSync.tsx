@@ -16,7 +16,7 @@ export default function ThemeSync({ dark }: { dark: boolean }) {
     }));
     graph.updateEachEdgeAttributes((_e, a) => ({
       ...a,
-      color: a.kind === "dbChild" ? T.edgeDb : T.edgeHierarchy,
+      color: T.edgeHierarchy,
     }));
     sigma.refresh();
   }, [sigma, dark]);

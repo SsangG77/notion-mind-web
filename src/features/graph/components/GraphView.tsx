@@ -42,6 +42,8 @@ const SIGMA_SETTINGS = {
   minCameraRatio: 0.05,
   maxCameraRatio: 100,
   stagePadding: 60,
+  // 소속선 두께 하한(화면 px). 기본 1.7 은 WebGL 안티앨리어싱 때문에 1px 머리카락 선으로 보여 2.2 로 올림(2026-11-01)
+  minEdgeThickness: 2.2,
 };
 
 export default function GraphView({

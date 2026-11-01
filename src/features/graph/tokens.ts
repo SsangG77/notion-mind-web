@@ -9,8 +9,10 @@ export interface Palette {
   text: string;
   border: string;
   accent: string;
+  /** 소속선(DB 안 페이지, 페이지 안 페이지와 DB) — 뼈대라 배경으로 물러남 */
   edgeHierarchy: string;
-  edgeDb: string;
+  /** 관계형 점선 — 이 제품에서 보는 선이라 소속선보다 진함. 액센트는 호버 표시와 겹쳐 쓰지 않음 */
+  edgeRelation: string;
   /** 호버 포커스 밖 엣지의 고스트 색 (배경에 가깝게) */
   edgeDim: string;
 }
@@ -26,7 +28,7 @@ export const LIGHT: Palette = {
   border: "#E9E9E7",
   accent: "#2383E2",
   edgeHierarchy: "#C9C7C1",
-  edgeDb: "#2E2C27",
+  edgeRelation: "#57564F",
   edgeDim: "#E7E6E2",
 };
 
@@ -42,7 +44,7 @@ export const DARK: Palette = {
   border: "#2F2F2F",
   accent: "#2383E2",
   edgeHierarchy: "#4A4844",
-  edgeDb: "#8D8A83",
+  edgeRelation: "#A8A6A0",
   edgeDim: "#212120",
 };
 
