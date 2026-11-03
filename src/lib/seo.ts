@@ -14,6 +14,7 @@ export const PUBLIC_PATHS = [
   "/blog/notion-mind-map",
   "/blog/notion-graph-view",
   "/blog/notion-vs-obsidian-graph-view",
+  "/blog/notion-relation-property",
   "/terms",
   "/privacy",
   "/refund",
@@ -68,6 +69,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "Only Obsidian has a graph view; Notion does not. What that screen actually shows, why the choice splits on it, and how to get the same picture of a Notion workspace without moving.",
     },
+    "/blog/notion-relation-property": {
+      title: "Notion relation property vs rollup: what each one shows",
+      description:
+        "A relation ties pages together; a rollup walks across the tie and brings a value back. One-way vs two-way, where people get stuck, and the one thing neither property can show.",
+    },
     "/terms": { title: "Terms of Service", description: "The terms that apply to using Notion-mind, including subscriptions, cancellation and the 14-day refund window." },
     "/privacy": { title: "Privacy Notice", description: "What Notion-mind reads from your workspace, what it stores, who processes it and the rights you have over it." },
     "/refund": { title: "Refund Policy", description: "Payments, including renewals, are fully refundable within 14 days, no reason required." },
@@ -110,6 +116,11 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "그래프뷰는 옵시디언에만 있고 노션에는 없습니다. 그 화면이 실제로 보여 주는 것, 선택이 갈리는 지점, 노션을 옮기지 않고 같은 그림을 보는 방법.",
     },
+    "/blog/notion-relation-property": {
+      title: "노션 관계형 속성, 롤업과 뭐가 다른가요?",
+      description:
+        "관계형은 페이지를 잇고 롤업은 그 연결을 건너가 값을 가져옵니다. 한 방향과 양방향의 차이, 헷갈리는 지점, 두 속성 다 못 보여 주는 한 가지.",
+    },
     "/terms": { title: "이용약관", description: "Notion-mind 이용에 적용되는 약관. 구독과 해지, 14일 환불 기간을 포함합니다." },
     "/privacy": { title: "개인정보 처리방침", description: "Notion-mind 가 워크스페이스에서 읽는 것, 저장하는 것, 처리를 맡기는 곳과 이용자의 권리." },
     "/refund": { title: "환불정책", description: "갱신 결제를 포함해 결제 후 14일 안에는 이유를 묻지 않고 전액 환불합니다." },
@@ -118,6 +129,7 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
 
 /** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. 날짜는 공개일(화면 표시용) */
 export const BLOG_POSTS = [
+  { path: "/blog/notion-relation-property", date: "2026-11-03" },
   { path: "/blog/notion-vs-obsidian-graph-view", date: "2026-11-01" },
   { path: "/blog/notion-graph-view", date: "2026-11-01" },
   { path: "/blog/notion-mind-map", date: "2026-11-01" },
