@@ -17,6 +17,8 @@ export const PUBLIC_PATHS = [
   "/blog/notion-relation-property",
   "/blog/how-to-make-mind-map-in-notion",
   "/blog/notion-backlinks",
+  "/blog/notion-second-brain",
+  "/blog/notion-knowledge-graph",
   "/terms",
   "/privacy",
   "/refund",
@@ -86,6 +88,16 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "Backlinks list the pages that point at the one you are on, above the title. The three reasons one is missing — nothing links yet, it is a relation, or permissions — and the one thing the list cannot show.",
     },
+    "/blog/notion-second-brain": {
+      title: "Notion second brain: where it stalls a few months in",
+      description:
+        "A second brain in Notion builds fine and stalls later, when you can no longer see what is tied to what. Why PARA does not solve that, the three symptoms, and how to see the links you already have.",
+    },
+    "/blog/notion-knowledge-graph": {
+      title: "Building a knowledge graph in Notion",
+      description:
+        "A zettelkasten and a knowledge graph both want the shape linked notes make, not a single note. What mentions, relations and subpages already give you in Notion, the one thing missing, and how to see it.",
+    },
     "/terms": { title: "Terms of Service", description: "The terms that apply to using Notion-mind, including subscriptions, cancellation and the 14-day refund window." },
     "/privacy": { title: "Privacy Notice", description: "What Notion-mind reads from your workspace, what it stores, who processes it and the rights you have over it." },
     "/refund": { title: "Refund Policy", description: "Payments, including renewals, are fully refundable within 14 days, no reason required." },
@@ -143,6 +155,16 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
       description:
         "백링크는 이 페이지를 가리키는 페이지 목록이고 제목 위에 뜹니다. 안 보이는 이유 셋 — 아직 링크가 없음, 관계형임, 권한 — 과 그 목록이 못 보여 주는 한 가지.",
     },
+    "/blog/notion-second-brain": {
+      title: "노션 세컨드 브레인, 몇 달 뒤에 막히는 지점",
+      description:
+        "노션 세컨드 브레인은 잘 만들어지고 몇 달 뒤에 막힙니다. 무엇이 무엇과 엮였는지 안 보이기 때문. PARA 로 안 풀리는 이유, 세 가지 증상, 이미 있는 연결을 보는 방법.",
+    },
+    "/blog/notion-knowledge-graph": {
+      title: "노션으로 지식 그래프 만들기",
+      description:
+        "제텔카스텐과 지식 그래프가 원하는 건 노트 한 장이 아니라 이어진 모양입니다. 노션의 멘션, 관계형, 하위 페이지로 이미 되는 것과 빠진 것 하나, 그걸 보는 방법.",
+    },
     "/terms": { title: "이용약관", description: "Notion-mind 이용에 적용되는 약관. 구독과 해지, 14일 환불 기간을 포함합니다." },
     "/privacy": { title: "개인정보 처리방침", description: "Notion-mind 가 워크스페이스에서 읽는 것, 저장하는 것, 처리를 맡기는 곳과 이용자의 권리." },
     "/refund": { title: "환불정책", description: "갱신 결제를 포함해 결제 후 14일 안에는 이유를 묻지 않고 전액 환불합니다." },
@@ -151,6 +173,8 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
 
 /** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. 날짜는 공개일(화면 표시용) */
 export const BLOG_POSTS = [
+  { path: "/blog/notion-knowledge-graph", date: "2026-11-06" },
+  { path: "/blog/notion-second-brain", date: "2026-11-05" },
   { path: "/blog/notion-backlinks", date: "2026-11-04" },
   { path: "/blog/how-to-make-mind-map-in-notion", date: "2026-11-04" },
   { path: "/blog/notion-relation-property", date: "2026-11-03" },
