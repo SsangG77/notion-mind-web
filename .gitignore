@@ -47,3 +47,7 @@ next-env.d.ts
 
 # Playwright MCP 가 남기는 세션 기록
 .playwright-mcp/
+
+.code-review-graph/
+.crg-autobuild.lock
+.crg-autobuild.log

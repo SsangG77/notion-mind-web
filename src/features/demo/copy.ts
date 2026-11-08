@@ -40,7 +40,7 @@ export const DEMO_COPY: Record<Lang, Copy> = {
       {
         heading: "Pinning and hiding",
         body: [
-          "Drag a node where you want it and the rest settles around it. Right-click gives you Pin, which freezes it in place while the physics keeps running for everything else, and Hide, which takes it out of the view. On the Free plan those choices last for the session; on Pro they are stored and follow you to another browser.",
+          "Drag a node where you want it and the rest settles around it. Hover a node and the menu below it gives you Pin, which freezes it in place while the physics keeps running for everything else, and Hide, which takes it out of the view. On the Free plan those choices last for the session; on Pro they are stored and follow you to another browser.",
         ],
       },
       {
@@ -84,7 +84,7 @@ export const DEMO_COPY: Record<Lang, Copy> = {
       {
         heading: "고정과 숨기기",
         body: [
-          "노드를 원하는 자리로 끌어다 놓으면 나머지가 그 주위로 정리됩니다. 우클릭하면 핀 고정과 숨기기가 나옵니다. 핀은 그 노드만 제자리에 묶어 두고 나머지 물리는 계속 돌게 하며, 숨기기는 화면에서 빼냅니다. Free 에서는 이 선택이 그 세션 동안만 남고, Pro 에서는 저장되어 다른 브라우저에서도 따라옵니다.",
+          "노드를 원하는 자리로 끌어다 놓으면 나머지가 그 주위로 정리됩니다. 노드에 커서를 올리면 바로 아래에 핀 고정과 숨기기가 나옵니다. 핀은 그 노드만 제자리에 묶어 두고 나머지 물리는 계속 돌게 하며, 숨기기는 화면에서 빼냅니다. Free 에서는 이 선택이 그 세션 동안만 남고, Pro 에서는 저장되어 다른 브라우저에서도 따라옵니다.",
         ],
       },
       {

@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useSigma } from "@react-sigma/core";
 import { BLOCK, BLOCK_PRESS } from "@/components/blockStyle";
 import { useT } from "@/features/i18n/LangProvider";
-import { applyOrphanFilter, clearOrphanFilter, orphanCount } from "../lib/orphanFilter";
+import { orphanCount } from "../lib/graphFilter";
+import { getFilter, getFilterServer, setFilter, subscribeFilter } from "../lib/filterStore";
 
 /** 검색 + 필터 통합 바 — 하나의 노드 블록 안에서 구분선으로 분리 */
 export default function SearchPanel() {
@@ -12,22 +13,25 @@ export default function SearchPanel() {
   const sigma = useSigma();
   const [q, setQ] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [orphansOnly, setOrphansOnly] = useState(false);
+  const filter = useSyncExternalStore(subscribeFilter, getFilter, getFilterServer);
 
   // 패널을 열 때 몇 개가 남는지 미리 보여준다 — 켜 봐야 아는 건 불친절하다
-  const orphans = useMemo(
-    () => (filterOpen ? orphanCount(sigma.getGraph()) : 0),
-    [filterOpen, sigma],
-  );
-
-  const toggleOrphans = () => {
+  const counts = useMemo(() => {
     const graph = sigma.getGraph();
-    const next = !orphansOnly;
-    if (next) applyOrphanFilter(graph);
-    else clearOrphanFilter(graph);
-    setOrphansOnly(next);
-    sigma.refresh();
-  };
+    const dbs: string[] = [];
+    let pages = 0;
+    if (filterOpen) {
+      graph.forEachNode((id, a) => {
+        if (a.nodeType === "database") dbs.push(id);
+        else pages++;
+      });
+    }
+    return { dbs, pages, orphans: filterOpen ? orphanCount(graph) : 0 };
+  }, [filterOpen, sigma]);
+
+  const allCollapsed =
+    counts.dbs.length > 0 && counts.dbs.every((id) => filter.collapsed.has(id));
+  const fmt = (n: number) => t.filterOrphansCount(n.toLocaleString());
 
   const results = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -104,33 +108,88 @@ export default function SearchPanel() {
       {filterOpen && (
         <div
           data-testid="filter_panel"
-          className={`${BLOCK} absolute right-0 top-11 w-52 px-3 py-2 text-sm`}
+          className={`${BLOCK} absolute right-0 top-11 w-60 px-3 py-2 text-sm`}
         >
-          <button
-            data-testid="filter_orphans_toggle"
-            onClick={toggleOrphans}
-            aria-pressed={orphansOnly}
-            className="flex w-full items-center justify-between gap-2 py-1.5 text-left"
-          >
-            <span>
-              {t.filterOrphans}
-              <span className="mt-0.5 block text-[10px] text-[#91908C]">{t.filterOrphansHint}</span>
-            </span>
-            <span className="flex shrink-0 items-center gap-2">
-              <span className="text-[11px] text-[#91908C]">
-                {t.filterOrphansCount(orphans.toLocaleString())}
-              </span>
-              <span
-                className={`relative h-[18px] w-[34px] shrink-0 rounded-full ${orphansOnly ? "bg-[#2383E2]" : "bg-[#E9E9E7] dark:bg-black"}`}
-              >
-                <span
-                  className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow ${orphansOnly ? "left-[18px]" : "left-[2px]"}`}
-                />
-              </span>
-            </span>
-          </button>
+          <ToggleRow
+            testId="filter_databases_toggle"
+            label={t.filterDatabases}
+            count={fmt(counts.dbs.length)}
+            on={filter.showDb}
+            onToggle={() => setFilter({ showDb: !filter.showDb })}
+          />
+          <ToggleRow
+            testId="filter_pages_toggle"
+            label={t.filterPages}
+            count={fmt(counts.pages)}
+            on={filter.showPage}
+            onToggle={() => setFilter({ showPage: !filter.showPage })}
+          />
+          <ToggleRow
+            testId="filter_orphans_toggle"
+            label={t.filterOrphans}
+            hint={t.filterOrphansHint}
+            count={fmt(counts.orphans)}
+            on={filter.orphansOnly}
+            onToggle={() => setFilter({ orphansOnly: !filter.orphansOnly })}
+          />
+          <ToggleRow
+            testId="filter_hierarchy_toggle"
+            label={t.filterHierarchy}
+            hint={t.filterHierarchyHint}
+            on={filter.showHierarchy}
+            onToggle={() => setFilter({ showHierarchy: !filter.showHierarchy })}
+          />
+          <ToggleRow
+            testId="filter_collapse_all_toggle"
+            label={t.filterCollapseAll}
+            hint={t.filterCollapseAllHint}
+            on={allCollapsed}
+            onToggle={() =>
+              setFilter({ collapsed: allCollapsed ? new Set() : new Set(counts.dbs) })
+            }
+          />
         </div>
       )}
     </div>
+  );
+}
+
+function ToggleRow({
+  testId,
+  label,
+  hint,
+  count,
+  on,
+  onToggle,
+}: {
+  testId: string;
+  label: string;
+  hint?: string;
+  count?: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      data-testid={testId}
+      onClick={onToggle}
+      aria-pressed={on}
+      className="flex w-full items-center justify-between gap-2 py-1.5 text-left"
+    >
+      <span>
+        {label}
+        {hint && <span className="mt-0.5 block text-[10px] text-[#91908C]">{hint}</span>}
+      </span>
+      <span className="flex shrink-0 items-center gap-2">
+        {count && <span className="text-[11px] text-[#91908C]">{count}</span>}
+        <span
+          className={`relative h-[18px] w-[34px] shrink-0 rounded-full ${on ? "bg-[#2383E2]" : "bg-[#E9E9E7] dark:bg-black"}`}
+        >
+          <span
+            className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow ${on ? "left-[18px]" : "left-[2px]"}`}
+          />
+        </span>
+      </span>
+    </button>
   );
 }

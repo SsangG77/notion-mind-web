@@ -45,7 +45,8 @@ export function useWorkspaceSettings(plan: Plan) {
       timer.current = setTimeout(() => {
         const next: WorkspaceSettings = { hidden: [], pinned: {}, autoSync: autoSyncRef.current };
         graph.forEachNode((id, a) => {
-          if (a.hidden) next.hidden.push(id);
+          // 필터가 잠깐 가린 노드는 사용자가 숨긴 게 아니다 — 저장하면 필터를 꺼도 영영 숨는다
+          if (a.hidden && !a.filteredOut) next.hidden.push(id);
           if (a.pinned) next.pinned[id] = { x: a.x as number, y: a.y as number };
         });
         fetch(apiUrl("/api/settings"), {

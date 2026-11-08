@@ -13,6 +13,7 @@ import { drawNodeHover, drawNodeLabel, setSelected } from "../drawNode";
 import ContainerResize from "./ContainerResize";
 import LayoutManager from "./LayoutManager";
 import RelationEdgesLayer from "./RelationEdgesLayer";
+import GraphFilters from "./GraphFilters";
 import NodeInteractions from "./NodeInteractions";
 import NodeDetailPanel, { type Selection } from "./NodeDetailPanel";
 import { useLang } from "@/features/i18n/LangProvider";
@@ -102,6 +103,7 @@ export default function GraphView({
         <ContainerResize />
         <LayoutManager data={data} gen={gen} loading={loading} saved={saved} />
         <RelationEdgesLayer />
+        <GraphFilters />
         <NodeInteractions onSelect={handleSelect} onPersist={persist} />
         {selection && (
           <NodeDetailPanel

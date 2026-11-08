@@ -42,12 +42,14 @@ Hover a node and only it and its direct neighbours stay sharp; everything else f
 
 Nodes can be dragged. Neighbours follow on springs, and when you let go everything wobbles and settles again. If you want a specific arrangement, pin the node in place as described below.
 
-### Right-click menu: hide and pin
+### Node menu: hide, pin, collapse, only linked
 
-Right-click a node for a menu.
+Hover a node and a menu appears right below it. It stays while the cursor is on the node or the menu, and goes away once you move off both.
 
 - **Hide**: removes the node from the graph. Useful for clearing away pages you do not care about. While anything is hidden, two chips appear at the bottom of the screen: "N hidden, show all" and "View hidden". The list lets you bring back individual nodes.
-- **Pin**: the physics simulation stops moving that node. It stays exactly where you dropped it. Right-click again and choose "Unpin" to release it.
+- **Pin**: the physics simulation stops moving that node. It stays exactly where you dropped it. Choose "Unpin" in the same menu to release it.
+- **Collapse** (databases only): hides the pages inside the database and leaves the database node. "Expand" brings them back.
+- **Only linked**: keeps just the nodes directly connected to this one. Use it to see what a project actually touches. "Show all" at the top of the screen clears it.
 
 On the Free plan, hidden nodes and pins last only for the current browser session and reset on refresh. On Pro they are stored on the server and come back on your next visit and on other devices.
 
