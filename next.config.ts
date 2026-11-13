@@ -26,9 +26,10 @@ const nextConfig: NextConfig = {
       { source: "/eu/privacy", destination: "/privacy", permanent: true },
       { source: "/eu/terms", destination: "/terms", permanent: true },
       { source: "/eu/refund", destination: "/refund", permanent: true },
-      // 예시 화면은 홈 안으로 합쳤다(같은 내용을 두 주소가 나눠 갖고 있었다). 옛 주소는 홈의 그 자리로
-      { source: "/demo", destination: "/#demo", permanent: true },
-      { source: "/ko/demo", destination: "/ko#demo", permanent: true },
+      // 예시 화면은 홈 안으로 합쳤다(같은 내용을 두 주소가 나눠 갖고 있었다). 옛 주소는 홈으로.
+      // 도착지에 #demo 를 붙이지 않는다 — Search Console 에 "리디렉션 오류"가 떠서 뗐다(2026-11-12 알림)
+      { source: "/demo", destination: "/", permanent: true },
+      { source: "/ko/demo", destination: "/ko", permanent: true },
     ];
   },
 };
