@@ -1,17 +1,57 @@
 # Notion vs Obsidian: the graph view gap
 
-Only Obsidian has a graph view. Notion does not. It is the difference that comes up most when people compare the two, and the screen most often named as the reason for picking Obsidian.
+Notion and Obsidian are compared more often than any other pair of note apps, and the comparison usually ends on one screen: the graph view. Obsidian has one. Notion does not. Everything else differs too, though, and it is worth seeing the whole list before deciding the graph is the thing that matters to you.
 
-Obsidian's graph view lays out the links between your notes as dots and lines. You can see which notes are heavily connected and which sit alone, and the picture grows by itself as you write. There is nothing to maintain.
+## The short version
 
-Notion has connections too. Pages are tied together by database membership, subpages and relation properties. What is missing is not the links but **a screen that draws them**. Table, board, timeline and the rest each show one database at a time, as rows, so the shape of the whole is visible nowhere.
+| | Notion | Obsidian |
+| --- | --- | --- |
+| Where notes live | Notion's servers, opened in an app or browser | Markdown files in a folder on your device |
+| Offline | Pages you mark as available offline, in the desktop and mobile apps | Everything, always. The files are local |
+| Structure | Pages inside pages, and databases with properties | Files and folders, linked with `[[wikilinks]]` |
+| Databases | Built in: table, board, timeline, calendar, list, gallery, chart | Bases, a core plugin that builds table-like views from note properties |
+| Working with others | Live co-editing, comments, per-page permissions | Built for one person. Shared editing needs add-ons |
+| Extending it | Integrations through an API | Community plugins and themes that change the app itself |
+| Graph view | None | Built in, for the whole vault or one note |
 
-That is where the choice splits. If seeing the shape of your connections matters most, Obsidian. If tables, databases and working with other people matter most, Notion. A lot of people stay on Notion and miss exactly one thing.
+## Where your notes live
 
-You do not have to move for that one thing. Notion-mind reads the three kinds of connection your workspace already has and draws them the way Obsidian's graph view does: pages and databases as nodes, connections as lines, and hovering a node dims everything it is not tied to. Notion stays as it is; the picture is added on top.
+This is the difference the others grow out of. An Obsidian vault is a folder of plain Markdown files. You can open them in any text editor, back them up however you like, and they are still readable if Obsidian disappears tomorrow. Syncing between devices is your choice: Obsidian sells a sync service, and the files also work with whatever file sync you already use.
+
+Notion keeps your workspace on its servers. That is what makes sharing a page a one-click job and lets two people type in the same paragraph. The cost is that your notes are not files you hold. Notion added an offline mode, but it works page by page: you mark a page as available offline in the desktop or mobile app, and that choice is per device.
+
+## Databases
+
+Notion's databases are the reason many people never leave. Every row is a full page, properties can be dates, selects, people or formulas, and a relation property ties rows in one database to rows in another. The same data can be shown as a table, a board, a calendar or a timeline without copying anything.
+
+Obsidian caught up part of the way with Bases, a core plugin that reads the properties at the top of your notes and shows the notes as a filterable table or cards. It is good for a reading list or a project index. It is not a relational database: there is nothing like a relation property with a rollup counting across it.
+
+## Working with other people
+
+Notion was built for teams. Comments, mentions, page-level permissions and a shared sidebar are all stock. Obsidian was built for one person's notes. Shared vaults exist, and community plugins add live editing, but it is not what the app is for.
+
+## Links, backlinks and the graph
+
+Both apps can link one note to another and both show backlinks. The difference is what they do with the links afterwards.
+
+Obsidian draws them. Graph view is a core plugin that shows every note as a dot and every link as a line. You can filter it by search, colour groups of notes, show or hide notes with no links at all, and open a local graph that shows only what surrounds the note you are reading. Nothing has to be maintained: write a link and the picture changes.
+
+Notion stores just as many connections. A page sits inside a parent page, a row belongs to a database, a relation property points at rows elsewhere, a mention links two pages. But every database view shows one database as rows, and backlinks are listed one page at a time. No screen shows the shape of the whole. That is the gap in the title.
+
+## Which one to pick
+
+- **Pick Obsidian** if owning your files, working fully offline and seeing the shape of your notes matter most, and the notes are mainly for you
+- **Pick Notion** if you need databases, share work with other people, or want documents and structured data in one place
+- **Use both** if you can keep them apart cleanly, for example Notion for team projects and Obsidian for private thinking. It stops working once the same note needs to live in both
+
+## If you stay on Notion and miss the graph
+
+That is the most common outcome. People pick Notion for the databases and the sharing, and miss exactly one thing. Moving everything to Obsidian for one screen is a poor trade: relations, rollups and database views are the parts of a Notion workspace that do not come across intact.
+
+Notion-mind covers that one screen without a move. It reads three kinds of connection your workspace already has (database membership, subpages and relation properties) and draws them as a graph: pages and databases as nodes, connections as lines. Hovering a node dims everything it is not tied to, like Obsidian's local graph, and one filter leaves only the pages no relation touches.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
 
-See what your own Notion looks like as a graph.
+[Does Notion have a graph view?](/blog/notion-graph-view) goes into what Notion itself can and cannot show.
 
 <Cta to="login" />

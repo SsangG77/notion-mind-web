@@ -144,9 +144,10 @@ src/
 - 기준 주소 `https://notion-mind.com`, 색인 대상은 `lib/seo.ts` 의 `PUBLIC_PATHS` 9개 × 두 언어 = 18개. `/graph`, `/dev`, `/admin` 은 robots.txt 차단 + noindex
 - 페이지 메타데이터는 `pageMeta(lang, path)` 한 곳에서 나온다 — 제목, 설명, 자기 참조 canonical, hreflang(en/ko/x-default), OG, 트위터 카드. 새 공개 페이지를 만들면 `PUBLIC_PATHS` 와 `META` 에 추가하고 `generateMetadata` 에서 `pageMeta` 를 부른다
 - 검색 결과 노출 문구는 `lib/seo.ts` 의 `META` 에 둔다(화면 사전 `i18n.ts` 와 분리 — 길이 제약과 쓰임이 다름). 문구 가드 예외 파일
-- `app/sitemap.ts` 가 14개 주소를 `lastmod` 와 언어 대체 주소까지 생성. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
-- 구조화 데이터는 Organization(layout)과 BreadcrumbList(문서, 법률 페이지)만. FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
+- `app/sitemap.ts` 가 공개 주소 전부를 `lastmod` 와 언어 대체 주소까지 생성. 글의 `lastmod` 는 `BLOG_POSTS` 의 `updated`(본문을 마지막으로 고친 날), 나머지는 배포 시각 — 본문을 고치면 `updated` 도 같이 고친다. **`changefreq` 와 `priority` 는 넣지 않는다** — 구글이 무시한다고 공식 문서에 명시
+- 구조화 데이터는 Organization(layout), BreadcrumbList(문서, 법률 페이지), BlogPosting(글 — `blogPostingJsonLd`, 공개일과 수정일을 알림. 글쓴이는 개인 이름이 아니라 운영 주체로 적는다). FAQPage 는 리치 결과가 정부와 보건 사이트 전용, HowTo 는 구글이 문서째 삭제, SoftwareApplication 은 `aggregateRating` 또는 `review` 가 있어야 자격 — 셋 다 지금은 소득 0 이라 안 넣음
 - 공유 카드(OG) 이미지는 `lib/ogCard.tsx` 가 그리고, 주소마다 그 폴더의 `opengraph-image.tsx` 가 제목을 넣어 부른다(이미지 파일 없음). 홈과 글이 같은 그림이면 외부에 올릴 때 구별이 안 되므로 글은 따로 만든다. 글꼴 파일을 안 받으려고 영문만 씀 — 한국어 주소도 영문 카드다. 도트 배경은 생성기가 지원하지 않아 안 그려짐
+- 글 본문 기준(2026-11-14, AdSense 가 "가치가 별로 없는 콘텐츠"로 다시 거절한 뒤 전면 보강): 글 하나가 그 검색어의 답을 혼자서 끝까지 해 준다 — 소제목(H2) 여러 개, 순서, 비교표, 자주 막히는 지점. 영어 650~900단어. 제품 소개는 끝의 한 구역과 유도 버튼 하나로 줄인다(질문에 짧게 답하고 바로 제품으로 넘어가던 옛 글이 얇은 글로 읽혔다). ⚠️ 제품이 읽는 연결은 소속, 하위 페이지, 관계형 셋뿐이다 — **멘션과 백링크는 읽지 않으므로** 글에 그린다고 쓰지 않는다(옛 지식 그래프 글에 그렇게 적혀 있었음). 노션 화면 이름은 버전에 따라 달라 확인 안 된 한국어 라벨은 영문을 병기한다
 - 검색어 글(`/blog`): 목록 `app/blog/page.tsx`, 글 `app/blog/<이름>/page.tsx` + `content/docs/<이름>.{ko,en}.mdx`. 목록 순서와 공개일은 `lib/seo.ts` 의 `BLOG_POSTS` 한 곳. 글 본문의 `<Cta to="demo|login" />` 는 `components/CtaBlock` 이고, MDX 는 언어를 모르므로 페이지가 언어를 묶어 넘긴다. ⚠️ 본문 이미지는 마크다운 문법으로 쓴다 — MDX 는 직접 쓴 `<img>` 태그를 그대로 내보내서 `next/image` 교체가 안 걸린다. 글 화면은 메뉴를 두지 않는다(나가는 길은 유도 버튼 둘 + 목록으로 돌아가는 링크 하나)
 - `public/robots.txt` 는 `/api`, `/graph`, `/dev`, `/admin`(양 언어)을 막고 맨 아래 `Sitemap:` 줄로 sitemap 위치를 알린다 — 구글은 이 줄의 주소가 전체 주소일 것을 요구
 - `npm run check:seo [주소]` — 14개 주소에 title, description, canonical, hreflang, og 가 다 있는지, sitemap 개수가 맞는지 검사. **완료 판정은 이 명령의 0건으로 한다.** 서버가 떠 있어야 해서 `lint` 에는 안 묶임

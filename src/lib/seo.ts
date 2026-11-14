@@ -56,47 +56,47 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
     "/blog": {
       title: "Posts",
       description:
-        "Short answers about Notion's views, links between pages, and seeing a workspace as a graph.",
+        "Guides and answers about Notion's views, links between pages, and seeing a workspace as a graph.",
     },
     "/blog/notion-mind-map": {
       title: "Does Notion have mind maps?",
       description:
-        "Notion has no mind map or graph view — its database views are table, board, timeline, calendar, list, gallery and chart. The three options that remain, and when each one is the right answer.",
+        "Notion has no mind map view. What to use for mapping new ideas, and how to see the pages you already have as a map without drawing one.",
     },
     "/blog/notion-graph-view": {
       title: "Does Notion have a graph view?",
       description:
-        "Notion has no graph view like Obsidian's and no official plugin that adds one. What its database views actually show, and how to see the links between your pages instead.",
+        "Notion has no graph view like Obsidian's. What its sidebar, backlinks, relations and database views show instead, the workarounds, and where each stops.",
     },
     "/blog/notion-vs-obsidian-graph-view": {
       title: "Notion vs Obsidian: the graph view gap",
       description:
-        "Only Obsidian has a graph view; Notion does not. What that screen actually shows, why the choice splits on it, and how to get the same picture of a Notion workspace without moving.",
+        "Notion vs Obsidian compared: where notes live, offline use, databases, collaboration and the graph view only Obsidian has. Plus what to do if you stay on Notion.",
     },
     "/blog/notion-relation-property": {
-      title: "Notion relation property vs rollup: what each one shows",
+      title: "Notion relation vs rollup: what each one shows",
       description:
-        "A relation ties pages together; a rollup walks across the tie and brings a value back. One-way vs two-way, where people get stuck, and the one thing neither property can show.",
+        "A relation ties pages together; a rollup brings a value back across it. Setup steps, one-way vs two-way, common snags, and what neither property shows.",
     },
     "/blog/how-to-make-mind-map-in-notion": {
       title: "How to make a mind map in Notion",
       description:
-        "Notion has no mind map feature, so there are two ways: nested toggles, or an embedded Miro or Excalidraw board. The steps for each, what each one cannot do, and what to use for pages you already wrote.",
+        "Two ways to make a mind map in Notion: nested toggles, or an embedded Miro or Excalidraw board. Steps, tips, a comparison table, and when to use which.",
     },
     "/blog/notion-backlinks": {
-      title: "Notion backlinks: where they show, and why they sometimes don't",
+      title: "Notion backlinks: where they show and why not",
       description:
-        "Backlinks list the pages that point at the one you are on, above the title. The three reasons one is missing — nothing links yet, it is a relation, or permissions — and the one thing the list cannot show.",
+        "What creates a Notion backlink, what does not, and four reasons one is missing. When to use a relation instead, and the one thing the list cannot show.",
     },
     "/blog/notion-second-brain": {
-      title: "Notion second brain: where it stalls a few months in",
+      title: "Notion second brain: where it stalls",
       description:
-        "A second brain in Notion builds fine and stalls later, when you can no longer see what is tied to what. Why PARA does not solve that, the three symptoms, and how to see the links you already have.",
+        "A Notion second brain stalls when you can no longer see what is tied to what. Why PARA does not fix it, habits that help, and how to see the links you have.",
     },
     "/blog/notion-knowledge-graph": {
       title: "Building a knowledge graph in Notion",
       description:
-        "A zettelkasten and a knowledge graph both want the shape linked notes make, not a single note. What mentions, relations and subpages already give you in Notion, the one thing missing, and how to see it.",
+        "How to build a zettelkasten-style knowledge graph in Notion with a Notes database and relations, the one thing Notion lacks, and how to read the result.",
     },
     "/terms": { title: "Terms of Service", description: "The terms that apply to using Notion-mind, including subscriptions, cancellation and the 14-day refund window." },
     "/privacy": { title: "Privacy Notice", description: "What Notion-mind reads from your workspace, what it stores, who processes it and the rights you have over it." },
@@ -123,47 +123,47 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
     },
     "/blog": {
       title: "게시글",
-      description: "노션의 보기, 페이지 사이의 연결, 워크스페이스를 그래프로 보는 것에 대한 짧은 답.",
+      description: "노션의 보기, 페이지 사이의 연결, 워크스페이스를 그래프로 보는 것에 대한 정리와 답.",
     },
     "/blog/notion-mind-map": {
       title: "노션에 마인드맵 기능이 있나요?",
       description:
-        "노션에는 마인드맵 뷰도 그래프 뷰도 없습니다. 지원하는 보기는 표, 보드, 타임라인, 캘린더, 목록, 갤러리, 차트 일곱 가지뿐. 남은 방법 세 가지와 어느 쪽이 맞는지.",
+        "노션에는 마인드맵 보기가 없습니다. 새 생각을 그릴 때 쓰는 방법 두 가지와, 이미 써 둔 페이지를 그리지 않고 지도로 보는 방법.",
     },
     "/blog/notion-graph-view": {
       title: "노션에 그래프뷰가 있나요?",
       description:
-        "노션에는 옵시디언 같은 그래프뷰도, 그 기능을 더해 주는 공식 플러그인도 없습니다. 노션의 보기가 실제로 보여 주는 것과, 페이지 사이의 연결을 한 화면에서 보는 방법.",
+        "노션에는 옵시디언 같은 그래프뷰가 없습니다. 사이드바, 백링크, 관계형, 데이터베이스 보기가 대신 보여 주는 것과 우회 방법, 각각의 한계.",
     },
     "/blog/notion-vs-obsidian-graph-view": {
       title: "노션 vs 옵시디언, 그래프뷰 차이",
       description:
-        "그래프뷰는 옵시디언에만 있고 노션에는 없습니다. 그 화면이 실제로 보여 주는 것, 선택이 갈리는 지점, 노션을 옮기지 않고 같은 그림을 보는 방법.",
+        "노션과 옵시디언 비교. 노트가 있는 곳, 오프라인, 데이터베이스, 함께 쓰기, 그리고 옵시디언에만 있는 그래프뷰. 노션에 남는다면 할 수 있는 것.",
     },
     "/blog/notion-relation-property": {
       title: "노션 관계형 속성, 롤업과 뭐가 다른가요?",
       description:
-        "관계형은 페이지를 잇고 롤업은 그 연결을 건너가 값을 가져옵니다. 한 방향과 양방향의 차이, 헷갈리는 지점, 두 속성 다 못 보여 주는 한 가지.",
+        "관계형은 페이지를 잇고, 롤업은 그 연결을 건너 값을 가져옵니다. 만드는 순서, 한 방향과 양방향, 자주 막히는 지점, 둘 다 못 보여 주는 것.",
     },
     "/blog/how-to-make-mind-map-in-notion": {
       title: "노션에서 마인드맵 만드는 법",
       description:
-        "노션에는 마인드맵 기능이 없어 토글로 흉내 내거나 Miro, Excalidraw 를 임베드하는 두 가지 방법뿐입니다. 각각의 순서와 한계, 이미 써 둔 페이지는 어떻게 보는지.",
+        "노션에서 마인드맵을 만드는 두 가지 방법. 토글 중첩과 Miro, Excalidraw 임베드. 순서, 요령, 비교표, 어느 쪽을 언제 쓰는지.",
     },
     "/blog/notion-backlinks": {
       title: "노션 백링크, 어디서 보고 왜 안 보이나",
       description:
-        "백링크는 이 페이지를 가리키는 페이지 목록이고 제목 위에 뜹니다. 안 보이는 이유 셋 — 아직 링크가 없음, 관계형임, 권한 — 과 그 목록이 못 보여 주는 한 가지.",
+        "노션 백링크가 생기는 경우와 안 생기는 경우, 안 보이는 이유 넷. 관계형을 써야 할 때와 백링크 목록이 못 보여 주는 한 가지.",
     },
     "/blog/notion-second-brain": {
       title: "노션 세컨드 브레인, 몇 달 뒤에 막히는 지점",
       description:
-        "노션 세컨드 브레인은 잘 만들어지고 몇 달 뒤에 막힙니다. 무엇이 무엇과 엮였는지 안 보이기 때문. PARA 로 안 풀리는 이유, 세 가지 증상, 이미 있는 연결을 보는 방법.",
+        "노션 세컨드 브레인은 무엇이 무엇과 엮였는지 안 보일 때 막힙니다. PARA 로 안 풀리는 이유, 노션 안에서 되는 습관, 이미 있는 연결을 보는 방법.",
     },
     "/blog/notion-knowledge-graph": {
       title: "노션으로 지식 그래프 만들기",
       description:
-        "제텔카스텐과 지식 그래프가 원하는 건 노트 한 장이 아니라 이어진 모양입니다. 노션의 멘션, 관계형, 하위 페이지로 이미 되는 것과 빠진 것 하나, 그걸 보는 방법.",
+        "노트 데이터베이스와 관계형으로 노션에 제텔카스텐식 지식 그래프를 만드는 순서, 노션에 빠진 한 가지, 만든 그래프를 읽는 방법.",
     },
     "/terms": { title: "이용약관", description: "Notion-mind 이용에 적용되는 약관. 구독과 해지, 14일 환불 기간을 포함합니다." },
     "/privacy": { title: "개인정보 처리방침", description: "Notion-mind 가 워크스페이스에서 읽는 것, 저장하는 것, 처리를 맡기는 곳과 이용자의 권리." },
@@ -171,18 +171,18 @@ const META: Record<Lang, Record<PublicPath, Meta>> = {
   },
 };
 
-/** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. 날짜는 공개일(화면 표시용) */
+/** 글 목록에 나오는 순서 — 새 글은 맨 앞에 넣는다. date 는 공개일(화면 표시용), updated 는 본문을 마지막으로 고친 날(sitemap lastmod 와 구조화 데이터의 dateModified — 본문을 고치면 같이 고친다) */
 export const BLOG_POSTS = [
-  { path: "/blog/notion-knowledge-graph", date: "2026-11-06" },
-  { path: "/blog/notion-second-brain", date: "2026-11-05" },
-  { path: "/blog/notion-backlinks", date: "2026-11-04" },
-  { path: "/blog/how-to-make-mind-map-in-notion", date: "2026-11-04" },
-  { path: "/blog/notion-relation-property", date: "2026-11-03" },
-  { path: "/blog/notion-vs-obsidian-graph-view", date: "2026-11-01" },
-  { path: "/blog/notion-graph-view", date: "2026-11-01" },
-  { path: "/blog/notion-mind-map", date: "2026-11-01" },
+  { path: "/blog/notion-knowledge-graph", updated: "2026-11-14", date: "2026-11-06" },
+  { path: "/blog/notion-second-brain", updated: "2026-11-14", date: "2026-11-05" },
+  { path: "/blog/notion-backlinks", updated: "2026-11-14", date: "2026-11-04" },
+  { path: "/blog/how-to-make-mind-map-in-notion", updated: "2026-11-14", date: "2026-11-04" },
+  { path: "/blog/notion-relation-property", updated: "2026-11-14", date: "2026-11-03" },
+  { path: "/blog/notion-vs-obsidian-graph-view", updated: "2026-11-14", date: "2026-11-01" },
+  { path: "/blog/notion-graph-view", updated: "2026-11-14", date: "2026-11-01" },
+  { path: "/blog/notion-mind-map", updated: "2026-11-14", date: "2026-11-01" },
 ] as const satisfies
-  readonly { path: PublicPath; date: string }[];
+  readonly { path: PublicPath; date: string; updated: string }[];
 
 /** 글 공개일 — 화면에 쓰는 형식으로. 목록과 글 본문이 같은 값을 쓴다 */
 export function postDate(lang: Lang, path: PublicPath) {
@@ -251,5 +251,30 @@ export function breadcrumbJsonLd(lang: Lang, path: PublicPath) {
         item: `${SITE_URL}${langHref(lang, p)}`,
       })),
     ],
+  };
+}
+
+/**
+ * 글 한 편의 구조화 데이터 — 공개일과 수정일을 검색 쪽에 알린다.
+ * 글쓴이는 운영 주체(Organization)로 적는다 — 개인 이름은 공개하지 않는다.
+ */
+export function blogPostingJsonLd(lang: Lang, path: PublicPath) {
+  const post = BLOG_POSTS.find((p) => p.path === path);
+  if (!post) return null;
+  const url = `${SITE_URL}${langHref(lang, path)}`;
+  const org = { "@type": "Organization", name: SITE_NAME, url: SITE_URL };
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: META[lang][path].title,
+    description: META[lang][path].description,
+    inLanguage: lang,
+    datePublished: post.date,
+    dateModified: post.updated,
+    mainEntityOfPage: url,
+    url,
+    image: `${url}/opengraph-image`,
+    author: org,
+    publisher: org,
   };
 }

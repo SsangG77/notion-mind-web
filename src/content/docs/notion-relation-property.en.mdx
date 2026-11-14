@@ -2,16 +2,68 @@
 
 A relation **ties** a page to other pages. A rollup **walks across** that tie and brings a value back from the other side to count or sum. That is why a rollup cannot exist until a relation does, and why looking for a rollup first ends with nothing to pick from.
 
-A relation is one-way by default. Add a page from database B to a relation in database A and nothing appears on the B side. The property's setting to show it on the related database (the `Show on …` toggle) makes it two-way, and from then on an edit from either side updates both. It works inside a single database too, so a task can point at other tasks.
+## Relation: a link between rows
 
-Two things trip people up. Without the two-way toggle, the related page does not know it has been linked. And a rollup is good at counts, sums and latest dates, but it never shows **what is tied to what**. It folds the tie into one number.
+A relation is a database property whose value is a list of pages from another database (or from the same one). In a Tasks database, a relation called Project holds the project page each task belongs to. Click the cell, search, pick a page, and the two rows are tied.
 
-Something else happens as relations accumulate. Each column is visible on its own, yet the shape of all the ties together is visible nowhere. Once three databases point at each other, the web has to be held in your head.
+To add one:
 
-Notion-mind draws those relations as dotted lines. One-way or two-way, it is one line, and it lands on one screen no matter which database it starts from. Database membership and subpages are drawn as solid lines on the same picture, so you can see where a relation cuts across that structure.
+1. Open the database and add a new property
+2. Choose **Relation** as the type
+3. Pick the database to relate to
+4. Decide whether to limit it to 1 page or leave it at no limit
+5. Turn on the **Show on** toggle for the other database if you want the link visible from both sides
+
+## One-way and two-way
+
+A relation is one-way by default. Add a project to a task and nothing appears on the project. The `Show on …` toggle makes it two-way: a matching property is created in the other database, and from then on an edit from either side updates both.
+
+Two-way is usually what you want, with one exception. If the other database is shared with people who should not see a new column, keep the relation one-way.
+
+A relation can also point at its own database. That is how a task gets subtasks, or a note gets "related notes".
+
+## Rollup: a value pulled across the relation
+
+A rollup needs three choices:
+
+1. **Which relation** to follow
+2. **Which property** to read on the pages at the other end
+3. **How to calculate** the result
+
+On a Projects database with a two-way relation to Tasks, a rollup can follow Tasks, read the Status property, and show the percentage that are done. The same relation can feed several rollups: the number of tasks, the latest due date, the total of an estimate column.
+
+The calculations fall into groups.
+
+- **Show** the values as they are, or only the unique ones
+- **Count** all values, unique values, empty or not empty, as a number or a percentage
+- **For numbers**: sum, average, median, min, max, range
+- **For dates**: earliest, latest, date range
+
+## Side by side
+
+| | Relation | Rollup |
+| --- | --- | --- |
+| What it holds | Links to pages | A value calculated from those pages |
+| Needs the other one | No | Yes, a relation must exist first |
+| Editable in the cell | Yes, add or remove pages | No, it is calculated |
+| Typical use | "This task belongs to that project" | "This project has 12 tasks, 75% done" |
+| Shows which pages are tied | Yes | Only with "show original" |
+
+## What trips people up
+
+- **The rollup menu is empty.** There is no relation on that database yet. Add the relation first
+- **The other side does not show the link.** The relation is one-way. Edit the property and turn on the `Show on …` toggle
+- **The rollup shows a list where you wanted a number.** The calculation is still set to show the original values. Change it to a count or a sum
+- **A page can pick only one related page.** The relation is limited to 1 page. That limit is in the property's settings
+
+## What neither one shows
+
+A relation column shows the ties of one row. A rollup folds those ties into a number. Neither shows **the shape of all the ties together**. Once three databases point at each other (tasks to projects, projects to clients, meeting notes to both), the web exists only in your head, and you find out a page is tied to nothing only by scrolling a column looking for empty cells.
+
+Notion-mind draws those relations as dotted lines between nodes. One-way or two-way, each tie is one line, and it lands on one screen no matter which database it starts from. Database membership and subpages are drawn as solid lines on the same picture, so you can see where a relation cuts across the page structure.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
 
-See the web your own relations make.
+Relations are also the one kind of tie that Notion's backlinks leave out. [Notion backlinks](/blog/notion-backlinks) explains why.
 
 <Cta to="login" />

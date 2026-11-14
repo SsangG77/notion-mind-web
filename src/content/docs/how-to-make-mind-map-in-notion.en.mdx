@@ -1,28 +1,55 @@
 # How to make a mind map in Notion
 
-Notion has no mind map feature, so there are two ways to make one: **fake it with toggles, or embed a drawing tool.** The five-minute way comes first.
+Notion has no mind map feature, so there are two ways to make one: **build it from toggles, or embed a drawing tool.** The five-minute way comes first, then the one that looks like a real map, then how to choose.
 
 ## 1. Toggles (stays inside Notion)
 
-1. On a blank page, make the central idea a toggle block
-2. Open it and add each branch as a toggle inside
-3. Nest toggles inside branches for depth. Drag a toggle to move a branch
+1. On a blank page, type `>` and a space to make a toggle block, and write the central idea in it
+2. Open the toggle and add each main branch as a toggle inside it
+3. Nest toggles inside branches for depth
+4. Drag a toggle by its handle to move a branch somewhere else. Everything nested inside moves with it
 
-The upside is that it is searchable and can link to other pages. The limit is that it reads top to bottom like an outline, so you never get several branches spread out side by side.
+A few things make a toggle map easier to live with.
+
+- **Use toggle headings for the first level.** Type `/toggle heading` and pick a size. The branches then stand out from their contents
+- **Put branches side by side with columns.** Drag one toggle to the far right edge of another until a vertical line appears. Three or four columns give you something closer to a map than a list
+- **Link branches to real pages.** Type `@` and a page name inside a toggle. The branch now points at the page where the detail lives, and that page gets a backlink
+- **Collapse what you are not working on.** A map with twenty open toggles is an outline again
+
+The upside is that everything is ordinary Notion content: searchable, linkable, editable on a phone. The limit is the shape. It reads top to bottom, and you cannot draw a line between two branches on opposite sides.
 
 ## 2. Embed a drawing tool (an actual map)
 
-1. Draw the mind map in Miro or Excalidraw. Both are on Notion's list of officially supported embeds
-2. Copy the share link and paste it into a Notion page. Notion recognises an embeddable URL and offers the choice
-3. Pick embed, and the board appears inside the page and stays editable right there
+1. Draw the mind map in Miro or Excalidraw. Both are on Notion's list of supported embeds
+2. Copy the board's share link
+3. Paste it into a Notion page. Notion recognises an embeddable URL and offers a choice
+4. Pick the embed option. The board appears inside the page and stays editable right there
+5. Drag the corner of the embed to give it enough room
 
-If you want the real map shape, this is it. In exchange, Notion search does not see inside it, and nothing in the drawing is tied to your Notion pages.
+If you want a centre with branches radiating out, curved connectors and colours, this is the route. In exchange:
+
+- Notion search does not see inside the board
+- Nothing in the drawing is tied to your Notion pages. A box labelled "Q3 launch" and the page called "Q3 launch" do not know about each other
+- Anyone you share the Notion page with also needs access to the board
+
+## Which one to use
+
+| | Toggles | Embedded board |
+| --- | --- | --- |
+| Time to start | Seconds | A few minutes |
+| Looks like a mind map | No, an outline | Yes |
+| Found by Notion search | Yes | No |
+| Can link to Notion pages | Yes, with `@` | Only as pasted URLs |
+| Works well on a phone | Yes | Depends on the tool |
+| Good for | Quick structure, notes you will reuse | Workshops, presenting, visual thinking |
+
+A common pattern is to brainstorm on a board, then rewrite the result as toggles or pages once it settles, so the final version is searchable.
 
 ## What both have in common
 
-Both are for **ideas you are about to draw**. Neither can show how the few hundred pages you already wrote connect. That has to be copied across by hand, and every new page leaves the drawing one step behind.
+Both are for **ideas you are about to draw**. Neither can show how the few hundred pages you already wrote connect. That would have to be copied across by hand, and every new page leaves the drawing one step behind.
 
-For pages that already exist, there is nothing to draw. Notion-mind reads database membership, subpages and relation properties and lays the workspace out as a graph as it is.
+For pages that already exist, there is nothing to draw. Notion-mind reads database membership, subpages and relation properties and lays the workspace out as a graph as it is. [Does Notion have mind maps?](/blog/notion-mind-map) explains the difference between the two kinds of map in more detail.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
 
