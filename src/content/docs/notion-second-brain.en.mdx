@@ -1,21 +1,67 @@
 # Notion second brain: where it stalls a few months in
 
-A second brain in Notion builds fine. It stalls a few months later. The notes have grown into the hundreds, and **you can no longer see what is tied to what**, so you fail to find things you know you wrote and write them again. It is the most common complaint from people who run a second brain in Notion.
+A second brain in Notion builds fine. It stalls a few months later. The notes have grown into the hundreds, and **you can no longer see what is tied to what**, so you fail to find things you know you wrote and write them again. It is the most common complaint from people who run a second brain in Notion, and it is not a filing problem.
 
-Sorting into PARA folders (Projects, Areas, Resources, Archives — the frame Tiago Forte laid out) settles **where a note goes**. How notes connect to each other inside that is a different question. Notion already records those connections as relation properties, subpages and database membership. The problem is not the record but that **there is no screen that lays it all out at once**: tables and boards show one database at a time, as rows.
+## What a second brain is
 
-So the symptoms of a growing second brain look alike.
+The phrase comes from Tiago Forte's book *Building a Second Brain*. The idea is to keep what you read, think and work on in one trusted place outside your head, so that it can be found and reused later. His method has two parts that are often mixed up.
 
-- A note you definitely wrote and cannot find, because you forget which project it went under
-- The same topic started twice in two different folders
-- Material you linked with a relation once and forgot, left connected to nothing
+- **CODE** is the workflow: Capture, Organize, Distill, Express
+- **PARA** is the filing system: Projects, Areas, Resources, Archives
 
-Better filing does not fix this. Making the connections you already have **visible** does.
+Notion suits both. Databases hold the notes, properties tag them, and templates make capture fast.
 
-Notion-mind reads those connections and draws the whole second brain as one graph. Notes and databases are nodes, membership and subpages are solid lines, relations are dotted. Hover a note and only its neighbourhood stays sharp; one filter leaves only the notes no relation touches. All three symptoms above show up on that screen. It is rebuilt from the workspace each time you open it, so there is nothing to maintain.
+## The usual Notion setup
+
+Most Notion second brains look alike.
+
+- A **Projects** database for things with an end date
+- An **Areas** database for ongoing responsibilities
+- A **Resources** or Notes database for everything captured
+- An **Archive** state, usually a checkbox or a status
+- **Relation properties** tying a note to its project and a project to its area
+
+That last line matters more than it looks. PARA decides **where a note goes**. Relations decide **what it is connected to**. The first is a folder question. The second is the reason to keep notes at all.
+
+## Where it stalls
+
+For the first month every note is recent and you remember it. Around the few-hundred mark, three symptoms appear.
+
+- **A note you wrote and cannot find.** You remember the idea, not the title or the project it went under. Search needs a word you no longer recall
+- **The same topic started twice.** Two notes on one subject, in two different areas, each unaware of the other
+- **Material linked once and forgotten.** A resource was related to a project that is now archived, and nothing active points at it any more
+
+All three are the same problem seen from different sides: the connections exist, but there is no way to look at them.
+
+## Why better filing does not fix it
+
+The instinct is to reorganise: more tags, a stricter PARA, a new dashboard. That improves the answer to "where does this go?" and does nothing for "what is this connected to?".
+
+Notion already records the connections as relation properties, subpages and database membership. The record is fine. What is missing is **a screen that lays it all out at once**. Tables and boards show one database at a time, as rows. A relation column shows the ties of one row. Nothing shows the whole.
+
+## What helps inside Notion
+
+Some habits reduce the damage without any extra tool.
+
+- **Relate every note to at least one thing when you capture it.** A note with an empty relation column is the one you will lose
+- **Add a filtered view for unlinked notes.** In the Notes database, filter for "Project is empty" and review that view weekly
+- **Use rollups on projects** to count related notes. A project with zero is either new or dead
+- **Mention instead of retyping.** `@` a page and you get a backlink for free
+
+These work, but each is one database at a time. The view of unlinked notes in Notes says nothing about orphaned pages in Resources.
+
+## Seeing the whole thing
+
+Notion-mind reads the connections your second brain already has and draws them as one graph. Notes and databases are nodes, membership and subpages are solid lines, relations are dotted.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
 
-See what shape your second brain is in right now, and where the gaps are.
+The three symptoms map onto three things you can do on that screen.
+
+- **Cannot find a note:** open the project or area you half remember and look at what hangs off it. Hovering a node keeps only its neighbourhood sharp
+- **Duplicate topics:** two clusters that should be one are visible as two clusters
+- **Forgotten material:** one filter leaves only the pages no relation touches, across every database at once
+
+It is rebuilt from the workspace each time you open it, so it adds nothing to maintain. For the note-linking side of the same idea, see [Building a knowledge graph in Notion](/blog/notion-knowledge-graph).
 
 <Cta to="login" />

@@ -1,17 +1,59 @@
 # Building a knowledge graph in Notion
 
-A knowledge graph and a zettelkasten want the same thing. Not a single note, but the ideas that come from **the shape notes make once they are linked**. The zettelkasten began as Niklas Luhmann's paper slips, each tied to others by an index number, and that pile of cards produced roughly 50 books and 550 articles. The point was never the card. It was the links between cards.
+A knowledge graph and a zettelkasten want the same thing. Not a single note, but the ideas that come from **the shape notes make once they are linked**. Notion has every piece needed to build one except the last: a way to look at it.
 
-Notion already has the pieces to copy this. Mentions point one note at another, relation properties make an explicit link, and subpages branch out. All three are stock Notion features doing exactly what Luhmann's index numbers did.
+## Where the idea comes from
 
-One thing is missing: **a desk to spread the slips out on**. Luhmann physically flipped through the box and felt by hand which cards clustered and which sat alone. Notion hands you a table or a board instead: one database at a time, as rows. Once the links run into the hundreds, there is nowhere to see the shape of the whole.
+The zettelkasten began as Niklas Luhmann's paper slips. Each slip held one idea and carried an index number, and slips pointed at each other by number. That box of cards produced roughly 50 books and 550 articles. The point was never the card. It was the links between cards, and the habit of flipping through the box to see which ideas had gathered together.
 
-So people who run a Notion zettelkasten for a while tend to say the same thing. Mentions and relations keep piling up, but seeing what has clustered and what is sitting empty means opening notes one at a time and holding the picture in your head.
+A personal knowledge graph is the same thing with software in place of the box: notes are nodes, links are edges, and the value is in the structure.
 
-Notion-mind draws that structure directly. It reads mentions, relations and subpages, and lays notes and databases out as points with connections as lines. Hover one and only its neighbours stay visible; filter to see only the notes nothing links to. It is Luhmann's box, flipped through on screen instead of by hand.
+## Three rules that carry over
+
+- **One idea per note.** A note that covers five things can only be linked as a block
+- **Link when you write.** Each new note should point at one or more existing ones. The question to ask is "what does this connect to?", not "where do I file this?"
+- **Write in your own words.** A pasted quote is storage. A restated idea is something you can build on
+
+## The pieces Notion gives you
+
+| Zettelkasten | In Notion |
+| --- | --- |
+| A slip | A page, usually a row in a Notes database |
+| A reference to another slip | An `@`-mention, or a relation property |
+| An index or entry point | A hub page, or a Topics database |
+| A sequence of slips | Subpages, or a self-relation such as "follows" |
+
+## Setting it up
+
+1. Create a **Notes** database. One row per idea
+2. Add a relation from Notes **to itself**, called something like Related. Turn on the two-way toggle so a link made from one note shows on the other
+3. Create a **Topics** database and relate Notes to it. Topics are your entry points
+4. Add a **Sources** database for books and articles, related to the notes drawn from them
+5. Make a template for new notes with the Related and Topics properties shown first, so linking is part of capture
+
+Relations are better than mentions for this job. A mention sits in the text and cannot be filtered or counted. A relation is a property, so you can sort by it, roll it up, and find the notes where it is empty.
+
+## What is missing
+
+One thing: **a desk to spread the slips out on**. Luhmann physically flipped through the box and felt by hand which cards clustered and which sat alone. Notion hands you a table or a board instead: one database at a time, as rows.
+
+So people who run a Notion zettelkasten for a while tend to say the same thing. The relations keep piling up, but seeing what has clustered and what is sitting empty means opening notes one at a time and holding the picture in your head. A filtered view can list notes with no relation. It cannot show that two topics you thought were separate share six notes.
+
+## Reading the graph
+
+Notion-mind draws that structure directly. It reads relation properties, subpages and database membership, and lays notes and databases out as nodes with connections as lines. Mentions in text are not drawn, which is one more reason to prefer relations in the setup above.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
 
-See what shape your own notes are clustering into.
+Things to look for once it is on screen:
+
+- **Hubs.** Notes with many lines are the ideas your thinking keeps returning to
+- **Bridges.** A note tied to two clusters is often the most interesting one. It is where two subjects meet
+- **Islands.** Notes with no relation. One filter shows only these. Either link them or accept that they were never part of the graph
+- **Lopsided topics.** A topic with thirty notes and one with two tells you where you have depth and where you only have a heading
+
+Hover one node and only its neighbours stay visible. It is Luhmann's box, flipped through on screen instead of by hand.
+
+For the filing side of note-keeping, see [Notion second brain](/blog/notion-second-brain).
 
 <Cta to="login" />

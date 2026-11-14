@@ -1,19 +1,60 @@
 # Notion backlinks: where they show, and why they sometimes don't
 
-Backlinks are **the list of other pages that point at the page you are on**, and they sit just above the page title as "N backlinks". On a database page they appear with the properties. There is nothing to switch on: the moment another page @-mentions or links to this one, the backlink appears.
+Backlinks are **the list of other pages that point at the page you are on**. They sit at the top of the page, by the title, as a small "N backlinks" label; click it and the list opens. On a database page they appear with the properties. There is nothing to switch on: the moment another page links to this one, the backlink appears.
 
-If you are not seeing one, it is usually one of three things.
+## What creates a backlink
 
-- **Nothing links here yet.** A subpage, or a page sitting in the same database, is membership rather than a link, so it does not count as a backlink
-- **The tie is a relation property.** A relation is a property, not a backlink. That connection shows in the property, not in the backlink list
-- **Permissions.** A link from a page you cannot access does not appear in your list. A link from a page only you can see shows to others as `Private`
+Three things, all of them links you make on purpose.
 
-That part is Notion's job and it works. The limit is elsewhere. Backlinks are **one page at a time**. They show what points here, not where those pages lead next, and not what the whole looks like; for that you open pages one by one and stitch it together in your head. Membership and relations are outside the list from the start.
+- **An @-mention.** Type `@` and the page name in any text
+- **A link to page block.** Type `/link to page` and pick the page
+- **A pasted page URL** turned into a mention or a link
 
-Notion-mind draws all three on one screen. Subpages and database membership are solid lines, relation properties are dotted, and hovering a node keeps only the connections in and out of that page while the rest dims. It is the backlink panel, read as a map instead of one page at a time.
+Type `[[` and start a page name, and Notion offers the same choice: link to an existing page or create a new one.
+
+## What does not create one
+
+This is where most of the confusion comes from.
+
+- **Being a subpage.** A page inside another page is membership, not a link. The parent does not show the child as a backlink
+- **Being in the same database.** Rows in one database are not linked to each other by that alone
+- **A relation property.** A relation is a property, not a backlink. That connection shows in the property column and nowhere in the backlink list
+
+## Why you might not see them
+
+If you expected a backlink and there is none, it is usually one of these.
+
+1. **Nothing links here yet.** The page is connected by membership or a relation, which do not count (see above)
+2. **Backlinks are hidden on the page.** The page's `•••` menu has a customise option where backlinks can be shown in full, tucked into a popover, or switched off. If the label is missing on a page you know is linked, check there
+3. **Permissions.** You only see backlinks from pages you have access to. A link from someone else's private page does not appear in your list
+4. **The link was removed.** Backlinks are live. Delete the mention and the backlink goes with it
+
+## Using backlinks well
+
+A few habits make them more useful.
+
+- **Mention, do not paste titles.** Writing "see the Q3 plan" creates nothing. Writing `@Q3 plan` creates a link in both directions
+- **Link from meeting notes to projects.** The project page then collects every meeting that discussed it, without anyone filing anything
+- **Open the list before deleting a page.** It tells you what will be left pointing at nothing
+
+## Backlinks, relations, or both
+
+| | Backlinks | Relation property |
+| --- | --- | --- |
+| Created by | Mentioning or linking in text | Picking pages in a database property |
+| Works between | Any two pages | Rows of databases |
+| Can be filtered and sorted | No | Yes |
+| Can feed a rollup | No | Yes |
+| Shows on the other side | Always | Only when two-way is on |
+
+Use a mention for a passing reference inside prose. Use a relation when the tie is structural and you will want to filter by it or count across it. [Relation vs rollup](/blog/notion-relation-property) covers that side.
+
+## The limit
+
+Backlinks work. The limit is that they are **one page at a time**. They show what points here, not where those pages lead next, and not what the whole looks like. For that you open pages one by one and stitch it together in your head. Membership and relations are outside the list from the start, so the backlink panel is a partial answer even for one page.
+
+Notion-mind draws the structural ties on one screen: subpages and database membership as solid lines, relation properties as dotted ones. Hover a node and only the connections in and out of that page stay sharp while the rest dims. It is the same question the backlink panel answers, read as a map.
 
 ![A Notion workspace drawn as a graph: database nodes, page nodes and relation lines](/shots/graph-overview.png)
-
-To see which page is linked from where in one look, open your own workspace.
 
 <Cta to="login" />

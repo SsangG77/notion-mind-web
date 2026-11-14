@@ -4,7 +4,7 @@ import DocLayout from "@/components/DocLayout";
 import CtaBlock from "@/components/CtaBlock";
 import RelatedPosts from "@/components/RelatedPosts";
 import { currentLang } from "@/lib/lang.server";
-import { breadcrumbJsonLd, pageMeta, postDate } from "@/lib/seo";
+import { blogPostingJsonLd, breadcrumbJsonLd, pageMeta, postDate } from "@/lib/seo";
 import { currentPlan } from "@/lib/plan.server";
 import AdBanner from "@/components/AdBanner";
 import Ko from "@/content/docs/notion-second-brain.ko.mdx";
@@ -48,6 +48,10 @@ export default async function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(lang, PATH)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd(lang, PATH)) }}
       />
       <DocLayout lang={lang} page="blog" path={PATH} ad={plan === "free" ? <AdBanner /> : null}>
         {lang === "en" ? <En components={components} /> : <Ko components={components} />}

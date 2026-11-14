@@ -1,21 +1,56 @@
 # Does Notion have mind maps?
 
-Notion itself has no mind map view and no graph view. This is what a Notion mind map of your own workspace looks like:
+No. Notion has no mind map block and no mind map view. It also has no graph view. What it has are pieces that can stand in for a mind map, and tools that sit next to it. Which one fits depends on what you mean by "mind map", because people use the phrase for two different jobs.
+
+## Two things people call a mind map
+
+**A map of new ideas.** You start with one topic in the middle and branch outward while you think. The map does not exist yet; drawing it is the point.
+
+**A map of what already exists.** You have a workspace with hundreds of pages and want to see how they connect. Nothing needs to be invented. The connections are already there and you want them on one screen.
+
+Notion handles neither natively, and the fixes for the two are different.
+
+## For new ideas
+
+There are two usual routes, and [How to make a mind map in Notion](/blog/how-to-make-mind-map-in-notion) walks through both step by step.
+
+- **Nested toggles.** A toggle block for the central idea, toggles inside it for branches. It stays inside Notion and stays searchable, but it reads top to bottom like an outline
+- **An embedded whiteboard.** Draw the map in a tool such as Miro or Excalidraw and embed it in a Notion page. It looks like a real mind map, but Notion's search cannot see inside it
+
+Both work well for a brainstorm. Both have the same limit: the map is something you draw, so it only contains what you put in it.
+
+## For pages you already have
+
+This is where drawing stops making sense. A workspace changes every day. A hand-drawn map of it is out of date by the next morning, and nobody redraws three hundred boxes.
+
+Notion already records how those pages connect:
+
+- every row belongs to a database
+- every subpage sits inside a parent page
+- every relation property points from one row to others
+
+That is the same information a mind map shows, stored as data. What is missing is the picture. Tables, boards and timelines show one database at a time, as rows.
+
+## What a map of your workspace looks like
+
+Notion-mind reads those three kinds of connection and lays them out for you. This is a real workspace drawn that way:
 
 ![A Notion mind map of a workspace: database nodes, page nodes and relation lines drawn as one graph](/shots/graph-overview.png)
 
+Databases are the larger nodes, pages the smaller ones. Solid lines are membership (a page in a database, a page inside a page). Dotted lines are relation properties. Strictly speaking this is a graph, not a classic mind map: a mind map has one centre, and a workspace has many. For seeing how existing pages connect, that is the more honest shape.
+
+A few things follow from the map being read, not drawn.
+
+- **It cannot go stale.** It is rebuilt from the workspace each time you open it
+- **You can follow one page.** Hover it and everything unconnected dims; click it for its properties and a link into Notion
+- **You can find what you lost.** One filter leaves only the pages no relation touches, which is usually where forgotten notes are
+
 <Cta to="demo" />
 
-## Why it beats drawing one
+## How to try it
 
-- **You never draw it.** Notion-mind reads the links your workspace already has — database membership, subpages, relation properties — and lays them out for you.
-- **It cannot go stale.** The map is rebuilt from the workspace every time you open it. A hand-drawn diagram starts aging the moment you add a page.
-- **The whole workspace, one screen.** Connections that Notion only shows one database at a time appear side by side.
-- **Follow one page.** Hover it and everything unconnected dims; click it for its properties, its relations and a link straight into Notion.
-- **Find what you lost.** One filter leaves only the pages no relation touches — the notes you wrote once and never found again.
+Sign in with Google, then connect your Notion workspace. Notion's own consent screen lets you choose which pages to share, so you can start with one corner of the workspace. Titles, properties and relations are read from Notion and drawn in your browser; page content is not stored on our server. The free plan covers 1,000 pages.
 
-## Connect your workspace
-
-Sign in with Google, then connect your Notion workspace. There is no separate account to create. Notion's own consent screen lets you choose which pages to share, so you can try one corner of the workspace first. Titles, properties and relations are read from Notion and drawn in your browser; your content is never stored on our server. Free covers 1,000 pages.
+If what you need is the other kind of map, the one for new ideas, the toggle and whiteboard routes above are the right tools and this one is not.
 
 <Cta to="login" />
